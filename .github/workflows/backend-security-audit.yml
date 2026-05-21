@@ -29,8 +29,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: owasp-nvd-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
-          restore-keys: owasp-nvd-${{ runner.os }}-
+          key: owasp-nvd-${{ runner.os }}-dc12.2.2-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: |
+            owasp-nvd-${{ runner.os }}-dc12.2.2-
+            owasp-nvd-${{ runner.os }}-
 
       - name: OWASP dependency check
         run: npm run security:audit:backend

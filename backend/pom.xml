@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.4</version>
+    <version>3.4.13</version>
     <relativePath />
   </parent>
 
@@ -19,12 +19,15 @@
 
   <properties>
     <java.version>21</java.version>
+    <!-- Patch embedded stack ahead of Spring Boot BOM for known CVSS ≥ 8 findings. -->
+    <tomcat.version>10.1.55</tomcat.version>
+    <spring-security.version>6.5.10</spring-security.version>
     <spotless.version>2.44.2</spotless.version>
     <google-java-format.version>1.29.0</google-java-format.version>
     <checkstyle.version>10.21.2</checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <spotbugs-maven-plugin.version>4.9.8.3</spotbugs-maven-plugin.version>
-    <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
+    <dependency-check-maven.version>12.2.2</dependency-check-maven.version>
     <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
@@ -265,6 +268,27 @@
           <skipProvidedScope>true</skipProvidedScope>
           <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
           <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+          <!-- Reuse cached NVD data in CI; full refresh at most once per week. -->
+          <nvdValidForHours>168</nvdValidForHours>
+          <!-- Java-only backend: skip analyzers that add minutes without signal. -->
+          <nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
+          <nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
+          <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+          <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+          <pnpmAuditAnalyzerEnabled>false</pnpmAuditAnalyzerEnabled>
+          <composerAnalyzerEnabled>false</composerAnalyzerEnabled>
+          <pythonAnalyzerEnabled>false</pythonAnalyzerEnabled>
+          <rubygemsAnalyzerEnabled>false</rubygemsAnalyzerEnabled>
+          <golangDepEnabled>false</golangDepEnabled>
+          <golangModEnabled>false</golangModEnabled>
+          <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+          <cmakeAnalyzerEnabled>false</cmakeAnalyzerEnabled>
+          <autoconfAnalyzerEnabled>false</autoconfAnalyzerEnabled>
+          <pearAnalyzerEnabled>false</pearAnalyzerEnabled>
+          <swiftPackageManagerAnalyzerEnabled>false</swiftPackageManagerAnalyzerEnabled>
+          <suppressionFiles>
+            <suppressionFile>${project.basedir}/config/dependency-check/suppressions.xml</suppressionFile>
+          </suppressionFiles>
         </configuration>
       </plugin>
     </plugins>

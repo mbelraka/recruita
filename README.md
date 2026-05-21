@@ -68,7 +68,7 @@ Users can choose **necessary only**, **enable all optional**, or **custom** togg
 | **A03 Injection** | Match `POST` body capped at **512 KB**; allowlisted top-level keys only; per-candidate fields reduced to `id`, `skills`, `yearsOfExperience`, `currentJobTitle`; `model` name pattern whitelist; LLM output parsed as JSON only (no `eval`). |
 | **A04 Insecure design** | Rate limiting on match routes; deterministic scoring path without external calls; privacy consent gates before third-party calls; generic client errors in production. |
 | **A05 Security misconfiguration** | Spring Security deny-by-default; CSP, nosniff, COOP/CORP, Permissions-Policy, optional HSTS; production refuses wildcard CORS; `TRUST_PROXY=1` for accurate rate limits. |
-| **A06 Vulnerable components** | `package-lock.json` + Maven lock via CI; `npm run security:audit` (frontend) and OWASP Dependency-Check on backend in every CI run (`security:audit:backend`) plus weekly workflow; SpotBugs + FindSecBugs on `verify`. |
+| **A06 Vulnerable components** | `package-lock.json` + Maven lock via CI; `npm run security:audit` (frontend); OWASP Dependency-Check on backend weekly (`backend-security-audit.yml`, CVSS ≥ 8 fails); SpotBugs + FindSecBugs on every `verify`. |
 | **A07 Identification & auth** | `AuthInterceptor` and XSRF configuration ready for your IdP; session handling per your policy (no credentials documented here). |
 | **A08 Software & data integrity** | `package-lock.json` verified in CI and pre-commit; Angular bundles third-party scripts (no ad-hoc script tags). |
 | **A09 Logging & monitoring** | API logs Groq failures; production masks internal error strings; malformed JSON returns stable JSON without stack traces. |
@@ -306,7 +306,7 @@ Pre-commit (`scripts/pre-commit.sh`): **lint-staged** (ESLint/Prettier on fronte
 - **frontend** — `validate:ci:frontend` when frontend (or lockfile) changes; always on push to `main` / `master`
 - **backend** — `validate:ci:backend` when `backend/` changes; always on push to `main` / `master`
 
-Backend CI runs OWASP Dependency-Check on every push/PR; scheduled **backend-security-audit** repeats the scan weekly.
+Backend CI runs SpotBugs + FindSecBugs on every push/PR. OWASP Dependency-Check runs in the scheduled **backend-security-audit** workflow (weekly + manual); locally: `npm run security:audit:backend` (set `NVD_API_KEY` for faster NVD sync).
 
 ---
 

@@ -38,7 +38,7 @@
     "doctor:full": "npm run doctor:full -w @recruita/frontend",
     "doctor:lint": "npm run doctor:lint -w @recruita/frontend",
     "security:audit": "npm run security:audit -w @recruita/frontend",
-    "security:audit:backend": "sh scripts/run-mvn.sh -DskipTests -Psecurity-audit dependency-check:check -q",
+    "security:audit:backend": "sh scripts/run-security-audit.sh",
     "letify": "npm run letify -w @recruita/frontend",
     "test:backend": "sh scripts/run-mvn.sh test -q",
     "verify:backend": "sh scripts/run-mvn.sh verify -q",

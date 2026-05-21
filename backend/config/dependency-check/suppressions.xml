@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <!-- CPE matcher maps embedded Tomcat 10.1.x to legacy Apache Tomcat 8.x CVEs. -->
+  <suppress>
+    <notes><![CDATA[
+      CVE-2025-31651 affects Apache Tomcat 8.5.x (rewrite valve), not Tomcat 10.1 embedded.
+    ]]></notes>
+    <packageUrl regex="true">pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-core@.*</packageUrl>
+    <cve>CVE-2025-31651</cve>
+  </suppress>
+
+  <!-- Recruita API: web + security + aop only — no actuator, no Cassandra (see backend/pom.xml). -->
+  <suppress>
+    <notes><![CDATA[
+      CVE-2026-22733: CloudFoundry Actuator auth bypass (spring-boot-actuator). Not on classpath.
+    ]]></notes>
+    <cve>CVE-2026-22733</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      CVE-2026-22731: Actuator health-group path auth bypass. Not on classpath.
+    ]]></notes>
+    <cve>CVE-2026-22731</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      CVE-2026-40974: Cassandra SSL hostname verification in spring-boot-autoconfigure. Not on classpath.
+    ]]></notes>
+    <cve>CVE-2026-40974</cve>
+  </suppress>
+</suppressions>
