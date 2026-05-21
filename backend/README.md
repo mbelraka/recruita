@@ -85,4 +85,4 @@ From this directory: `./mvnw verify`
 
 Pre-commit runs `precommit:backend` when any path under `backend/` is staged.
 
-**JDK:** Java 21+ (see `.java-version`).
+**JDK:** Java **21 or higher** (see `.java-version` for the recommended LTS).

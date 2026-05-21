@@ -14,7 +14,7 @@ The backend is **not** an npm workspace; root `package.json` runs Maven via `scr
 
 - **Node.js 22** (see `.nvmrc`)
 - **npm 10.9.2** (`corepack enable && corepack prepare npm@10.9.2 --activate`)
-- **Java 21** (see `backend/.java-version`)
+- **Java 21 or higher** (see `backend/.java-version` for the recommended LTS)
 - Copy `backend/.env.example` → `backend/.env` (never commit `.env`)
 
 ## Install
