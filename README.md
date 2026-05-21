@@ -250,6 +250,8 @@ npm run start:backend    # Spring API only (in-memory match cache; no DB)
 
 If `ng serve` fails with missing modules, run `npm ci` again.
 
+**Docker (PostgreSQL + Redis):** Compose project name is **`recruita`** (see `docker-compose.yml` and root `.env`). Containers: `recruita-postgres`, `recruita-redis`; network: `recruita`; volume: `recruita_pg-data`. If you previously ran Compose from a checkout folder named `applicant-project`, stop the old stack once (`docker compose -p applicant-project down`) before `npm run infra:up`.
+
 ### Production build
 
 ```bash
@@ -269,7 +271,7 @@ Serve the static bundle behind HTTPS with the Spring API configured per [SECURIT
 | `npm run dev` | Docker + Angular + Spring with persistence (4200 + 3001) |
 | `npm start` | Angular only |
 | `npm run start:backend` | Spring only (default `dev` profile, no DB) |
-| `npm run infra:up` / `infra:down` | PostgreSQL + Redis via Docker Compose |
+| `npm run infra:up` / `infra:down` | PostgreSQL + Redis (Docker Compose project **recruita**) |
 | `npm run seed:applicants` | Load demo applicants into PostgreSQL (idempotent) |
 | **Quality (fast)** | |
 | `npm run quality` | Frontend + backend format check & lint |

@@ -40,9 +40,11 @@ Secrets: `backend/.env` (from `.env.example`).
 Applicant rosters are stored in PostgreSQL when the persistence profile is active. The Angular SPA reads and writes them through `/api/applicants`.
 
 ```bash
-docker compose up -d
+npm run infra:up
 SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend
 ```
+
+Docker Compose project name is **`recruita`** (`recruita-postgres`, `recruita-redis`). Use `npm run infra:up` / `infra:down` so scripts pick up the pinned project name.
 
 | Profile | Behavior |
 |---------|----------|

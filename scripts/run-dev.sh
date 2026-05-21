@@ -3,6 +3,7 @@ set -e
 ROOT="$(CDPATH= cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 . "$ROOT/scripts/clean-npm-env.sh"
+. "$ROOT/scripts/compose-env.sh"
 
 docker compose up -d
 

@@ -1,8 +1,12 @@
-# Local PostgreSQL + Redis for the persistence profile.
-# Usage: npm run dev  (or: docker compose up -d && SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend)
+# Recruita local infrastructure (PostgreSQL + Redis).
+# Project name is fixed to `recruita` (containers: recruita-postgres, recruita-redis).
+# Usage: npm run dev  (or: npm run infra:up && SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend)
+name: recruita
+
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: recruita-postgres
     environment:
       POSTGRES_DB: recruita
       POSTGRES_USER: recruita
@@ -10,7 +14,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - recruita-pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U recruita -d recruita']
       interval: 5s
@@ -19,6 +23,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    container_name: recruita-redis
     ports:
       - '6379:6379'
     healthcheck:
@@ -27,5 +32,9 @@ services:
       timeout: 3s
       retries: 5
 
+networks:
+  default:
+    name: recruita
+
 volumes:
-  recruita-pg-data:
+  pg-data:
