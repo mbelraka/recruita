@@ -5,9 +5,7 @@
     "dist/**",
     "node_modules/**",
     ".angular/**",
-    "coverage/**",
-    "e2e/**",
-    "playwright.config.ts"
+    "coverage/**"
   ],
   "overrides": [
     {

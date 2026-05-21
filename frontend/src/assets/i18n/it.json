@@ -49,7 +49,7 @@
       "summaryTitle": "Sintesi",
       "summaryBody": "Senza consensi extra i dati rimangono offline. Traduzione, geocoding e matching IA inviano unicamente gli attributi dichiarati all’endpoint corrispondente.",
       "processingTitle": "Trattamenti in questa vista",
-      "procLocalStorage": "Locale: candidati, snapshot stato, lingua e consensi restano sulla macchina.",
+      "procSessionState": "Stato sessione: lingua e consenso fino alla chiusura della scheda. I candidati provengono dal server.",
       "procTranslation": "Traduzione (default off): testi sintetizzati tramite endpoint pubblico MyMemory.",
       "procGeocode": "Località intelligente (default off): ricerca tramite Open‑Meteo sulla stringa digitata.",
       "procMatch": "Matching IA (default off): combinazione JD + curriculum secondo backend dedicato.",

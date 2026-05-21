@@ -1,6 +1,6 @@
 # Recruita — security posture (OWASP-aligned)
 
-This document maps **Recruita** controls to [OWASP Top 10 (2021)](https://owasp.org/Top10/) themes and typical [ASVS](https://github.com/OWASP/ASVS) expectations. It is not a certification or audit. For data-privacy behavior (consent, local storage, LLM minimization), see the **Security and data privacy** section in [README.md](./README.md).
+This document maps **Recruita** controls to [OWASP Top 10 (2021)](https://owasp.org/Top10/) themes and typical [ASVS](https://github.com/OWASP/ASVS) expectations. It is not a certification or audit. For data-privacy behavior (consent, session state, LLM minimization), see the **Security and data privacy** section in [README.md](./README.md).
 
 ## Application controls
 

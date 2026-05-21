@@ -49,7 +49,7 @@
       "summaryTitle": "Resumaziun",
       "summaryBody": "Senza opziuns restan las datas localas. Opziuns per translaziun, geocoding u matching IA tramettan mo ils champs descrits.",
       "processingTitle": "Tractament",
-      "procLocalStorage": "Stor local: candidats, instant da status, preferenzas e consent restan sin l’apparat.",
+      "procSessionState": "Stadi da sessiun: lingua e consent fin a serrar la fanestra. Candidats dal server.",
       "procTranslation": "Translaziun (standard deactivada): MyMemory public.",
       "procGeocode": "Geocoding (standard deactivada): Open‑Meteo cun input da text.",
       "procMatch": "Matching IA (standard deactivada): backend configurà.",

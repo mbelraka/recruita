@@ -26,8 +26,6 @@ import { isViewType, ViewTypes } from '../../enums/view-types.enum';
 import { Applicant } from '../../models/applicant.model';
 import {
   addApplicant,
-  loadApplicants,
-  seedApplicants,
   setFilterByCountry,
   setFilterBySkill,
   setFilterByStatus,
@@ -99,8 +97,6 @@ export class ApplicantsComponent {
     APP_CONFIG.APPLICANTS.GRID_SORT_FIELD_OPTIONS;
 
   public constructor() {
-    this._store.dispatch(loadApplicants());
-    this._store.dispatch(seedApplicants());
     this._store.dispatch(setFilterBySkill({ skill: null }));
     this._destroyRef.onDestroy((): void =>
       this._clearNewApplicantFabExpandTimer()

@@ -55,6 +55,9 @@ public class MatchProperties {
 
   public static class CacheProperties {
     private boolean enabled = true;
+    @NotBlank private String store = "memory";
+    @Positive private long ttlSeconds = 3600;
+    @NotBlank private String keyPrefix = "recruita:match:";
     @Valid @NotNull private MatchCacheKeyProperties keyFields = new MatchCacheKeyProperties();
     @NotBlank private String nullCanonicalLiteral = "null";
 
@@ -64,6 +67,30 @@ public class MatchProperties {
 
     public void setEnabled(boolean enabled) {
       this.enabled = enabled;
+    }
+
+    public String getStore() {
+      return store;
+    }
+
+    public void setStore(String store) {
+      this.store = store;
+    }
+
+    public long getTtlSeconds() {
+      return ttlSeconds;
+    }
+
+    public void setTtlSeconds(long ttlSeconds) {
+      this.ttlSeconds = ttlSeconds;
+    }
+
+    public String getKeyPrefix() {
+      return keyPrefix;
+    }
+
+    public void setKeyPrefix(String keyPrefix) {
+      this.keyPrefix = keyPrefix;
     }
 
     public MatchCacheKeyProperties getKeyFields() {

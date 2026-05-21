@@ -1,0 +1,57 @@
+package com.recruita.api.applicant.mapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
+import com.recruita.api.persistence.entity.ApplicantEntity;
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+class ApplicantMapperTest {
+
+  private final ApplicantMapper mapper = new ApplicantMapper();
+
+  @Test
+  void mapsEntityToDto() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setName("Alex");
+    entity.setEmail("alex@example.com");
+    entity.setSkills(List.of("java", "spring"));
+    entity.setAvailableFrom(LocalDate.parse("2026-06-01"));
+
+    var dto = mapper.toDto(entity);
+
+    assertEquals("a-1", dto.id());
+    assertEquals("Alex", dto.name());
+    assertEquals("alex@example.com", dto.email());
+    assertEquals(List.of("java", "spring"), dto.skills());
+    assertEquals(LocalDate.parse("2026-06-01"), dto.availableFrom());
+  }
+
+  @Test
+  void mapsRequestToNewEntity() {
+    var request =
+        new SaveApplicantRequestDto(
+            "a-2",
+            "Sam",
+            "sam@example.com",
+            "+1",
+            "Berlin",
+            4.0,
+            "screening",
+            "Engineer",
+            LocalDate.parse("2026-07-01"),
+            List.of("angular"),
+            "notes");
+
+    ApplicantEntity entity = mapper.toNewEntity(request);
+
+    assertEquals("a-2", entity.getId());
+    assertEquals("Sam", entity.getName());
+    assertEquals(List.of("angular"), entity.getSkills());
+    assertNull(entity.getCreatedAt());
+  }
+}

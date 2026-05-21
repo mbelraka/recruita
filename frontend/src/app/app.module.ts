@@ -29,13 +29,11 @@ import { APP_CONFIG } from './config/app.config';
 import { provideRootAnimations } from './provide-root-animations';
 import { Languages } from './enums/language.enum';
 import { appReducer } from './state/app.reducer';
-import { metaReducerLocalStorage } from './state/meta-reducers';
 import { AppEffects } from './state/app.effects';
 import { NotificationSnackBarComponent } from './components/notification-snack-bar/notification-snack-bar.component';
 import { localeIdFactory } from './utilities/factories/locale-id.factory';
 import { matDateLocaleFactory } from './utilities/factories/mat-date-locale.factory';
 import { AuthInterceptor } from './core/http/auth.interceptor';
-import { LocalStorageService } from './services/local-storage.service';
 import { environment } from '../environments/environment';
 import { registerMaterialSymbolsOutlinedFont } from './utilities/initializers/material-symbols-outlined-font.initializer';
 
@@ -62,7 +60,6 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     StoreModule.forRoot(
       { app: appReducer },
       {
-        metaReducers: [metaReducerLocalStorage()],
         runtimeChecks: {
           strictStateImmutability: true,
           strictActionImmutability: true,
@@ -95,12 +92,10 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     {
       provide: LOCALE_ID,
       useFactory: localeIdFactory,
-      deps: [LocalStorageService],
     },
     {
       provide: MAT_DATE_LOCALE,
       useFactory: matDateLocaleFactory,
-      deps: [LocalStorageService],
     },
     provideAppInitializer(() => {
       registerMaterialSymbolsOutlinedFont(inject(MatIconRegistry))();

@@ -13,4 +13,5 @@ fi
 set +a
 
 export PORT=3001
-exec sh scripts/run-mvn.sh -q -Dspring-boot.run.profiles=dev spring-boot:run
+export SPRING_PROFILES_ACTIVE="${SPRING_PROFILES_ACTIVE:-dev}"
+exec sh scripts/run-mvn.sh -q -Dspring-boot.run.profiles="${SPRING_PROFILES_ACTIVE}" spring-boot:run

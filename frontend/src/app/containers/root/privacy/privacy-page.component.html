@@ -21,7 +21,7 @@
       {{ 'privacy.page.processingTitle' | translate }}
     </h2>
     <ul class="privacy-page__bullets">
-      <li>{{ 'privacy.page.procLocalStorage' | translate }}</li>
+      <li>{{ 'privacy.page.procSessionState' | translate }}</li>
       <li>{{ 'privacy.page.procTranslation' | translate }}</li>
       <li>{{ 'privacy.page.procGeocode' | translate }}</li>
       <li>{{ 'privacy.page.procMatch' | translate }}</li>
@@ -37,14 +37,14 @@
       <button mat-stroked-button type="button" (click)="openConsentEditor()">
         {{ 'privacy.page.changeConsent' | translate }}
       </button>
-      <button mat-stroked-button type="button" (click)="exportLocalCopy()">
+      <button mat-stroked-button type="button" (click)="exportSessionCopy()">
         {{ 'privacy.page.exportJson' | translate }}
       </button>
       <button
         mat-flat-button
         color="warn"
         type="button"
-        (click)="eraseLocalData()"
+        (click)="eraseSessionData()"
       >
         {{ 'privacy.page.eraseLocal' | translate }}
       </button>

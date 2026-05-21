@@ -92,9 +92,6 @@ export const setFilterByCountry = createAction(
   props<{ country: string | null }>()
 );
 
-// Seed demo applicants (each row goes through the same add pipeline as the new-applicant dialog)
-export const seedApplicants = createAction(ApplicantActionTypes.SeedApplicants);
-
 // Location autocomplete (geocoding)
 export const searchLocationSuggestions = createAction(
   ApplicantActionTypes.SearchLocationSuggestions,

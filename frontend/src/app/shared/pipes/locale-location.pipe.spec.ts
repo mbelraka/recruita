@@ -47,6 +47,13 @@ describe('LocaleLocationPipe', () => {
     expect(result).toContain('Germania');
   });
 
+  it('should localize ISO country codes using selected language', () => {
+    langSubject.next(Languages.French);
+    const result = pipe.transform('Paris, fr');
+    expect(result).toContain('Paris');
+    expect(result).not.toBe('Paris, fr');
+  });
+
   it('should keep value unchanged when country cannot be localized', () => {
     const raw = 'Somewhere, Mars Colony';
     expect(pipe.transform(raw)).toBe(raw);

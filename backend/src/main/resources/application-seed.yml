@@ -1,0 +1,10 @@
+spring:
+  main:
+    web-application-type: none
+
+recruita:
+  seed:
+    applicants-demo: true
+  match:
+    groq:
+      require-api-key-at-startup: false

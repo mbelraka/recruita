@@ -10,10 +10,7 @@ import { NavLink } from 'src/app/modules/main/models/nav-link.model';
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { FullState } from '../../../models/full-state.model';
-import {
-  loadApplicants,
-  seedApplicants,
-} from '../../../modules/applicants/state/applicants.actions';
+import { loadApplicants } from '../../../modules/applicants/state/applicants.actions';
 import { LocalizationService } from '../../../services/localization.service';
 import { PrivacyConsentDialogService } from '../privacy/privacy-consent-dialog.service';
 import { selectAppLanguage } from '../../../state/app.selectors';
@@ -80,7 +77,6 @@ export class RootComponent implements OnInit {
 
   private _initApplicantsState(): void {
     this._store.dispatch(loadApplicants());
-    this._store.dispatch(seedApplicants());
   }
 
   private _initCurrentRouteStream(): void {

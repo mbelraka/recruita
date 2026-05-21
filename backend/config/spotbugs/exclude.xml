@@ -18,6 +18,11 @@
       <Package name="com.recruita.api.match.mapper"/>
       <Package name="com.recruita.api.match.groq"/>
       <Package name="com.recruita.api.match.cache"/>
+      <Package name="com.recruita.api.match.cache.store"/>
+      <Package name="com.recruita.api.applicant.service"/>
+      <Package name="com.recruita.api.applicant.mapper"/>
+      <Package name="com.recruita.api.seed"/>
+      <Package name="com.recruita.api.api.controller"/>
       <Package name="com.recruita.api.api.advice"/>
       <Package name="com.recruita.api.observability.aop"/>
     </Or>

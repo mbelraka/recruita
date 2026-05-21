@@ -1,7 +1,14 @@
 import { expect, test } from '@playwright/test';
 
+import {
+  installApplicantsApiMock,
+  seededApplicantCount,
+} from './support/applicants-api.mock';
+
 test.describe('Match candidates flow', () => {
   test('evaluates seeded applicants and marks top three', async ({ page }) => {
+    installApplicantsApiMock(page);
+
     let candidatesCount = 0;
 
     await page.route('**/api/match-job', async (route) => {
@@ -25,9 +32,12 @@ test.describe('Match candidates flow', () => {
       });
     });
 
-    // Ensure applicants feature initializes and seeds demo rows.
+    // Applicants feature loads from the mocked API (preloaded demo rows).
     await page.goto('/applicants');
     await expect(page).toHaveURL(/\/applicants(\/|$)/);
+    await expect(page.locator('.applicant-grid__card')).toHaveCount(
+      seededApplicantCount
+    );
 
     await page.goto('/match');
     await expect(page).toHaveURL(/\/match(\/|$)/);

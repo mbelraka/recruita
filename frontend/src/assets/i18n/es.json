@@ -49,7 +49,7 @@
       "summaryTitle": "Resumen",
       "summaryBody": "Sin opciones adicionales, los perfiles siguen locales. Habilitando traducción, geocodificación o IA se envían solo los campos descritos.",
       "processingTitle": "Tratamientos relevantes",
-      "procLocalStorage": "Datos locales: candidatos, instantáneas del estado y preferencias en el equipo.",
+      "procSessionState": "Estado de sesión: idioma y consentimiento hasta cerrar la pestaña. Los candidatos se cargan desde el servidor.",
       "procTranslation": "Traducción (por defecto apagado): llamadas públicas MyMemory.",
       "procGeocode": "Ayuda geográfica (por defecto apagado): Open‑Meteo con lo que escribes.",
       "procMatch": "Matching IA (por defecto apagado): combinación trabajo + fichas contra tu backend configurado.",

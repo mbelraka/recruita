@@ -1,6 +1,6 @@
 # Recruita
 
-**Talent without boundaries** — a full-stack recruitment workspace for managing applicants locally, ranking candidates with AI-assisted matching, exporting hiring data, and giving users explicit control over privacy and third-party processing.
+**Talent without boundaries** — a full-stack recruitment workspace for managing applicants, ranking candidates with AI-assisted matching, exporting hiring data, and giving users explicit control over privacy and third-party processing.
 
 The codebase is structured for long-term growth: lazy-loaded feature modules, centralized configuration, NgRx state per domain, a Spring match API with strict validation and test coverage, and quality gates that mirror CI on every commit.
 
@@ -16,16 +16,16 @@ The codebase is structured for long-term growth: lazy-loaded feature modules, ce
 | **Applicants** | `/applicants` | Create, view, edit, and delete applicants; grid and list views; pagination; skill filters; location autocomplete (Open-Meteo geocoding, consent-gated); application status chips |
 | **Match** | `/match` | Score applicants against a job description via a **Groq**-backed proxy (consent-gated); top candidates with localized reasoning |
 | **Export** | `/export` | Download applicant data as **CSV**, **JSON**, **Excel**, or **PDF** |
-| **Privacy** | `/privacy` | Policy overview, consent preferences, local JSON export, and erase-all-local-data |
+| **Privacy** | `/privacy` | Policy overview, consent preferences, session JSON export, and session reset |
 
 **Cross-cutting behavior**
 
 - **i18n** — UI copy in `frontend/src/assets/i18n` (English, German, French, Italian, Romansh, Spanish); locale-aware dates and numbers via shared pipes
 - **Notifications** — Transactional Material snackbars driven by NgRx (`showNotification`) with themed success / info / error panels
-- **Persistence** — Applicant list and app preferences (language, privacy consent) rehydrate from `localStorage` via NgRx meta-reducers
+- **Persistence** — With the `persistence` profile (`npm run dev`), applicant rosters live in **PostgreSQL** and sync through `/api/applicants`. Language and consent choices stay in memory for the current browser session.
 - **PWA** — Production builds enable the Angular service worker (`ngsw-config.json`)
 
-Applicant data is stored **in the browser** unless you integrate an external backend. AI matching requires the **Spring match API** so match-provider credentials never reach the client.
+Applicant data is stored in **PostgreSQL** when the persistence profile is active (`npm run dev`). Without it, the roster is empty until you add applicants through the UI. AI matching requires the **Spring match API** so match-provider credentials never reach the client.
 
 ---
 
@@ -39,12 +39,12 @@ Full control matrix and deployment checklist: **[SECURITY.md](./SECURITY.md)**.
 
 | Principle | How Recruita applies it |
 |-----------|-------------------------|
-| **Local-first storage** | Applicant records, workspace state, language, and consent live in the browser (`localStorage`). No applicant database is required for core features. |
+| **Session preferences** | Language and consent apply for the current browser tab. Applicant rosters use PostgreSQL when the persistence profile is active. |
 | **Opt-in optional processing** | Translation, geocoding, and AI matching are **off until the user consents**. Services check `PrivacyConsentService` before calling external APIs. |
 | **Data minimization (AI)** | Match requests send only ephemeral correlation ids, skills, years of experience, and job title — never name, email, phone, location, notes, or application status. The server strips again before scoring or Groq. |
 | **Transparency** | `/privacy` explains what is stored locally and what each optional feature transmits. Consent can be reopened anytime. |
-| **Portability** | Users can download a structured JSON snapshot of locally stored data (`PrivacyConsentService.buildLocalDataExportJson`). |
-| **Right to erasure (local)** | “Erase local data” removes applicants, full state, locale keys, and consent, then reloads the app. This affects **this browser only** — not server logs at your host. |
+| **Portability** | Users can download a JSON snapshot of applicants loaded in the current session (`PrivacyConsentService.buildDataExportJson$`). |
+| **Right to erasure (session)** | “Reset session” reloads the app and clears in-memory consent and UI state. Server-stored applicants are not deleted. |
 | **Versioned consent** | Consent records include `PRIVACY_CONSENT_VERSION`; stale consent re-triggers the gate dialog. |
 
 ### Consent model
@@ -151,7 +151,7 @@ match         → proxy client + match state
 export        → format selection + download effects
 ```
 
-Routes: `frontend/src/app/containers/root/root-routing.module.ts`. `RootComponent` owns nav, language, applicant seed/load, and the privacy consent gate.
+Routes: `frontend/src/app/containers/root/root-routing.module.ts`. `RootComponent` owns nav, language, applicant load, and the privacy consent gate.
 
 ### State management
 
@@ -162,7 +162,7 @@ Routes: `frontend/src/app/containers/root/root-routing.module.ts`. `RootComponen
 | `match` | `match` | Job description, scores, loading / error |
 | `export` | `export` | Selected format and export job state |
 
-Effects for side effects; meta-reducers persist `FullState` to `localStorage` with validation on rehydrate.
+Effects for side effects; NgRx holds in-memory UI state for the session. Applicant CRUD goes through NgRx effects and the Spring API when persistence is enabled.
 
 ### Spring backend (`backend/`)
 
@@ -237,9 +237,10 @@ Set at least **`GROQ_API_KEY`** and **`PORT=3001`** in `backend/.env` (never com
 ### Run locally
 
 ```bash
-npm run dev              # Angular :4200 + Spring :3001 (recommended)
+npm run dev              # Docker (Postgres + Redis), Angular :4200, Spring :3001 with persistence
+npm run seed:applicants  # Optional: load demo applicants into PostgreSQL
 npm start                # Frontend only (proxies /api → :3001)
-npm run start:backend    # Spring API only
+npm run start:backend    # Spring API only (in-memory match cache; no DB)
 ```
 
 | URL | Service |
@@ -265,9 +266,11 @@ Serve the static bundle behind HTTPS with the Spring API configured per [SECURIT
 | Script | Purpose |
 |--------|---------|
 | **Dev** | |
-| `npm run dev` | Angular + Spring (4200 + 3001) |
+| `npm run dev` | Docker + Angular + Spring with persistence (4200 + 3001) |
 | `npm start` | Angular only |
-| `npm run start:backend` | Spring only |
+| `npm run start:backend` | Spring only (default `dev` profile, no DB) |
+| `npm run infra:up` / `infra:down` | PostgreSQL + Redis via Docker Compose |
+| `npm run seed:applicants` | Load demo applicants into PostgreSQL (idempotent) |
 | **Quality (fast)** | |
 | `npm run quality` | Frontend + backend format check & lint |
 | `npm run quality:backend` | Spotless + Checkstyle |

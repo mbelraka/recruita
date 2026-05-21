@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.recruita.api.common.exception.ApplicantConflictException;
+import com.recruita.api.common.exception.ApplicantNotFoundException;
 import com.recruita.api.match.groq.GroqChatClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,21 @@ class GlobalApiExceptionHandlerTest {
     ProblemDetail detail = handler.handleNotFound();
     assertEquals(HttpStatus.NOT_FOUND.value(), detail.getStatus());
     assertEquals("Not found.", detail.getProperties().get("error"));
+  }
+
+  @Test
+  void handleApplicantNotFoundReturnsProblemDetail() {
+    ProblemDetail detail =
+        handler.handleApplicantNotFound(new ApplicantNotFoundException("Applicant not found."));
+    assertEquals(HttpStatus.NOT_FOUND.value(), detail.getStatus());
+  }
+
+  @Test
+  void handleApplicantConflictReturnsProblemDetail() {
+    ProblemDetail detail =
+        handler.handleApplicantConflict(
+            new ApplicantConflictException("An applicant with this id already exists."));
+    assertEquals(HttpStatus.CONFLICT.value(), detail.getStatus());
   }
 
   @Test

@@ -36,6 +36,7 @@ recruita:
       health-path: /api/health
       match-path: /api/match
       match-legacy-path: /api/match-job
+      applicants-path: /api/applicants
   operational:
     startup:
       missing-groq-api-key: Missing GROQ_API_KEY in environment.
@@ -54,7 +55,7 @@ recruita:
   security:
     cors:
       allowed-origins: ${CORS_ORIGIN:http://localhost:4200,http://127.0.0.1:4200}
-      allowed-methods: GET,HEAD,POST,OPTIONS
+      allowed-methods: GET,HEAD,POST,PUT,DELETE,OPTIONS
       allowed-headers: Content-Type
       max-age-seconds: 86400
       allow-credentials: false
@@ -98,9 +99,20 @@ recruita:
       forwarded-for-client-separator: ','
       match-request-method: POST
       milliseconds-per-second: 1000
+  persistence:
+    enabled: false
+  seed:
+    applicants-demo: false
+  applicant:
+    id-required: Applicant id is required.
+    not-found: Applicant not found.
+    already-exists: An applicant with this id already exists.
   match:
     cache:
       enabled: true
+      store: memory
+      ttl-seconds: 3600
+      key-prefix: 'recruita:match:'
       null-canonical-literal: 'null'
       key-fields:
         job-description: jobDescription

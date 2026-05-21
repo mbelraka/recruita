@@ -66,12 +66,6 @@ describe('ApplicantsComponent', () => {
   it('should create and dispatch initial actions', () => {
     expect(component).toBeTruthy();
     expect(mockStore.dispatch).toHaveBeenCalledWith(
-      ApplicantsActions.loadApplicants()
-    );
-    expect(mockStore.dispatch).toHaveBeenCalledWith(
-      ApplicantsActions.seedApplicants()
-    );
-    expect(mockStore.dispatch).toHaveBeenCalledWith(
       ApplicantsActions.setFilterBySkill({ skill: null })
     );
   });

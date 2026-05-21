@@ -49,7 +49,7 @@
       "summaryTitle": "Überblick",
       "summaryBody": "Ohne gewählte Optionen bleiben Profile lokal auf Ihrem Rechner. Übersetzung, Ortssuche oder KI-Matching senden Ausschnitte erst nach Freigabe an Drittanbieter.",
       "processingTitle": "Verarbeitungen in dieser Ansicht",
-      "procLocalStorage": "Local Storage: Bewerbungsdaten, Arbeitszustand, Lokalisierung und Zustimmung verbleiben auf dem Gerät.",
+      "procSessionState": "Sitzungszustand: Sprache und Einwilligung gelten bis zum Schließen des Tabs. Bewerberlisten kommen vom Server.",
       "procTranslation": "Optionale Übersetzung (Standard aus): gekürzte Texte können die öffentliche MyMemory-Schnittstelle nutzen.",
       "procGeocode": "Optionale Ortswahl (Standard aus): Ihre Standorteingaben gelangen zur Open‑Meteo-Geokodierung.",
       "procMatch": "Optionales KI-Ranking (Standard aus): Ausschnitte aus Ausschreibung und Profil gehen zur konfigurierten Matching-Backend-Instanz.",

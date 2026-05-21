@@ -34,8 +34,8 @@
     },
     "dialog": {
       "title": "Privacy & data choices",
-      "intro": "Applicant profiles you manage are saved in this browser (local storage). Optional features forward data to third-party services only if you explicitly enable them below.",
-      "necessaryNote": "Always on: storing your data locally, language and formatting preferences, and core app flows that keep applicant data inside the browser.",
+      "intro": "Applicant profiles are stored on the server when persistence is enabled. This session keeps language and consent choices in memory until you close the tab. Optional features forward data to third-party services only if you explicitly enable them below.",
+      "necessaryNote": "Always on: core applicant flows through the Recruita API, language and formatting preferences for this session, and consent management.",
       "optionalHeading": "Optional integrations",
       "privacyNoticeLink": "Privacy overview",
       "necessaryOnly": "Necessary only",
@@ -47,20 +47,20 @@
       "title": "Privacy & your data",
       "legalNotice": "This page explains how Recruita handles data in your browser. It supplements your organisation's policies and duties as data controller.",
       "summaryTitle": "Summary",
-      "summaryBody": "This app runs mostly in your browser. Without optional features, resumes and profiles stay on your device. Enabling translation, lookup, or AI matching sends only the respective fields to external APIs as described.",
+      "summaryBody": "Applicant rosters are loaded from the Recruita API when persistence is enabled. Without optional features, only the fields required for each action are sent to external services.",
       "processingTitle": "What we process here",
-      "procLocalStorage": "Local storage: applicant records, workspace snapshots, locale, and consent flags remain on device.",
+      "procSessionState": "Session state: language and consent choices apply until you close the browser tab. Applicant rosters are loaded from the server.",
       "procTranslation": "Optional translation (off by default): short UI snippets may use the public MyMemory translation endpoint.",
       "procGeocode": "Optional city lookup (off by default): what you type in the location field is sent to Open‑Meteo geocoding to suggest places.",
       "procMatch": "Optional AI ranking (off by default): role text and applicant fields contained in scoring API payload are transmitted to your configured matching backend.",
       "procFonts": "Icons/styles: Material Symbols may load from Google servers; Latin UI text fonts are bundled in the bundle (no CDN for Manrope body text).",
       "rightsTitle": "Rights & controls",
-      "rightsBody": "Open consent anytime to revise optional processing, download a structured JSON snapshot of locally stored applicant data for portability, or erase everything in this browser (clears applicants, preferences and consent — the app reloads).",
+      "rightsBody": "Open consent anytime to revise optional processing, download a JSON snapshot of applicants loaded in this session, or reload the app to reset session preferences and consent.",
       "changeConsent": "Change consent choices",
-      "exportJson": "Download browser data (JSON)",
-      "eraseLocal": "Erase local data",
-      "eraseHint": "Erasing wipes this browser profile only — it cannot remove server‑side telemetry your hosting exposes.",
-      "eraseConfirm": "Delete all locally saved applicant data for this installation? Preferences and consent will reset and the page will reload."
+      "exportJson": "Download session data (JSON)",
+      "eraseLocal": "Reset session",
+      "eraseHint": "Reloading resets consent and in-memory UI state — it does not delete applicants stored on the server.",
+      "eraseConfirm": "Reset this session? Consent and in-memory preferences will clear and the page will reload."
     }
   },
   "notifications": {

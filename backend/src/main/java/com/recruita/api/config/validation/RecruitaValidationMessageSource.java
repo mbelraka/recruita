@@ -1,5 +1,6 @@
 package com.recruita.api.config.validation;
 
+import com.recruita.api.config.properties.ApplicantProperties;
 import com.recruita.api.config.properties.MatchProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.text.MessageFormat;
@@ -15,19 +16,24 @@ public class RecruitaValidationMessageSource extends AbstractMessageSource {
       "recruita.match.validation.candidates-must-be-array";
   public static final String CANDIDATE_ID_REQUIRED_KEY =
       "recruita.match.validation.candidate-id-required";
+  public static final String APPLICANT_ID_REQUIRED_KEY =
+      "recruita.applicant.validation.id-required";
 
-  private final MatchProperties.MessageProperties messages;
+  private final MatchProperties.MessageProperties matchMessages;
+  private final ApplicantProperties applicantMessages;
 
   public RecruitaValidationMessageSource(RecruitaProperties properties) {
-    this.messages = properties.getMatch().getMessages();
+    this.matchMessages = properties.getMatch().getMessages();
+    this.applicantMessages = properties.getApplicant();
   }
 
   @Override
   protected MessageFormat resolveCode(String code, Locale locale) {
     String message =
         switch (code) {
-          case CANDIDATES_MUST_BE_ARRAY_KEY -> messages.getCandidatesMustBeArray();
-          case CANDIDATE_ID_REQUIRED_KEY -> messages.getCandidateIdRequired();
+          case CANDIDATES_MUST_BE_ARRAY_KEY -> matchMessages.getCandidatesMustBeArray();
+          case CANDIDATE_ID_REQUIRED_KEY -> matchMessages.getCandidateIdRequired();
+          case APPLICANT_ID_REQUIRED_KEY -> applicantMessages.getIdRequired();
           default -> null;
         };
     if (message == null) {

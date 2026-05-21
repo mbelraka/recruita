@@ -1,31 +1,8 @@
 import { ApplicationStatus } from '../../modules/applicants/enums/application-status.enum';
 import { Applicant } from '../../modules/applicants/models/applicant.model';
 
-/** Demo rows used by `seedApplicants` (persisted via the same `addApplicant` flow as the dialog). */
+/** Demo roster for Playwright API mocks (not loaded automatically by the app). */
 export function buildDemoApplicants(): Applicant[] {
-  const availableA = new Date();
-  availableA.setMonth(availableA.getMonth() + 1);
-  const availableB = new Date();
-  availableB.setDate(availableB.getDate() + 14);
-  const availableC = new Date();
-  availableC.setDate(availableC.getDate() + 21);
-  const availableD = new Date();
-  availableD.setDate(availableD.getDate() + 7);
-  const availableE = new Date();
-  availableE.setMonth(availableE.getMonth() + 2);
-  const availableF = new Date();
-  availableF.setDate(availableF.getDate() + 30);
-  const availableG = new Date();
-  availableG.setDate(availableG.getDate() + 45);
-  const availableH = new Date();
-  availableH.setMonth(availableH.getMonth() + 3);
-  const availableI = new Date();
-  availableI.setDate(availableI.getDate() + 10);
-  const availableJ = new Date();
-  availableJ.setDate(availableJ.getDate() + 18);
-  const availableK = new Date();
-  availableK.setMonth(availableK.getMonth() + 1);
-  availableK.setDate(availableK.getDate() + 5);
   return [
     new Applicant({
       id: 'a1b2c3d4-e5f6-41a8-9b0c-1d2e3f4a5b6c',
@@ -36,7 +13,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 8,
       applicationStatus: ApplicationStatus.Screening,
       currentJobTitle: 'Senior Frontend Engineer',
-      availableFrom: availableA,
+      availableFrom: new Date('2026-06-20'),
       skills: ['Angular', 'TypeScript', 'NgRx'],
       notes: 'Open to hybrid arrangements.',
     }),
@@ -49,7 +26,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 5,
       applicationStatus: ApplicationStatus.InterviewScheduled,
       currentJobTitle: 'QA Automation Lead',
-      availableFrom: availableB,
+      availableFrom: new Date('2026-06-03'),
       skills: ['RxJS', 'Jest', 'Playwright'],
       notes:
         'Strong CI background; asked about on-call expectations for the platform team.',
@@ -63,7 +40,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 6,
       applicationStatus: ApplicationStatus.Received,
       currentJobTitle: 'UI Engineer',
-      availableFrom: availableC,
+      availableFrom: new Date('2026-06-10'),
       skills: ['SCSS', 'Accessibility', 'Material Design'],
       notes: 'Prefers fully remote EU time zones.',
     }),
@@ -76,7 +53,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 4,
       applicationStatus: ApplicationStatus.Shortlisted,
       currentJobTitle: 'Product Designer',
-      availableFrom: availableD,
+      availableFrom: new Date('2026-05-27'),
       skills: ['Figma', 'Design systems', 'User research'],
       notes:
         'Portfolio emphasizes B2B SaaS; asked about design–dev handoff process.',
@@ -90,7 +67,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 10,
       applicationStatus: ApplicationStatus.OfferExtended,
       currentJobTitle: 'Engineering Manager',
-      availableFrom: availableE,
+      availableFrom: new Date('2026-07-20'),
       skills: ['People leadership', 'System design', 'Java'],
       notes: 'Negotiating start date; references checked.',
     }),
@@ -103,7 +80,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 3,
       applicationStatus: ApplicationStatus.Rejected,
       currentJobTitle: 'Backend Engineer',
-      availableFrom: availableF,
+      availableFrom: new Date('2026-06-19'),
       skills: ['Node.js', 'PostgreSQL', 'Docker'],
       notes: 'Role filled internally; encouraged to apply again next quarter.',
     }),
@@ -116,7 +93,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 7,
       applicationStatus: ApplicationStatus.Withdrawn,
       currentJobTitle: 'DevOps Engineer',
-      availableFrom: availableG,
+      availableFrom: new Date('2026-07-04'),
       skills: ['Kubernetes', 'Terraform', 'AWS'],
       notes: 'Withdrew after accepting another offer.',
     }),
@@ -129,7 +106,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 4,
       applicationStatus: ApplicationStatus.Received,
       currentJobTitle: 'Full-stack Developer',
-      availableFrom: availableH,
+      availableFrom: new Date('2026-08-20'),
       skills: ['React', 'NestJS', 'GraphQL'],
       notes: 'Recently relocated from Barcelona.',
     }),
@@ -142,7 +119,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 5,
       applicationStatus: ApplicationStatus.Screening,
       currentJobTitle: 'Data Engineer',
-      availableFrom: availableI,
+      availableFrom: new Date('2026-05-30'),
       skills: ['Python', 'Spark', 'dbt'],
       notes: 'Strong ETL experience; prefers remote-first teams.',
     }),
@@ -155,7 +132,7 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 6,
       applicationStatus: ApplicationStatus.InterviewScheduled,
       currentJobTitle: 'Mobile Engineer',
-      availableFrom: availableJ,
+      availableFrom: new Date('2026-06-07'),
       skills: ['Swift', 'Kotlin', 'CI/CD'],
       notes: 'Interview panel scheduled for next week.',
     }),
@@ -168,93 +145,9 @@ export function buildDemoApplicants(): Applicant[] {
       yearsOfExperience: 9,
       applicationStatus: ApplicationStatus.Shortlisted,
       currentJobTitle: 'Site Reliability Engineer',
-      availableFrom: availableK,
+      availableFrom: new Date('2026-06-25'),
       skills: ['Go', 'Prometheus', 'Incident response'],
       notes: 'Final reference check in progress.',
     }),
   ];
-}
-
-function isBlank(str: string | undefined | null): boolean {
-  return str == null || String(str).trim() === '';
-}
-
-/**
- * For applicants whose `id` matches a demo row, fills empty/missing fields from the seed
- * so localStorage stays aligned with the canonical demo shape.
- */
-export function normalizeApplicantsAgainstSeed(applicants: Applicant[]): {
-  applicants: Applicant[];
-  changed: boolean;
-} {
-  const seeds = buildDemoApplicants();
-  const seedById = new Map(seeds.map((s) => [s.id, s]));
-  let changed = false;
-
-  const next = applicants.map((a) => {
-    const seed = seedById.get(a.id);
-    if (!seed) {
-      return a;
-    }
-
-    const name = isBlank(a.name) ? seed.name : a.name;
-    const email = isBlank(a.email) ? seed.email : a.email;
-    const phone = isBlank(a.phone) ? seed.phone : a.phone;
-    const location = isBlank(a.location) ? seed.location : a.location;
-    const currentJobTitle = isBlank(a.currentJobTitle)
-      ? seed.currentJobTitle
-      : a.currentJobTitle;
-    const notes = isBlank(a.notes) ? seed.notes : a.notes;
-
-    const applicationStatus =
-      isBlank(a.applicationStatus) && seed.applicationStatus
-        ? seed.applicationStatus
-        : a.applicationStatus;
-
-    const yearsOfExperience =
-      a.yearsOfExperience === undefined || a.yearsOfExperience === null
-        ? seed.yearsOfExperience
-        : a.yearsOfExperience;
-
-    const skills =
-      !a.skills || a.skills.length === 0
-        ? seed.skills
-          ? [...seed.skills]
-          : []
-        : [...a.skills];
-
-    const availableFrom =
-      a.availableFrom == null ? seed.availableFrom : a.availableFrom;
-
-    if (
-      name !== a.name ||
-      email !== a.email ||
-      phone !== a.phone ||
-      location !== a.location ||
-      currentJobTitle !== a.currentJobTitle ||
-      notes !== a.notes ||
-      applicationStatus !== a.applicationStatus ||
-      yearsOfExperience !== a.yearsOfExperience ||
-      JSON.stringify(skills) !== JSON.stringify(a.skills ?? []) ||
-      (a.availableFrom == null && seed.availableFrom != null)
-    ) {
-      changed = true;
-    }
-
-    return new Applicant({
-      id: a.id,
-      name,
-      email,
-      phone,
-      location,
-      yearsOfExperience,
-      applicationStatus,
-      currentJobTitle,
-      availableFrom,
-      skills,
-      notes,
-    });
-  });
-
-  return { applicants: next, changed };
 }

@@ -1,24 +1,43 @@
-import { APP_CONFIG } from '../config/app.config';
-import {
-  PRIVACY_CONSENT_STORAGE_KEY,
-  PRIVACY_CONSENT_VERSION,
-} from '../constants/privacy.constants';
-import type { StoredPrivacyConsent } from '../models/stored-privacy-consent.model';
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
-import { LocalStorageService } from './local-storage.service';
+import { StateFeatures } from '../containers/root/enums/state-features.enum';
+import { Languages } from '../enums/language.enum';
+import { PRIVACY_CONSENT_VERSION } from '../constants/privacy.constants';
+import { adapter } from '../modules/applicants/state/applicants.reducer';
+import { ViewTypes } from '../modules/applicants/enums/view-types.enum';
+import { initialAppState } from '../state/app.reducer';
+
 import { PrivacyConsentService } from './privacy-consent.service';
 
 describe('PrivacyConsentService', () => {
-  let storage: LocalStorageService;
   let service: PrivacyConsentService;
 
   beforeEach(() => {
-    localStorage.clear();
-    storage = new LocalStorageService();
-    service = new PrivacyConsentService(storage);
+    TestBed.configureTestingModule({
+      providers: [
+        PrivacyConsentService,
+        provideMockStore({
+          initialState: {
+            app: initialAppState,
+            [StateFeatures.Applicants]: adapter.getInitialState({
+              loading: false,
+              error: null,
+              filter: '',
+              sortBy: 'name',
+              sortDirection: 'asc',
+              filterBySkill: null,
+              filterByStatus: null,
+              filterByCountry: null,
+              viewType: ViewTypes.GRID,
+              locationSuggestions: [],
+            }),
+          },
+        }),
+      ],
+    });
+    service = TestBed.inject(PrivacyConsentService);
   });
-
-  afterEach(() => localStorage.clear());
 
   it('isConsentCompleteAndCurrent is false when nothing stored', () => {
     expect(service.isConsentCompleteAndCurrent()).toBeFalse();
@@ -43,23 +62,6 @@ describe('PrivacyConsentService', () => {
       optionalGeocoding: false,
       optionalAiMatching: true,
     });
-  });
-
-  it('isConsentCompleteAndCurrent requires matching version', () => {
-    const stale: StoredPrivacyConsent = {
-      version: 0,
-      savedAtIso: '2000',
-      complete: true,
-      optionalRemoteTranslation: true,
-      optionalGeocoding: true,
-      optionalAiMatching: true,
-    };
-    localStorage.setItem(PRIVACY_CONSENT_STORAGE_KEY, JSON.stringify(stale));
-    const next = new PrivacyConsentService(new LocalStorageService());
-
-    expect(next.isConsentCompleteAndCurrent()).toBeFalse();
-    expect(next.snapshot()?.complete).toBeTrue();
-    expect(next.snapshot()?.optionalRemoteTranslation).toBeTrue();
   });
 
   it('saveNecessaryOnly clears optional toggles', () => {
@@ -101,41 +103,69 @@ describe('PrivacyConsentService', () => {
     service.resetConsentDecision();
 
     expect(service.snapshot()).toBeNull();
-    expect(localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY)).toBeNull();
   });
 
-  it('buildLocalDataExportJson includes consent version', () => {
-    storage.setItem(APP_CONFIG.LOCALIZATION.LANGUAGE_KEY, 'de');
+  it('isConsentCompleteAndCurrent is false when consent is incomplete', () => {
+    (
+      service as unknown as {
+        _persist: (record: {
+          version: number;
+          savedAtIso: string;
+          complete: boolean;
+          optionalRemoteTranslation: boolean;
+          optionalGeocoding: boolean;
+          optionalAiMatching: boolean;
+        }) => void;
+      }
+    )._persist({
+      version: PRIVACY_CONSENT_VERSION,
+      savedAtIso: '2026-01-01T00:00:00.000Z',
+      complete: false,
+      optionalRemoteTranslation: false,
+      optionalGeocoding: false,
+      optionalAiMatching: false,
+    });
+
+    expect(service.isConsentCompleteAndCurrent()).toBeFalse();
+  });
+
+  it('isConsentCompleteAndCurrent is false when consent version is stale', () => {
+    (
+      service as unknown as {
+        _persist: (record: {
+          version: number;
+          savedAtIso: string;
+          complete: boolean;
+          optionalRemoteTranslation: boolean;
+          optionalGeocoding: boolean;
+          optionalAiMatching: boolean;
+        }) => void;
+      }
+    )._persist({
+      version: 0,
+      savedAtIso: '2026-01-01T00:00:00.000Z',
+      complete: true,
+      optionalRemoteTranslation: true,
+      optionalGeocoding: true,
+      optionalAiMatching: true,
+    });
+
+    expect(service.isConsentCompleteAndCurrent()).toBeFalse();
+  });
+
+  it('buildDataExportJson$ includes consent version and language', async () => {
     service.saveAcceptAllOptional();
-    const json = service.buildLocalDataExportJson();
-    const parsed = JSON.parse(json) as { privacyConsentVersion: number };
+    const json = await new Promise<string>((resolve) => {
+      service.buildDataExportJson$().subscribe(resolve);
+    });
+    const parsed = JSON.parse(json) as {
+      privacyConsentVersion: number;
+      language: Languages;
+      applicants: unknown[];
+    };
 
     expect(parsed.privacyConsentVersion).toBe(PRIVACY_CONSENT_VERSION);
-  });
-
-  it('ignores malformed consent payloads in storage', () => {
-    localStorage.setItem(PRIVACY_CONSENT_STORAGE_KEY, '"not-object"');
-
-    const next = new PrivacyConsentService(new LocalStorageService());
-
-    expect(next.snapshot()).toBeNull();
-  });
-
-  it('ignores consent objects with invalid field types', () => {
-    localStorage.setItem(
-      PRIVACY_CONSENT_STORAGE_KEY,
-      JSON.stringify({
-        version: '1',
-        savedAtIso: 'x',
-        complete: true,
-        optionalRemoteTranslation: true,
-        optionalGeocoding: true,
-        optionalAiMatching: true,
-      })
-    );
-
-    const next = new PrivacyConsentService(new LocalStorageService());
-
-    expect(next.snapshot()).toBeNull();
+    expect(parsed.applicants).toEqual([]);
+    expect(parsed.language).toBe(Languages.English);
   });
 });

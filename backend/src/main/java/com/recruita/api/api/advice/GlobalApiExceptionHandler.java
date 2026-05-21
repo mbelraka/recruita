@@ -1,5 +1,7 @@
 package com.recruita.api.api.advice;
 
+import com.recruita.api.common.exception.ApplicantConflictException;
+import com.recruita.api.common.exception.ApplicantNotFoundException;
 import com.recruita.api.common.exception.MatchServiceUnavailableException;
 import com.recruita.api.common.exception.MatchValidationException;
 import com.recruita.api.config.properties.RecruitaProperties;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalApiExceptionHandler {
@@ -29,6 +32,16 @@ public class GlobalApiExceptionHandler {
             .map(FieldError::getDefaultMessage)
             .orElse(properties.getMatch().getMessages().getJobDescriptionRequired());
     return problem(HttpStatus.BAD_REQUEST, message);
+  }
+
+  @ExceptionHandler(ApplicantNotFoundException.class)
+  public ProblemDetail handleApplicantNotFound(ApplicantNotFoundException ex) {
+    return problem(HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(ApplicantConflictException.class)
+  public ProblemDetail handleApplicantConflict(ApplicantConflictException ex) {
+    return problem(HttpStatus.CONFLICT, ex.getMessage());
   }
 
   @ExceptionHandler(MatchValidationException.class)
@@ -51,7 +64,7 @@ public class GlobalApiExceptionHandler {
     return problem(HttpStatus.INTERNAL_SERVER_ERROR, message);
   }
 
-  @ExceptionHandler(NoHandlerFoundException.class)
+  @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
   public ProblemDetail handleNotFound() {
     return problem(HttpStatus.NOT_FOUND, properties.getMatch().getMessages().getNotFound());
   }

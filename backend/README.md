@@ -35,6 +35,41 @@ npm run dev
 
 Secrets: `backend/.env` (from `.env.example`).
 
+### Optional PostgreSQL + Redis
+
+Applicant rosters are stored in PostgreSQL when the persistence profile is active. The Angular SPA reads and writes them through `/api/applicants`.
+
+```bash
+docker compose up -d
+SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend
+```
+
+| Profile | Behavior |
+|---------|----------|
+| default (`dev`) | In-memory match cache; no database |
+| `persistence` | Flyway migrations on PostgreSQL; match cache in Redis |
+
+Flyway schema: `src/main/resources/db/migration/` (`applicants` table mirrors the Angular model).
+
+When the `persistence` profile is active, CRUD endpoints are available at `/api/applicants`:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/applicants` | List all applicants |
+| `POST` | `/api/applicants` | Create applicant (201) |
+| `PUT` | `/api/applicants/{id}` | Update applicant |
+| `DELETE` | `/api/applicants/{id}` | Delete applicant (204) |
+
+Without the profile, these routes return **404** (persistence disabled).
+
+The Angular app loads and mutates applicants via `/api/applicants` (see `ApplicantApiService` and `ApplicantsEffects`). A fresh database starts empty; load demo rows separately when needed:
+
+```bash
+npm run seed:applicants
+```
+
+This runs a one-shot Spring job (`persistence,seed` profiles) that upserts rows from `src/main/resources/seed/applicants-demo.json` and exits. Safe to re-run — existing ids are skipped.
+
 ## Quality
 
 | Command | Purpose |

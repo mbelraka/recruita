@@ -10,12 +10,16 @@ public class ApiRoutePaths {
   private final String healthPath;
   private final String matchPath;
   private final String matchLegacyPath;
+  private final String applicantsPath;
+  private final String applicantsPathWithId;
 
   public ApiRoutePaths(RecruitaProperties properties) {
     var routes = properties.getApi().getRoutes();
     this.healthPath = routes.getHealthPath();
     this.matchPath = routes.getMatchPath();
     this.matchLegacyPath = routes.getMatchLegacyPath();
+    this.applicantsPath = routes.getApplicantsPath();
+    this.applicantsPathWithId = routes.getApplicantsPathWithId();
   }
 
   public String getHealthPath() {
@@ -28,5 +32,13 @@ public class ApiRoutePaths {
 
   public String getMatchLegacyPath() {
     return matchLegacyPath;
+  }
+
+  public String getApplicantsPath() {
+    return applicantsPath;
+  }
+
+  public String getApplicantsPathWithId() {
+    return applicantsPathWithId;
   }
 }

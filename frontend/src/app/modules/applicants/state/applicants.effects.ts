@@ -1,23 +1,17 @@
 import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { concatMap, from, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, exhaustMap, map, switchMap } from 'rxjs/operators';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
-import { APPLICANTS_STORAGE_KEY } from '../../../constants/persistence.constants';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
-import { LocalStorageService } from '../../../services/local-storage.service';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import {
   concatWithErrorNotification,
   concatWithNotification,
 } from '../../../utilities/notification.utils';
-import {
-  buildDemoApplicants,
-  normalizeApplicantsAgainstSeed,
-} from '../../../utilities/seed/demo-applicants';
-import { Applicant } from '../models/applicant.model';
+import { ApplicantApiService } from '../services/applicant-api.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
   addApplicant,
@@ -35,31 +29,27 @@ import {
   searchLocationSuggestions,
   searchLocationSuggestionsFailure,
   searchLocationSuggestionsSuccess,
-  seedApplicants,
 } from './applicants.actions';
 
 @Injectable()
 export class ApplicantsEffects {
-  private readonly storageKey = APPLICANTS_STORAGE_KEY;
-
-  constructor(
+  public constructor(
     private readonly _actions$: Actions,
-    private readonly _localStorageService: LocalStorageService,
+    private readonly _applicantApi: ApplicantApiService,
     private readonly _citySearchService: CitySearchService
   ) {}
 
-  // Load Applicants
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadApplicants),
-      switchMap(() => {
-        try {
-          const applicants = this._readApplicants();
-          return of(loadApplicantsSuccess({ applicants }));
-        } catch (error: unknown) {
-          return of(loadApplicantsFailure({ error: getErrorMessage(error) }));
-        }
-      })
+      switchMap(() =>
+        this._applicantApi.list().pipe(
+          map((applicants) => loadApplicantsSuccess({ applicants })),
+          catchError((error: unknown) =>
+            of(loadApplicantsFailure({ error: getErrorMessage(error) }))
+          )
+        )
+      )
     )
   );
 
@@ -77,131 +67,82 @@ export class ApplicantsEffects {
     )
   );
 
-  seedApplicants$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(seedApplicants),
-      concatMap(() => {
-        const stored = this._readApplicants();
-        const storedIds = new Set(stored.map((a) => a.id));
-        const missing = buildDemoApplicants().filter(
-          (d) => !storedIds.has(d.id)
-        );
-        return from(missing).pipe(
-          map((applicant) => addApplicant({ applicant }))
-        );
-      })
-    )
-  );
-
-  // Add Applicant
   addApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(addApplicant),
-      exhaustMap(({ applicant }) => {
-        try {
-          const applicants = this._readApplicants();
-          applicants.push(applicant);
-          this._writeApplicants(applicants);
-          return concatWithNotification(addApplicantSuccess({ applicants }), {
-            type: AppNotificationType.Success,
-            messageKey: NOTIFICATION_MESSAGE_KEYS.applicantCreatedSuccess,
-          });
-        } catch (error: unknown) {
-          const errMsg = getErrorMessage(error);
-          return concatWithErrorNotification(
-            addApplicantFailure({ error: errMsg }),
-            errMsg
-          );
-        }
-      })
+      exhaustMap(({ applicant }) =>
+        this._applicantApi.create(applicant).pipe(
+          switchMap(() => this._applicantApi.list()),
+          switchMap((applicants) =>
+            concatWithNotification(addApplicantSuccess({ applicants }), {
+              type: AppNotificationType.Success,
+              messageKey: NOTIFICATION_MESSAGE_KEYS.applicantCreatedSuccess,
+            })
+          ),
+          catchError((error: unknown) => {
+            const errMsg = getErrorMessage(error);
+            return concatWithErrorNotification(
+              addApplicantFailure({ error: errMsg }),
+              errMsg
+            );
+          })
+        )
+      )
     )
   );
 
-  // Update Applicant
   updateApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(updateApplicant),
-      exhaustMap(({ applicant }) => {
-        try {
-          const applicants = this._readApplicants();
-          const idx = applicants.findIndex((a) => a.id === applicant.id);
-          if (idx < 0) {
-            const errMsg = 'Applicant not found';
-            return concatWithErrorNotification(
-              updateApplicantFailure({ error: errMsg }),
-              undefined,
-              NOTIFICATION_MESSAGE_KEYS.applicantNotFound
-            );
-          }
-          const next = [...applicants];
-          next[idx] = applicant;
-          this._writeApplicants(next);
-          return concatWithNotification(
-            updateApplicantSuccess({ applicants: next }),
-            {
+      exhaustMap(({ applicant }) =>
+        this._applicantApi.update(applicant).pipe(
+          switchMap(() => this._applicantApi.list()),
+          switchMap((applicants) =>
+            concatWithNotification(updateApplicantSuccess({ applicants }), {
               type: AppNotificationType.Success,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantUpdatedSuccess,
+            })
+          ),
+          catchError((error: unknown) => {
+            const errMsg = getErrorMessage(error);
+            if (errMsg.toLowerCase().includes('not found')) {
+              return concatWithErrorNotification(
+                updateApplicantFailure({ error: errMsg }),
+                undefined,
+                NOTIFICATION_MESSAGE_KEYS.applicantNotFound
+              );
             }
-          );
-        } catch (error: unknown) {
-          const errMsg = getErrorMessage(error);
-          return concatWithErrorNotification(
-            updateApplicantFailure({ error: errMsg }),
-            errMsg
-          );
-        }
-      })
+            return concatWithErrorNotification(
+              updateApplicantFailure({ error: errMsg }),
+              errMsg
+            );
+          })
+        )
+      )
     )
   );
 
-  // Delete Applicant
   deleteApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(deleteApplicant),
-      exhaustMap(({ id }) => {
-        try {
-          const applicants = this._readApplicants();
-          const updatedApplicants = applicants.filter(
-            (applicant: Applicant): boolean => applicant.id !== id
-          );
-          this._writeApplicants(updatedApplicants);
-          return concatWithNotification(
-            deleteApplicantSuccess({ applicants: updatedApplicants }),
-            {
+      exhaustMap(({ id }) =>
+        this._applicantApi.delete(id).pipe(
+          switchMap(() => this._applicantApi.list()),
+          switchMap((applicants) =>
+            concatWithNotification(deleteApplicantSuccess({ applicants }), {
               type: AppNotificationType.Info,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantDeletedSuccess,
-            }
-          );
-        } catch (error: unknown) {
-          const errMsg = getErrorMessage(error);
-          return concatWithErrorNotification(
-            deleteApplicantFailure({ error: errMsg }),
-            errMsg
-          );
-        }
-      })
+            })
+          ),
+          catchError((error: unknown) => {
+            const errMsg = getErrorMessage(error);
+            return concatWithErrorNotification(
+              deleteApplicantFailure({ error: errMsg }),
+              errMsg
+            );
+          })
+        )
+      )
     )
   );
-
-  // Shared helper methods for local storage operations
-  private _readApplicants(): Applicant[] {
-    const raw =
-      this._localStorageService.getItem<Record<string, unknown>[]>(
-        this.storageKey
-      ) || [];
-    const applicants = raw.map(
-      (row: Record<string, unknown>) =>
-        new Applicant(row as ConstructorParameters<typeof Applicant>[0])
-    );
-    const { applicants: normalized, changed } =
-      normalizeApplicantsAgainstSeed(applicants);
-    if (changed) {
-      this._writeApplicants(normalized);
-    }
-    return normalized;
-  }
-
-  private _writeApplicants(applicants: Applicant[]): void {
-    this._localStorageService.setItem(this.storageKey, applicants);
-  }
 }

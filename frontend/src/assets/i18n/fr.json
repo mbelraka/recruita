@@ -49,7 +49,7 @@
       "summaryTitle": "Synthèse",
       "summaryBody": "Sans options, les dossiers candidats restent sur l’ordinateur ; activation de la traduction, recherche géographique ou matching IA transfère uniquement les champs prévus aux API concernées.",
       "processingTitle": "Traitements proposés ici",
-      "procLocalStorage": "Stockage local : dossiers candidats, instantanés d’état, préférences régionales, choix RGPD persistent sur l’appareil.",
+      "procSessionState": "État de session : langue et consentement jusqu’à la fermeture de l’onglet. Les candidats sont chargés depuis le serveur.",
       "procTranslation": "Traduction en ligne désactivée par défaut : extraits envoyés au point de terminaison MyMemory public.",
       "procGeocode": "Reconnaissance géographique désactivée par défaut : la saisie lieu transite vers Open‑Meteo pour proposer des résultats.",
       "procMatch": "Ranking IA désactivé par défaut : champ offre/profil transmis selon votre backend configuré.",

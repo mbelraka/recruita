@@ -166,6 +166,17 @@ export const APP_CONFIG = {
 
   // Applicants module UI (see ApplicantsComponent)
   APPLICANTS: {
+    API: {
+      BASE_PATH: '/api/applicants',
+      REQUEST_TIMEOUT_MS: 15000,
+      ERRORS: {
+        REQUEST_TIMEOUT: 'The applicant request timed out. Please try again.',
+        UNREACHABLE:
+          'Unable to reach the applicant service. Start the backend with the persistence profile and try again.',
+        NOT_AVAILABLE:
+          'Applicant API is not available. Run docker compose and start the backend with SPRING_PROFILES_ACTIVE=dev,persistence.',
+      },
+    } as const,
     /** Collapse debounce after pointer leaves the new-applicant FAB shell (ms); avoids edge flicker during resize. */
     NEW_APPLICANT_FAB_POINTER_LEAVE_MS: 120,
     /**
@@ -293,9 +304,6 @@ export const APP_CONFIG = {
       [Languages.Romansh]: 'de-CH',
       [Languages.Spanish]: 'es-ES',
     },
-    // Keys for localStorage management
-    LANGUAGE_KEY: 'app_language',
-    DATE_FORMAT_KEY: 'app_dateFormat',
   },
 
   /**

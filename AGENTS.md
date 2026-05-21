@@ -18,6 +18,8 @@ npm run validate:ci:backend
 
 Backend Maven: `npm run verify:backend` (or `sh scripts/run-mvn.sh verify`)
 
+Optional DB/Redis: `npm run dev` starts Docker and the backend with `dev,persistence`. Demo applicants are **not** seeded automatically — run `npm run seed:applicants` when you want sample data. For backend only: `npm run infra:up` then `SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend` (see `backend/README.md`).
+
 ## Conventions
 
 - No magic strings in Java — use `application.yml` + `@ConfigurationProperties`.

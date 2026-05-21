@@ -1,6 +1,12 @@
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+
+import { StateFeatures } from '../containers/root/enums/state-features.enum';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
+import { adapter } from '../modules/applicants/state/applicants.reducer';
+import { ViewTypes } from '../modules/applicants/enums/view-types.enum';
+import { initialAppState } from '../state/app.reducer';
 import { PrivacyConsentService } from '../services/privacy-consent.service';
-import { LocalStorageService } from '../services/local-storage.service';
 
 import {
   commitPrivacyConsentDialogOutcome,
@@ -38,12 +44,35 @@ describe('privacy-consent-dialog-outcome.util', () => {
   });
 
   describe('commitPrivacyConsentDialogOutcome', () => {
-    beforeEach(() => localStorage.clear());
-    afterEach(() => localStorage.clear());
+    let svc: PrivacyConsentService;
+
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        providers: [
+          PrivacyConsentService,
+          provideMockStore({
+            initialState: {
+              app: initialAppState,
+              [StateFeatures.Applicants]: adapter.getInitialState({
+                loading: false,
+                error: null,
+                filter: '',
+                sortBy: 'name',
+                sortDirection: 'asc',
+                filterBySkill: null,
+                filterByStatus: null,
+                filterByCountry: null,
+                viewType: ViewTypes.GRID,
+                locationSuggestions: [],
+              }),
+            },
+          }),
+        ],
+      });
+      svc = TestBed.inject(PrivacyConsentService);
+    });
 
     it('persist necessary / all / custom', () => {
-      const svc = new PrivacyConsentService(new LocalStorageService());
-
       commitPrivacyConsentDialogOutcome(svc, { mode: 'necessary' });
       expect(svc.snapshot()?.optionalAiMatching).toBeFalse();
 
@@ -64,7 +93,6 @@ describe('privacy-consent-dialog-outcome.util', () => {
     });
 
     it('ignores malformed results', () => {
-      const svc = new PrivacyConsentService(new LocalStorageService());
       svc.saveAcceptAllOptional();
       commitPrivacyConsentDialogOutcome(svc, 'oops');
       expect(svc.snapshot()?.optionalAiMatching).toBeTrue();

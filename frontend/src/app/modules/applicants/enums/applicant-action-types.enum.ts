@@ -17,7 +17,6 @@ export enum ApplicantActionTypes {
   SetFilterBySkill = '[Applicants] Set Filter By Skill',
   SetFilterByStatus = '[Applicants] Set Filter By Status',
   SetFilterByCountry = '[Applicants] Set Filter By Country',
-  SeedApplicants = '[Applicants] Seed Applicants',
   SearchLocationSuggestions = '[Applicants] Search Location Suggestions',
   SearchLocationSuggestionsSuccess = '[Applicants] Search Location Suggestions Success',
   SearchLocationSuggestionsFailure = '[Applicants] Search Location Suggestions Failure',
