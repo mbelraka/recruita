@@ -11,6 +11,7 @@ import { PrivacyConsentService } from '../services/privacy-consent.service';
 import {
   commitPrivacyConsentDialogOutcome,
   isPrivacyConsentDialogCloseResult,
+  privacyChoicesFromDialogResult,
 } from './privacy-consent-dialog-outcome.util';
 
 describe('privacy-consent-dialog-outcome.util', () => {
@@ -40,6 +41,35 @@ describe('privacy-consent-dialog-outcome.util', () => {
           choices: { x: true },
         })
       ).toBeFalse();
+    });
+  });
+
+  describe('privacyChoicesFromDialogResult', () => {
+    it('maps dialog modes to stored consent flags', () => {
+      expect(privacyChoicesFromDialogResult({ mode: 'necessary' })).toEqual({
+        optionalRemoteTranslation: false,
+        optionalGeocoding: false,
+        optionalAiMatching: false,
+      });
+      expect(privacyChoicesFromDialogResult({ mode: 'all' })).toEqual({
+        optionalRemoteTranslation: true,
+        optionalGeocoding: true,
+        optionalAiMatching: true,
+      });
+      expect(
+        privacyChoicesFromDialogResult({
+          mode: 'custom',
+          choices: {
+            optionalRemoteTranslation: true,
+            optionalGeocoding: false,
+            optionalAiMatching: true,
+          },
+        })
+      ).toEqual({
+        optionalRemoteTranslation: true,
+        optionalGeocoding: false,
+        optionalAiMatching: true,
+      });
     });
   });
 

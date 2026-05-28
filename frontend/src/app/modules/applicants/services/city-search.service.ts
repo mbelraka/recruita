@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, Observable, of } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';

@@ -1,10 +1,6 @@
 import type { MatchApiResponse } from '../models/match-api-response.model';
 import type { MatchScoreItem } from '../models/match-score-item.model';
 
-/** Match API `{ error: string }` body field (Spring ProblemDetail / JSON error contract). */
-export const MATCH_PROXY_RESPONSE_ERROR_PROPERTY = 'error' as const;
-
-/** Order matters: provider JSON collection names carrying score rows */
 export const MATCH_API_SCORE_COLLECTION_KEYS: ReadonlyArray<
   keyof MatchApiResponse
 > = ['scores', 'results', 'candidates'];

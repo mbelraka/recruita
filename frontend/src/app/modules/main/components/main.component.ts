@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { distinctUntilChanged, pairwise } from 'rxjs/operators';
+import { distinctUntilChanged, pairwise } from 'rxjs';
 
 import { FullState } from 'src/app/models/full-state.model';
 import {

@@ -1,3 +1,7 @@
+spring:
+  config:
+    import: optional:classpath:application-profile-api.yml
+
 recruita:
   runtime:
     production-mode: development

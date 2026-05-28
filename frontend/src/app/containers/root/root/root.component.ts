@@ -1,4 +1,11 @@
-import { afterNextRender, Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  DestroyRef,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
 import { Store } from '@ngrx/store';
@@ -11,8 +18,8 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { FullState } from '../../../models/full-state.model';
 import { loadApplicants } from '../../../modules/applicants/state/applicants.actions';
+import { loadProfile } from '../../../modules/main/state/profile.actions';
 import { LocalizationService } from '../../../services/localization.service';
-import { PrivacyConsentDialogService } from '../privacy/privacy-consent-dialog.service';
 import { selectAppLanguage } from '../../../state/app.selectors';
 import { isLanguage } from '../../../utilities/language.utils';
 
@@ -31,9 +38,9 @@ export class RootComponent implements OnInit {
   public readonly supportedLanguages =
     APP_CONFIG.LOCALIZATION.SUPPORTED_LANGUAGES;
 
-  public readonly language$ = this._store.select(selectAppLanguage);
-
   public currentRoute$!: Observable<NavLink | undefined>;
+
+  public selectedLanguage: Languages = APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
 
   public get sortedSupportedLanguages(): readonly Languages[] {
     return [...this.supportedLanguages].sort((a, b) =>
@@ -48,21 +55,21 @@ export class RootComponent implements OnInit {
     sensitivity: 'base',
   });
 
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _cdr = inject(ChangeDetectorRef);
+
   public constructor(
     private readonly _router: Router,
     private readonly _store: Store<FullState>,
     private readonly _localization: LocalizationService,
-    private readonly _translate: TranslateService,
-    private readonly _privacyConsentDialog: PrivacyConsentDialogService
-  ) {
-    afterNextRender(() => {
-      this._privacyConsentDialog.openConsentDialogIfRequired();
-    });
-  }
+    private readonly _translate: TranslateService
+  ) {}
 
   public ngOnInit(): void {
+    this._store.dispatch(loadProfile());
     this._initApplicantsState();
     this._initCurrentRouteStream();
+    this._syncLanguageSelectWithStore();
   }
 
   public onLanguageChange(value: unknown): void {
@@ -77,6 +84,16 @@ export class RootComponent implements OnInit {
 
   private _initApplicantsState(): void {
     this._store.dispatch(loadApplicants());
+  }
+
+  private _syncLanguageSelectWithStore(): void {
+    this._store
+      .select(selectAppLanguage)
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this._destroyRef))
+      .subscribe((language) => {
+        this.selectedLanguage = language;
+        this._cdr.markForCheck();
+      });
   }
 
   private _initCurrentRouteStream(): void {

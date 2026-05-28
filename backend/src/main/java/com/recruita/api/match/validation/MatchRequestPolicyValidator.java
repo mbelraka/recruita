@@ -5,6 +5,7 @@ import com.recruita.api.api.dto.match.MatchRequestDto;
 import com.recruita.api.common.exception.MatchValidationException;
 import com.recruita.api.config.properties.MatchProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.message.MatchApiErrorMessage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,7 +40,7 @@ public class MatchRequestPolicyValidator {
 
   private void validateCandidate(MatchCandidateDto candidate) {
     if (candidate.id() == null || candidate.id().isBlank()) {
-      throw new MatchValidationException(messages.getCandidateIdRequired());
+      throw new MatchValidationException(MatchApiErrorMessage.CANDIDATE_ID_REQUIRED.message());
     }
     if (candidate.id().length() > limits.getCandidateScalarMaxChars()) {
       throw new MatchValidationException(messages.getCandidateFieldTooLong());

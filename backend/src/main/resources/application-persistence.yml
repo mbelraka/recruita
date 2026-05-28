@@ -1,11 +1,6 @@
-recruita:
-  persistence:
-    enabled: true
-  match:
-    cache:
-      store: redis
-
 spring:
+  config:
+    import: optional:classpath:application-profile-api.yml
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:recruita}
     username: ${DATABASE_USER:recruita}
@@ -26,3 +21,10 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+
+recruita:
+  persistence:
+    enabled: true
+  match:
+    cache:
+      store: redis

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Languages } from '../../../enums/language.enum';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
+import { MatchErrorMessage } from '../enums/match-error-message.enum';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { MatchCandidatesService } from './match-candidates.service';
 
@@ -303,10 +304,7 @@ describe('MatchCandidatesService', () => {
 
     await expectAsync(
       firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))
-    ).toBeRejectedWithError(
-      Error,
-      'Unable to reach the matching service. Please try again later.'
-    );
+    ).toBeRejectedWithError(Error, MatchErrorMessage.GroqProxyUnreachable);
   });
 
   it('ignores score entries without id and name identity', async () => {

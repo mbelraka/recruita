@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
+import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 
+import { FullState } from '../../../models/full-state.model';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
-import { commitPrivacyConsentDialogOutcome } from '../../../utilities/privacy-consent-dialog-outcome.util';
+import { persistPrivacyConsentOutcome } from '../../../modules/main/state/profile.actions';
 
 import { PrivacyConsentDialogComponent } from './privacy-consent-dialog.component';
 
@@ -18,7 +20,8 @@ export class PrivacyConsentDialogService {
 
   public constructor(
     private readonly _dialog: MatDialog,
-    private readonly _privacy: PrivacyConsentService
+    private readonly _privacy: PrivacyConsentService,
+    private readonly _store: Store<FullState>
   ) {}
 
   /**
@@ -47,8 +50,8 @@ export class PrivacyConsentDialogService {
     ref
       .afterClosed()
       .pipe(take(1))
-      .subscribe((result) =>
-        commitPrivacyConsentDialogOutcome(this._privacy, result)
-      );
+      .subscribe((result) => {
+        this._store.dispatch(persistPrivacyConsentOutcome({ result }));
+      });
   }
 }

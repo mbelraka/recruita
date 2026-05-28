@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Privacidad y datos",
-      "intro": "Los candidatos se guardan en este navegador (almacenamiento local). Solo se comparten datos con terceros si activas opciones explícitas.",
+      "intro": "Los candidatos se guardan en el servidor cuando la persistencia está activa. La aceptación del aviso de privacidad se recuerda entre recargas. Solo se comparten datos con terceros si activas opciones explícitas.",
       "necessaryNote": "Imprescindible: guardar datos en local, preferencias de idioma/formato y el núcleo de la app cuando las APIs externas están apagadas.",
       "optionalHeading": "Opcional",
       "privacyNoticeLink": "Resumen de privacidad",

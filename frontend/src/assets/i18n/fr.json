@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Données & confidentialité",
-      "intro": "Les dossiers sont enregistrés dans ce navigateur (stockage local). Les fonctionnalités optionnelles ne transmettent des données qu’avec votre consentement explicite.",
+      "intro": "Les dossiers candidats sont stockés sur le serveur lorsque la persistance est activée. L’acceptation de l’avis de confidentialité est mémorisée entre les rechargements. Les fonctionnalités optionnelles ne transmettent des données qu’avec votre consentement explicite.",
       "necessaryNote": "Toujours actif : mémoire locale, préférences linguistiques/mise en forme et cœur de l’application qui conserve les dossiers hors services externes lorsque désactivée.",
       "optionalHeading": "Traitements optionnels",
       "privacyNoticeLink": "Voir la vue d’ensemble",

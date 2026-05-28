@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Datenschutz & Datenverwendung",
-      "intro": "Bewerberdaten, die Sie eingeben, werden in diesem Browser (Local Storage) gespeichert. Optionale Funktionen übermitteln Daten nur nach Ihrer aktiven Auswahl.",
+      "intro": "Bewerberdaten werden auf dem Server gespeichert, wenn Persistenz aktiv ist. Ihre Annahme des Datenschutzhinweises bleibt über Seitenaufrufe hinweg erhalten. Optionale Funktionen übermitteln Daten nur nach Ihrer aktiven Auswahl.",
       "necessaryNote": "Erforderlich: lokale Speicherung der Daten im Browser, Sprach- und Datums-/Formatwahl sowie Kernfunktionen ohne Datenweitergabe an externe APIs.",
       "optionalHeading": "Optionale Verarbeitungen",
       "privacyNoticeLink": "Datenschutzüberblick",

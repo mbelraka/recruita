@@ -42,6 +42,7 @@ public class ApiProperties {
     private String matchPath = "/api/match";
     private String matchLegacyPath = "/api/match-job";
     private String applicantsPath = "/api/applicants";
+    private String profilesPath = "/api/profiles";
 
     public String getHealthPath() {
       return healthPath;
@@ -75,13 +76,31 @@ public class ApiProperties {
       this.applicantsPath = applicantsPath;
     }
 
+    public String getProfilesPath() {
+      return profilesPath;
+    }
+
+    public void setProfilesPath(String profilesPath) {
+      this.profilesPath = profilesPath;
+    }
+
     public String getApplicantsPathWithId() {
       return applicantsPath + "/{id}";
     }
 
+    public String getProfilesPathWithId() {
+      return profilesPath + "/{id}";
+    }
+
     public String[] publicPaths() {
       return new String[] {
-        healthPath, matchPath, matchLegacyPath, applicantsPath, applicantsPath + "/**"
+        healthPath,
+        matchPath,
+        matchLegacyPath,
+        applicantsPath,
+        applicantsPath + "/**",
+        profilesPath,
+        profilesPath + "/**"
       };
     }
   }

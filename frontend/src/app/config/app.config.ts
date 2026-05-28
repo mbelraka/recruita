@@ -1,6 +1,7 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
 import { Languages } from '../enums/language.enum';
+import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-property-key.enum';
 import { Applicant } from '../modules/applicants/models/applicant.model';
 import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
@@ -10,6 +11,8 @@ export const APP_CONFIG = {
   HTTP: {
     XSRF_COOKIE_NAME: 'XSRF-TOKEN',
     XSRF_HEADER_NAME: 'X-XSRF-TOKEN',
+    /** Must match backend `recruita.api.problem-detail.error-property-key`. */
+    PROBLEM_DETAIL_ERROR_PROPERTY: ApiProblemDetailPropertyKey.Error,
   } as const,
 
   /** NgRx Store DevTools (`StoreDevtoolsModule.instrument`). */
@@ -164,18 +167,22 @@ export const APP_CONFIG = {
     panelClass: 'confirm-delete-applicant-dialog-panel',
   } as const,
 
+  PROFILE: {
+    /** Shared profile until a full profile UI exists. Must match `recruita.profile-api.admin-id`. */
+    DEFAULT_ID: 'admin',
+    API: {
+      BASE_PATH: '/api/profiles',
+      REQUEST_TIMEOUT_MS: 15000,
+      /** User-facing copy: `ProfileApiErrorMessage`. */
+    } as const,
+  } as const,
+
   // Applicants module UI (see ApplicantsComponent)
   APPLICANTS: {
     API: {
       BASE_PATH: '/api/applicants',
       REQUEST_TIMEOUT_MS: 15000,
-      ERRORS: {
-        REQUEST_TIMEOUT: 'The applicant request timed out. Please try again.',
-        UNREACHABLE:
-          'Unable to reach the applicant service. Start the backend with the persistence profile and try again.',
-        NOT_AVAILABLE:
-          'Applicant API is not available. Run docker compose and start the backend with SPRING_PROFILES_ACTIVE=dev,persistence.',
-      },
+      /** User-facing copy: `ApplicantApiErrorMessage`. */
     } as const,
     /** Collapse debounce after pointer leaves the new-applicant FAB shell (ms); avoids edge flicker during resize. */
     NEW_APPLICANT_FAB_POINTER_LEAVE_MS: 120,
@@ -256,6 +263,7 @@ export const APP_CONFIG = {
   MATCH: {
     TOP_CANDIDATES_COUNT: 3,
     REQUEST_TIMEOUT_MS: 30000,
+    /** User-facing copy: `MatchErrorMessage`. */
     SCORE: {
       MIN: 0,
       MAX: 100,
@@ -267,13 +275,6 @@ export const APP_CONFIG = {
       MODEL: 'llama-3.3-70b-versatile',
       TEMPERATURE: 0,
       DETERMINISTIC_SCORING: true,
-    } as const,
-    ERRORS: {
-      MISSING_JOB_DESCRIPTION: 'Please provide a job description.',
-      NO_APPLICANTS_AVAILABLE: 'No applicants available for matching.',
-      GROQ_REQUEST_TIMEOUT: 'The matching request timed out. Please try again.',
-      GROQ_PROXY_UNREACHABLE:
-        'Unable to reach the matching service. Please try again later.',
     } as const,
   } as const,
 

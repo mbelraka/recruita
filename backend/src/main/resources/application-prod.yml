@@ -1,7 +1,9 @@
 # Shared secrets: backend/.env (see backend/.env.example).
 spring:
   config:
-    import: optional:file:.env
+    import:
+      - optional:file:.env
+      - optional:classpath:application-profile-api.yml
 
 recruita:
   runtime:

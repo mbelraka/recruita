@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Datas & prot.da datas",
-      "intro": "Ils profils pon vegnir memorisads mo en quest browser (stor local). Las funcziuns facultativas tramettan datas mo cun tia selecziun.",
+      "intro": "Ils profils candidats vegnan memorisads sin il server sche la persistenza è activa. L’acceptaziun da l’avis da protecziun da datas resta memorisada tranter rechargiadas. Las funcziuns facultativas tramettan datas mo cun tia selecziun.",
       "necessaryNote": "Davosvart: stor local, lingua/data & il core-app senza API extern orda las opziuns chantadas.",
       "optionalHeading": "Opziunal",
       "privacyNoticeLink": "Survista da protecziun da datas",

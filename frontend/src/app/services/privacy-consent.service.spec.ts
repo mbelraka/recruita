@@ -153,6 +153,18 @@ describe('PrivacyConsentService', () => {
     expect(service.isConsentCompleteAndCurrent()).toBeFalse();
   });
 
+  it('hydrateFromProfile restores stored consent choices', () => {
+    service.hydrateFromProfile({
+      optionalRemoteTranslation: true,
+      optionalGeocoding: false,
+      optionalAiMatching: true,
+    });
+    expect(service.isConsentCompleteAndCurrent()).toBeTrue();
+    expect(service.optionalRemoteTranslation()).toBeTrue();
+    expect(service.optionalGeocoding()).toBeFalse();
+    expect(service.optionalAiMatching()).toBeTrue();
+  });
+
   it('buildDataExportJson$ includes consent version and language', async () => {
     service.saveAcceptAllOptional();
     const json = await new Promise<string>((resolve) => {
@@ -162,10 +174,47 @@ describe('PrivacyConsentService', () => {
       privacyConsentVersion: number;
       language: Languages;
       applicants: unknown[];
+      profile: null;
     };
 
     expect(parsed.privacyConsentVersion).toBe(PRIVACY_CONSENT_VERSION);
     expect(parsed.applicants).toEqual([]);
     expect(parsed.language).toBe(Languages.English);
+    expect(parsed.profile).toBeNull();
+  });
+
+  it('buildDataExportJson$ includes provided profile snapshot', async () => {
+    service.saveNecessaryOnly();
+    const json = await new Promise<string>((resolve) => {
+      service
+        .buildDataExportJson$({
+          id: 'p-1',
+          privacyNoticeAccepted: true,
+          lastLanguage: Languages.German,
+          optionalRemoteTranslation: false,
+          optionalGeocoding: true,
+          optionalAiMatching: false,
+        })
+        .subscribe(resolve);
+    });
+    const parsed = JSON.parse(json) as {
+      profile: {
+        id: string;
+        privacyNoticeAccepted: boolean;
+        lastLanguage: Languages;
+        optionalRemoteTranslation: boolean;
+        optionalGeocoding: boolean;
+        optionalAiMatching: boolean;
+      };
+    };
+
+    expect(parsed.profile).toEqual({
+      id: 'p-1',
+      privacyNoticeAccepted: true,
+      lastLanguage: Languages.German,
+      optionalRemoteTranslation: false,
+      optionalGeocoding: true,
+      optionalAiMatching: false,
+    });
   });
 });

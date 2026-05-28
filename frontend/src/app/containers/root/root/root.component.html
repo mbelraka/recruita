@@ -48,7 +48,7 @@
         <mat-select
           panelClass="select-panel--palette-secondary"
           [attr.aria-label]="'language.label' | translate"
-          [value]="language$ | async"
+          [value]="selectedLanguage"
           (selectionChange)="onLanguageChange($event.value)"
         >
           @for (lang of sortedSupportedLanguages; track lang) {

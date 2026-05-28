@@ -5,7 +5,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Sort } from '@angular/material/sort';
 import { of } from 'rxjs';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantListComponent } from './applicant-list.component';
 import { Applicant } from '../../models/applicant.model';
@@ -41,11 +40,7 @@ describe('ApplicantListComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [ApplicantListComponent],
-      imports: [
-        BrowserAnimationsModule,
-        TranslateModule.forRoot(),
-        SharedModule,
-      ],
+      imports: [TranslateModule.forRoot(), SharedModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [{ provide: Store, useValue: mockStore }],
     }).compileComponents();

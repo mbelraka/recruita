@@ -15,7 +15,7 @@ public class RecruitaProperties {
   @Valid @NotNull private MatchProperties match = new MatchProperties();
   @Valid @NotNull private OperationalProperties operational = new OperationalProperties();
   @Valid @NotNull private PersistenceProperties persistence = new PersistenceProperties();
-  @Valid @NotNull private ApplicantProperties applicant = new ApplicantProperties();
+  @Valid @NotNull private ProfileProperties profileApi = new ProfileProperties();
   @Valid @NotNull private SeedProperties seed = new SeedProperties();
 
   public RuntimeProperties getRuntime() {
@@ -66,12 +66,12 @@ public class RecruitaProperties {
     this.persistence = persistence;
   }
 
-  public ApplicantProperties getApplicant() {
-    return applicant;
+  public ProfileProperties getProfileApi() {
+    return profileApi;
   }
 
-  public void setApplicant(ApplicantProperties applicant) {
-    this.applicant = applicant;
+  public void setProfileApi(ProfileProperties profileApi) {
+    this.profileApi = profileApi;
   }
 
   public SeedProperties getSeed() {

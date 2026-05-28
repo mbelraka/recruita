@@ -26,7 +26,6 @@ import { SharedModule } from 'src/app/shared/shared.module';
 
 import { AppComponent } from './app.component';
 import { APP_CONFIG } from './config/app.config';
-import { provideRootAnimations } from './provide-root-animations';
 import { Languages } from './enums/language.enum';
 import { appReducer } from './state/app.reducer';
 import { AppEffects } from './state/app.effects';
@@ -76,7 +75,6 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     }),
   ],
   providers: [
-    provideRootAnimations,
     provideHttpClient(
       withXsrfConfiguration({
         cookieName: APP_CONFIG.HTTP.XSRF_COOKIE_NAME,

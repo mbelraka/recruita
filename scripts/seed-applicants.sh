@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 # Load demo applicants into PostgreSQL (requires Docker Postgres + Flyway schema).
+# Also seeds the interim admin session profile (id: admin).
 set -eu
 
 ROOT="$(CDPATH= cd "$(dirname "$0")/.." && pwd)"

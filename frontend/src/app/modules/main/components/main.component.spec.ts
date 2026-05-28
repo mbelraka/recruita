@@ -6,7 +6,7 @@ import {
 } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router, RouterLink, RouterModule } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import {
   TranslateFakeLoader,
   TranslateLoader,
@@ -42,6 +42,7 @@ describe('MainComponent', () => {
   let fixture: ComponentFixture<MainComponent>;
   let component: MainComponent;
   let componentPrivate: MainComponentPrivate;
+  let store: MockStore;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -65,6 +66,8 @@ describe('MainComponent', () => {
     fixture = TestBed.createComponent(MainComponent);
     component = fixture.componentInstance;
     componentPrivate = component as unknown as MainComponentPrivate;
+    store = TestBed.inject(MockStore);
+    spyOn(store, 'dispatch');
     fixture.detectChanges();
   });
 

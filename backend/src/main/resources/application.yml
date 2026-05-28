@@ -10,6 +10,8 @@ server:
 spring:
   application:
     name: recruita-api
+  config:
+    import: optional:classpath:application-profile-api.yml
   profiles:
     default: dev
   jackson:
@@ -37,6 +39,7 @@ recruita:
       match-path: /api/match
       match-legacy-path: /api/match-job
       applicants-path: /api/applicants
+      profiles-path: /api/profiles
   operational:
     startup:
       missing-groq-api-key: Missing GROQ_API_KEY in environment.
@@ -103,10 +106,7 @@ recruita:
     enabled: false
   seed:
     applicants-demo: false
-  applicant:
-    id-required: Applicant id is required.
-    not-found: Applicant not found.
-    already-exists: An applicant with this id already exists.
+    admin-profile: false
   match:
     cache:
       enabled: true

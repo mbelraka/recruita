@@ -11,6 +11,7 @@ import {
 } from '../constants/privacy.constants';
 import { FullState } from '../models/full-state.model';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
+import type { Profile } from '../modules/main/models/profile.model';
 import type { StoredPrivacyConsent } from '../models/stored-privacy-consent.model';
 import { selectAllApplicants } from '../modules/applicants/state/applicants.selectors';
 import { selectAppLanguage } from '../state/app.selectors';
@@ -82,6 +83,11 @@ export class PrivacyConsentService {
     this._persistComplete(choices);
   }
 
+  /** Restore consent choices saved on the shared profile row. */
+  public hydrateFromProfile(choices: PrivacyConsentFormState): void {
+    this._persistComplete(choices);
+  }
+
   /** Clear consent so the gate is shown again after next choice. */
   public resetConsentDecision(): void {
     this._consent$.next(null);
@@ -94,7 +100,9 @@ export class PrivacyConsentService {
     }
   }
 
-  public buildDataExportJson$(): Observable<string> {
+  public buildDataExportJson$(
+    profile: Profile | null = null
+  ): Observable<string> {
     return combineLatest([
       this._store.select(selectAllApplicants),
       this._store.select(selectAppLanguage),
@@ -105,6 +113,7 @@ export class PrivacyConsentService {
           {
             exportedAt: new Date().toISOString(),
             note: PRIVACY_DATA_EXPORT_NOTE,
+            profile,
             applicants,
             language,
             privacyConsentVersion: this.snapshot()?.version ?? null,

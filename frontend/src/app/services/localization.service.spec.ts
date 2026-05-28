@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { DateAdapter } from '@angular/material/core';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
 import { LocalizationService } from './localization.service';
 import { Languages } from '../enums/language.enum';
@@ -25,6 +25,7 @@ describe('LocalizationService', () => {
       'setDefaultLang',
       'use',
     ]);
+    mockTranslate.use.and.returnValue(of(undefined));
     mockDateAdapter = jasmine.createSpyObj('DateAdapter', ['setLocale']);
 
     TestBed.configureTestingModule({

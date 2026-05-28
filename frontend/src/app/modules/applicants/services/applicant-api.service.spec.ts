@@ -7,6 +7,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { ApplicantApiErrorMessage } from '../enums/applicant-api-error-message.enum';
 import { Applicant } from '../models/applicant.model';
 import { ApplicantApiService } from './applicant-api.service';
 
@@ -81,7 +82,7 @@ describe('ApplicantApiService', () => {
     );
 
     await expectAsync(promise).toBeRejectedWithError(
-      APP_CONFIG.APPLICANTS.API.ERRORS.NOT_AVAILABLE
+      ApplicantApiErrorMessage.NotAvailable
     );
   });
 
@@ -141,7 +142,7 @@ describe('ApplicantApiService', () => {
     req.flush(null, { status: 500, statusText: 'Server Error' });
 
     await expectAsync(promise).toBeRejectedWithError(
-      APP_CONFIG.APPLICANTS.API.ERRORS.UNREACHABLE
+      ApplicantApiErrorMessage.Unreachable
     );
   });
 

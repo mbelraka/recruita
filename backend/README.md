@@ -53,7 +53,7 @@ Docker Compose project name is **`recruita`** (`recruita-postgres`, `recruita-re
 
 Flyway schema: `src/main/resources/db/migration/` (`applicants` table mirrors the Angular model).
 
-When the `persistence` profile is active, CRUD endpoints are available at `/api/applicants`:
+When the `persistence` profile is active, CRUD endpoints are available at `/api/applicants` and `/api/profiles`:
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -61,6 +61,9 @@ When the `persistence` profile is active, CRUD endpoints are available at `/api/
 | `POST` | `/api/applicants` | Create applicant (201) |
 | `PUT` | `/api/applicants/{id}` | Update applicant |
 | `DELETE` | `/api/applicants/{id}` | Delete applicant (204) |
+| `GET` | `/api/profiles/{id}` | Load session profile (privacy notice flag) |
+| `POST` | `/api/profiles` | Create profile (201) |
+| `PUT` | `/api/profiles/{id}` | Update profile |
 
 Without the profile, these routes return **404** (persistence disabled).
 
@@ -70,7 +73,9 @@ The Angular app loads and mutates applicants via `/api/applicants` (see `Applica
 npm run seed:applicants
 ```
 
-This runs a one-shot Spring job (`persistence,seed` profiles) that upserts rows from `src/main/resources/seed/applicants-demo.json` and exits. Safe to re-run — existing ids are skipped.
+This runs a one-shot Spring job (`persistence,seed` profiles) that upserts demo applicants from `src/main/resources/seed/applicants-demo.json` and the interim **admin** session profile (`id: admin`, privacy flag only) from `seed/profile-admin.json`. Safe to re-run — existing ids are skipped.
+
+The Angular app uses profile id **`admin`** (`APP_CONFIG.PROFILE.DEFAULT_ID`) until a full profile UI exists; keep it aligned with `recruita.profile-api.admin-id` in `application.yml`.
 
 ## Quality
 

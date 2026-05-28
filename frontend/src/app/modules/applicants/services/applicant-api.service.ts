@@ -1,16 +1,10 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import {
-  catchError,
-  map,
-  Observable,
-  throwError,
-  timeout,
-  TimeoutError,
-} from 'rxjs';
+import { catchError, map, Observable, throwError, timeout } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { ApplicantApiErrorMessage } from '../enums/applicant-api-error-message.enum';
 import { Applicant } from '../models/applicant.model';
 import { ApplicantApiRecord } from '../models/applicant-api.model';
 import {
@@ -18,6 +12,7 @@ import {
   applicantToApiWrite,
   applicantsFromApi,
 } from '../utilities/applicant-api.mapper';
+import { toHttpApiServiceError } from '../../../utilities/http-api-error.util';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicantApiService {
@@ -80,32 +75,10 @@ export class ApplicantApiService {
   }
 
   private _toServiceError(error: unknown): Error {
-    if (error instanceof TimeoutError) {
-      return new Error(this.config.ERRORS.REQUEST_TIMEOUT);
-    }
-    const message = this._extractBackendErrorMessage(error);
-    return new Error(message ?? this.config.ERRORS.UNREACHABLE);
-  }
-
-  private _extractBackendErrorMessage(error: unknown): string | null {
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 404) {
-        return this.config.ERRORS.NOT_AVAILABLE;
-      }
-      const payload = error.error;
-      if (typeof payload === 'string' && payload.trim()) {
-        return payload.trim();
-      }
-      if (payload && typeof payload === 'object') {
-        const errText = (payload as Partial<Record<'error', unknown>>).error;
-        if (typeof errText === 'string' && errText.trim()) {
-          return errText.trim();
-        }
-      }
-    }
-    if (error instanceof Error && error.message.trim()) {
-      return error.message.trim();
-    }
-    return null;
+    return toHttpApiServiceError(error, {
+      requestTimeout: ApplicantApiErrorMessage.RequestTimeout,
+      notAvailable: ApplicantApiErrorMessage.NotAvailable,
+      unreachable: ApplicantApiErrorMessage.Unreachable,
+    });
   }
 }

@@ -3,31 +3,38 @@ package com.recruita.api.config.validation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.applicant.message.ApplicantApiErrorMessage;
+import com.recruita.api.match.message.MatchApiErrorMessage;
+import com.recruita.api.profile.message.ProfileApiErrorMessage;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 class RecruitaValidationMessageSourceTest {
 
   private final RecruitaValidationMessageSource messageSource =
-      new RecruitaValidationMessageSource(new RecruitaProperties());
+      new RecruitaValidationMessageSource();
 
   @Test
   void resolvesConfiguredValidationMessages() {
     assertEquals(
-        "candidates must be an array.",
+        MatchApiErrorMessage.CANDIDATES_MUST_BE_ARRAY.message(),
         messageSource
-            .resolveCode(RecruitaValidationMessageSource.CANDIDATES_MUST_BE_ARRAY_KEY, Locale.US)
+            .resolveCode(MatchValidationMessageKey.Codes.CANDIDATES_MUST_BE_ARRAY, Locale.US)
             .format(new Object[] {}));
     assertEquals(
-        "Each candidate must include a non-empty string id (correlation id).",
+        MatchApiErrorMessage.CANDIDATE_ID_REQUIRED.message(),
         messageSource
-            .resolveCode(RecruitaValidationMessageSource.CANDIDATE_ID_REQUIRED_KEY, Locale.US)
+            .resolveCode(MatchValidationMessageKey.Codes.CANDIDATE_ID_REQUIRED, Locale.US)
             .format(new Object[] {}));
     assertEquals(
-        "Applicant id is required.",
+        ApplicantApiErrorMessage.ID_REQUIRED.message(),
         messageSource
-            .resolveCode(RecruitaValidationMessageSource.APPLICANT_ID_REQUIRED_KEY, Locale.US)
+            .resolveCode(ApplicantValidationMessageKey.Codes.ID_REQUIRED, Locale.US)
+            .format(new Object[] {}));
+    assertEquals(
+        ProfileApiErrorMessage.ID_REQUIRED.message(),
+        messageSource
+            .resolveCode(ProfileValidationMessageKey.Codes.ID_REQUIRED, Locale.US)
             .format(new Object[] {}));
   }
 

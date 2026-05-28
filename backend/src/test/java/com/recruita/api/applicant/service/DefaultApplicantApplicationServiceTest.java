@@ -11,7 +11,6 @@ import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.mapper.ApplicantMapper;
 import com.recruita.api.common.exception.ApplicantConflictException;
 import com.recruita.api.common.exception.ApplicantNotFoundException;
-import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.persistence.entity.ApplicantEntity;
 import com.recruita.api.persistence.repository.ApplicantRepository;
 import java.util.List;
@@ -31,9 +30,7 @@ class DefaultApplicantApplicationServiceTest {
 
   @BeforeEach
   void setUp() {
-    service =
-        new DefaultApplicantApplicationService(
-            repository, new ApplicantMapper(), new RecruitaProperties());
+    service = new DefaultApplicantApplicationService(repository, new ApplicantMapper());
   }
 
   @Test

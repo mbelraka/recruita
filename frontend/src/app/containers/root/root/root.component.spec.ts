@@ -12,7 +12,7 @@ import {
   TranslateLoader,
   TranslateModule,
 } from '@ngx-translate/core';
-import { provideMockStore } from '@ngrx/store/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +23,7 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { NavLink } from 'src/app/modules/main/models/nav-link.model';
 import { LocalizationService } from '../../../services/localization.service';
-import { PrivacyConsentDialogService } from '../privacy/privacy-consent-dialog.service';
+import { loadProfile } from '../../../modules/main/state/profile.actions';
 import { RootComponent } from './root.component';
 
 @Component({ template: '', standalone: false })
@@ -33,6 +33,7 @@ describe('RootComponent', () => {
   let fixture: ComponentFixture<RootComponent>;
   let component: RootComponent;
   let localization: jasmine.SpyObj<LocalizationService>;
+  let store: MockStore;
 
   beforeEach(async () => {
     localization = jasmine.createSpyObj<LocalizationService>(
@@ -64,18 +65,13 @@ describe('RootComponent', () => {
           },
         }),
         { provide: LocalizationService, useValue: localization },
-        {
-          provide: PrivacyConsentDialogService,
-          useValue: jasmine.createSpyObj<PrivacyConsentDialogService>(
-            'PrivacyConsentDialogService',
-            ['openConsentDialogIfRequired']
-          ),
-        },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RootComponent);
     component = fixture.componentInstance;
+    store = TestBed.inject(MockStore);
+    spyOn(store, 'dispatch');
     component.ngOnInit();
     fixture.detectChanges();
   });
@@ -105,6 +101,20 @@ describe('RootComponent', () => {
     expect(router.serializeUrl(routerLink.urlTree!)).toBe(
       component.landingRoute
     );
+  });
+
+  it('should dispatch loadProfile on init', () => {
+    expect(store.dispatch).toHaveBeenCalledWith(loadProfile());
+  });
+
+  it('should sync selectedLanguage when the store language changes', () => {
+    expect(component.selectedLanguage).toBe(Languages.English);
+
+    store.setState({
+      app: { language: Languages.German, notification: null },
+    });
+
+    expect(component.selectedLanguage).toBe(Languages.German);
   });
 
   it('should call localization when language is valid', () => {

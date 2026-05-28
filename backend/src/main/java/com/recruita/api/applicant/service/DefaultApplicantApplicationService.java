@@ -3,9 +3,9 @@ package com.recruita.api.applicant.service;
 import com.recruita.api.api.dto.applicant.ApplicantDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.mapper.ApplicantMapper;
+import com.recruita.api.applicant.message.ApplicantApiErrorMessage;
 import com.recruita.api.common.exception.ApplicantConflictException;
 import com.recruita.api.common.exception.ApplicantNotFoundException;
-import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.persistence.entity.ApplicantEntity;
 import com.recruita.api.persistence.repository.ApplicantRepository;
 import java.util.List;
@@ -19,13 +19,11 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
 
   private final ApplicantRepository repository;
   private final ApplicantMapper mapper;
-  private final RecruitaProperties properties;
 
   public DefaultApplicantApplicationService(
-      ApplicantRepository repository, ApplicantMapper mapper, RecruitaProperties properties) {
+      ApplicantRepository repository, ApplicantMapper mapper) {
     this.repository = repository;
     this.mapper = mapper;
-    this.properties = properties;
   }
 
   @Override
@@ -38,7 +36,7 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
   @Transactional
   public ApplicantDto create(SaveApplicantRequestDto request) {
     if (repository.existsById(request.id())) {
-      throw new ApplicantConflictException(properties.getApplicant().getAlreadyExists());
+      throw new ApplicantConflictException(ApplicantApiErrorMessage.ALREADY_EXISTS.message());
     }
     ApplicantEntity entity = mapper.toNewEntity(request);
     return mapper.toDto(repository.save(entity));
@@ -51,7 +49,7 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
         repository
             .findById(id)
             .orElseThrow(
-                () -> new ApplicantNotFoundException(properties.getApplicant().getNotFound()));
+                () -> new ApplicantNotFoundException(ApplicantApiErrorMessage.NOT_FOUND.message()));
     mapper.applyRequest(entity, request);
     return mapper.toDto(repository.save(entity));
   }
@@ -60,7 +58,7 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
   @Transactional
   public void delete(String id) {
     if (!repository.existsById(id)) {
-      throw new ApplicantNotFoundException(properties.getApplicant().getNotFound());
+      throw new ApplicantNotFoundException(ApplicantApiErrorMessage.NOT_FOUND.message());
     }
     repository.deleteById(id);
   }

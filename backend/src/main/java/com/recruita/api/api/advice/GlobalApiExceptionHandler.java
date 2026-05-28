@@ -4,6 +4,8 @@ import com.recruita.api.common.exception.ApplicantConflictException;
 import com.recruita.api.common.exception.ApplicantNotFoundException;
 import com.recruita.api.common.exception.MatchServiceUnavailableException;
 import com.recruita.api.common.exception.MatchValidationException;
+import com.recruita.api.common.exception.ProfileConflictException;
+import com.recruita.api.common.exception.ProfileNotFoundException;
 import com.recruita.api.config.properties.RecruitaProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -41,6 +43,16 @@ public class GlobalApiExceptionHandler {
 
   @ExceptionHandler(ApplicantConflictException.class)
   public ProblemDetail handleApplicantConflict(ApplicantConflictException ex) {
+    return problem(HttpStatus.CONFLICT, ex.getMessage());
+  }
+
+  @ExceptionHandler(ProfileNotFoundException.class)
+  public ProblemDetail handleProfileNotFound(ProfileNotFoundException ex) {
+    return problem(HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(ProfileConflictException.class)
+  public ProblemDetail handleProfileConflict(ProfileConflictException ex) {
     return problem(HttpStatus.CONFLICT, ex.getMessage());
   }
 

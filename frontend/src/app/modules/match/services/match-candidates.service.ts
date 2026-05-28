@@ -13,12 +13,13 @@ import {
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
+import { ApiProblemDetailPropertyKey } from '../../../enums/api-problem-detail-property-key.enum';
 import { MATCH_SCORE_PREFIX } from '../../../utilities/RegEx';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
+import { MatchErrorMessage } from '../enums/match-error-message.enum';
 import {
   MATCH_API_SCORE_COLLECTION_KEYS,
-  MATCH_PROXY_RESPONSE_ERROR_PROPERTY,
   MATCH_SCORE_CORRELATION_ID_KEYS,
   MATCH_SCORE_NAME_KEYS,
   MATCH_SCORE_NESTED_NUMERIC_KEYS,
@@ -54,12 +55,12 @@ export class MatchCandidatesService {
   ): Observable<MatchCandidateResult[]> {
     if (!jobDescription.trim()) {
       return throwError(
-        () => new Error(this.config.ERRORS.MISSING_JOB_DESCRIPTION)
+        () => new Error(MatchErrorMessage.MissingJobDescription)
       );
     }
     if (applicants.length === 0) {
       return throwError(
-        () => new Error(this.config.ERRORS.NO_APPLICANTS_AVAILABLE)
+        () => new Error(MatchErrorMessage.NoApplicantsAvailable)
       );
     }
     if (!this._privacy.optionalAiMatching()) {
@@ -111,10 +112,8 @@ export class MatchCandidatesService {
       }
       if (payload && typeof payload === 'object') {
         const errText = (
-          payload as Partial<
-            Record<typeof MATCH_PROXY_RESPONSE_ERROR_PROPERTY, unknown>
-          >
-        )[MATCH_PROXY_RESPONSE_ERROR_PROPERTY];
+          payload as Partial<Record<ApiProblemDetailPropertyKey, unknown>>
+        )[APP_CONFIG.HTTP.PROBLEM_DETAIL_ERROR_PROPERTY];
         if (typeof errText === 'string' && errText.trim()) {
           return errText.trim();
         }
@@ -351,9 +350,9 @@ export class MatchCandidatesService {
   private _toServiceError(error: unknown): Error {
     const message =
       error instanceof TimeoutError
-        ? this.config.ERRORS.GROQ_REQUEST_TIMEOUT
+        ? MatchErrorMessage.GroqRequestTimeout
         : (this._extractBackendErrorMessage(error) ??
-          this.config.ERRORS.GROQ_PROXY_UNREACHABLE);
+          MatchErrorMessage.GroqProxyUnreachable);
     return new Error(message);
   }
 

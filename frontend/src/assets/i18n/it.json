@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Privacy e trattamento dati",
-      "intro": "I profili candidati restano in questo browser (archivio locale). Le funzioni opzionali inviano dati solo se le abiliti qui.",
+      "intro": "I profili candidati sono salvati sul server quando la persistenza è attiva. L’accettazione dell’informativa sulla privacy resta memorizzata tra un ricaricamento e l’altro. Le funzioni opzionali inviano dati solo se le abiliti qui.",
       "necessaryNote": "Sempre attivo: memorizzazione locale, preferenze lingua/formato e nucleo dell’app senza invio a API esterne se le opzioni restano disattivate.",
       "optionalHeading": "Trattamenti facoltativi",
       "privacyNoticeLink": "Informativa sintetica privacy",

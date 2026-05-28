@@ -2,10 +2,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { take } from 'rxjs';
 
 import { PrivacyConsentDialogService } from './privacy-consent-dialog.service';
+import { FullState } from '../../../models/full-state.model';
+import { clearProfileState } from '../../../modules/main/state/profile.actions';
+import { selectProfile } from '../../../modules/main/state/main.selectors';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 
 @Component({
@@ -19,6 +23,7 @@ import { PrivacyConsentService } from '../../../services/privacy-consent.service
 export class PrivacyPageComponent {
   private readonly _privacy = inject(PrivacyConsentService);
   private readonly _privacyDialog = inject(PrivacyConsentDialogService);
+  private readonly _store = inject(Store<FullState>);
   private readonly _translate = inject(TranslateService);
 
   protected openConsentEditor(): void {
@@ -26,17 +31,22 @@ export class PrivacyPageComponent {
   }
 
   protected exportSessionCopy(): void {
-    this._privacy
-      .buildDataExportJson$()
+    this._store
+      .select(selectProfile)
       .pipe(take(1))
-      .subscribe((payload) => {
-        const blob = new Blob([payload], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = `recruita-session-export-${Date.now()}.json`;
-        anchor.click();
-        URL.revokeObjectURL(url);
+      .subscribe((profile) => {
+        this._privacy
+          .buildDataExportJson$(profile)
+          .pipe(take(1))
+          .subscribe((payload) => {
+            const blob = new Blob([payload], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `recruita-session-export-${Date.now()}.json`;
+            anchor.click();
+            URL.revokeObjectURL(url);
+          });
       });
   }
 
@@ -45,6 +55,7 @@ export class PrivacyPageComponent {
       this._translate.instant('privacy.page.eraseConfirm')
     );
     if (ok) {
+      this._store.dispatch(clearProfileState());
       this._privacy.eraseSessionDataAndReload();
     }
   }

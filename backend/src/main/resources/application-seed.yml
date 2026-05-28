@@ -5,6 +5,7 @@ spring:
 recruita:
   seed:
     applicants-demo: true
+    admin-profile: true
   match:
     groq:
       require-api-key-at-startup: false

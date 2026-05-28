@@ -2,6 +2,18 @@ import type { PrivacyConsentDialogCloseResult } from '../models/privacy-consent-
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
 import { PrivacyConsentService } from '../services/privacy-consent.service';
 
+const ALL_DISABLED: PrivacyConsentFormState = {
+  optionalRemoteTranslation: false,
+  optionalGeocoding: false,
+  optionalAiMatching: false,
+};
+
+const ALL_ENABLED: PrivacyConsentFormState = {
+  optionalRemoteTranslation: true,
+  optionalGeocoding: true,
+  optionalAiMatching: true,
+};
+
 function isPrivacyConsentFormState(
   value: unknown
 ): value is PrivacyConsentFormState {
@@ -33,6 +45,24 @@ export function isPrivacyConsentDialogCloseResult(
     return false;
   }
   return isPrivacyConsentFormState((value as { choices: unknown }).choices);
+}
+
+/** Maps a dialog close payload to the consent flags stored on the profile. */
+export function privacyChoicesFromDialogResult(
+  result: PrivacyConsentDialogCloseResult
+): PrivacyConsentFormState {
+  switch (result.mode) {
+    case 'necessary':
+      return ALL_DISABLED;
+    case 'all':
+      return ALL_ENABLED;
+    case 'custom':
+      return result.choices;
+    default: {
+      const _exhaustive: never = result;
+      return _exhaustive;
+    }
+  }
 }
 
 /** Maps a dialog close payload to the corresponding {@link PrivacyConsentService} persist calls. */

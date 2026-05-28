@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app.config';
 import { NotificationSnackBarComponent } from '../components/notification-snack-bar/notification-snack-bar.component';

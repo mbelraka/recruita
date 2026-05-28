@@ -238,7 +238,7 @@ Set at least **`GROQ_API_KEY`** and **`PORT=3001`** in `backend/.env` (never com
 
 ```bash
 npm run dev              # Docker (Postgres + Redis), Angular :4200, Spring :3001 with persistence
-npm run seed:applicants  # Optional: load demo applicants into PostgreSQL
+npm run seed:applicants  # Optional: load demo applicants + admin profile into PostgreSQL
 npm start                # Frontend only (proxies /api → :3001)
 npm run start:backend    # Spring API only (in-memory match cache; no DB)
 ```
@@ -272,7 +272,7 @@ Serve the static bundle behind HTTPS with the Spring API configured per [SECURIT
 | `npm start` | Angular only |
 | `npm run start:backend` | Spring only (default `dev` profile, no DB) |
 | `npm run infra:up` / `infra:down` | PostgreSQL + Redis (Docker Compose project **recruita**) |
-| `npm run seed:applicants` | Load demo applicants into PostgreSQL (idempotent) |
+| `npm run seed:applicants` | Load demo applicants and admin profile into PostgreSQL (idempotent) |
 | **Quality (fast)** | |
 | `npm run quality` | Frontend + backend format check & lint |
 | `npm run quality:backend` | Spotless + Checkstyle |

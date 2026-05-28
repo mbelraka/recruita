@@ -1,0 +1,6 @@
+CREATE TABLE profiles (
+    id VARCHAR(64) PRIMARY KEY,
+    privacy_notice_accepted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

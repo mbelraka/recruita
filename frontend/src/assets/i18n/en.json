@@ -34,7 +34,7 @@
     },
     "dialog": {
       "title": "Privacy & data choices",
-      "intro": "Applicant profiles are stored on the server when persistence is enabled. This session keeps language and consent choices in memory until you close the tab. Optional features forward data to third-party services only if you explicitly enable them below.",
+      "intro": "Applicant profiles are stored on the server when persistence is enabled. Your privacy notice acceptance is remembered across reloads. Optional features forward data to third-party services only if you explicitly enable them below.",
       "necessaryNote": "Always on: core applicant flows through the Recruita API, language and formatting preferences for this session, and consent management.",
       "optionalHeading": "Optional integrations",
       "privacyNoticeLink": "Privacy overview",
@@ -49,7 +49,7 @@
       "summaryTitle": "Summary",
       "summaryBody": "Applicant rosters are loaded from the Recruita API when persistence is enabled. Without optional features, only the fields required for each action are sent to external services.",
       "processingTitle": "What we process here",
-      "procSessionState": "Session state: language and consent choices apply until you close the browser tab. Applicant rosters are loaded from the server.",
+      "procSessionState": "Session state: language and optional consent choices apply until you close the browser tab. Privacy notice acceptance is loaded from the server when available.",
       "procTranslation": "Optional translation (off by default): short UI snippets may use the public MyMemory translation endpoint.",
       "procGeocode": "Optional city lookup (off by default): what you type in the location field is sent to Open‑Meteo geocoding to suggest places.",
       "procMatch": "Optional AI ranking (off by default): role text and applicant fields contained in scoring API payload are transmitted to your configured matching backend.",
