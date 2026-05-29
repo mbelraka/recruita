@@ -63,6 +63,11 @@ export const selectLoading = createSelector(
   (state): boolean => state.loading
 );
 
+export const selectApplicantsReady = createSelector(
+  selectLoading,
+  (loading) => !loading
+);
+
 // Select View Type
 export const selectViewType = createSelector(
   selectApplicantStateSafe,

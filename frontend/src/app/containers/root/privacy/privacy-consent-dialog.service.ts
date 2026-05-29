@@ -4,8 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 
+import { PRIVACY_CONSENT_DIALOG_PANEL } from '../../../constants/privacy.constants';
 import { FullState } from '../../../models/full-state.model';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
+import { isPrivacyConsentDialogCloseResult } from '../../../utilities/privacy-consent-dialog-outcome.util';
 import { persistPrivacyConsentOutcome } from '../../../modules/main/state/profile.actions';
 
 import { PrivacyConsentDialogComponent } from './privacy-consent-dialog.component';
@@ -13,11 +15,6 @@ import { PrivacyConsentDialogComponent } from './privacy-consent-dialog.componen
 /** Opens the consent dialog with shared wiring (DRY) — UI shell concern, colocated with the dialog component. */
 @Injectable({ providedIn: 'root' })
 export class PrivacyConsentDialogService {
-  private static readonly _panel = {
-    disableClose: true,
-    width: 'min(560px, 94vw)',
-  } as const;
-
   public constructor(
     private readonly _dialog: MatDialog,
     private readonly _privacy: PrivacyConsentService,
@@ -41,7 +38,7 @@ export class PrivacyConsentDialogService {
 
   private openConsentEditorCore(): void {
     const ref = this._dialog.open(PrivacyConsentDialogComponent, {
-      ...PrivacyConsentDialogService._panel,
+      ...PRIVACY_CONSENT_DIALOG_PANEL,
       data: {
         initialChoices: this._privacy.formStateFromSnapshot(),
       },
@@ -51,7 +48,9 @@ export class PrivacyConsentDialogService {
       .afterClosed()
       .pipe(take(1))
       .subscribe((result) => {
-        this._store.dispatch(persistPrivacyConsentOutcome({ result }));
+        if (isPrivacyConsentDialogCloseResult(result)) {
+          this._store.dispatch(persistPrivacyConsentOutcome({ result }));
+        }
       });
   }
 }

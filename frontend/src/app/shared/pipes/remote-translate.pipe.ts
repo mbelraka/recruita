@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 
 import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
@@ -30,17 +30,20 @@ export class RemoteTranslatePipe implements PipeTransform {
   private readonly _remoteTranslate = inject(RemoteTranslateService);
 
   private _language: Languages = APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
-
   private _lastKey: string | null = null;
   private _lastValue = '';
+  private _translationSubscription: Subscription | undefined;
 
   public constructor() {
+    this._destroyRef.onDestroy(() => this._cancelPendingTranslation());
+
     this._store
       .select(selectAppLanguage)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((lang) => {
         this._language = lang;
         this._lastKey = null;
+        this._cancelPendingTranslation();
         this._cdr.markForCheck();
       });
   }
@@ -52,6 +55,7 @@ export class RemoteTranslatePipe implements PipeTransform {
     if (key === null) {
       this._lastKey = null;
       this._lastValue = '';
+      this._cancelPendingTranslation();
       return '';
     }
 
@@ -60,6 +64,8 @@ export class RemoteTranslatePipe implements PipeTransform {
     if (this._lastKey === key) {
       return this._lastValue;
     }
+
+    this._cancelPendingTranslation();
 
     if (to === Languages.English) {
       this._lastKey = key;
@@ -77,9 +83,9 @@ export class RemoteTranslatePipe implements PipeTransform {
     this._lastKey = key;
     this._lastValue = RemoteTranslatePipe._PENDING;
 
-    this._remoteTranslate
+    this._translationSubscription = this._remoteTranslate
       .translate(raw, from, to)
-      .pipe(takeUntilDestroyed(this._destroyRef), take(1))
+      .pipe(take(1))
       .subscribe((translated) => {
         if (this._lastKey !== key) {
           return;
@@ -89,5 +95,10 @@ export class RemoteTranslatePipe implements PipeTransform {
       });
 
     return this._lastValue;
+  }
+
+  private _cancelPendingTranslation(): void {
+    this._translationSubscription?.unsubscribe();
+    this._translationSubscription = undefined;
   }
 }

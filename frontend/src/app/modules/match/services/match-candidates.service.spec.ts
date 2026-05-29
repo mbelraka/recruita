@@ -13,7 +13,7 @@ describe('MatchCandidatesService', () => {
   let service: MatchCandidatesService;
   let httpClientSpy: jasmine.SpyObj<HttpClient>;
   let privacySpy: jasmine.SpyObj<
-    Pick<PrivacyConsentService, 'optionalAiMatching'>
+    Pick<PrivacyConsentService, 'allowsAiMatching'>
   >;
 
   const applicants: Applicant[] = [
@@ -30,9 +30,9 @@ describe('MatchCandidatesService', () => {
 
     httpClientSpy = jasmine.createSpyObj<HttpClient>('HttpClient', ['post']);
     privacySpy = jasmine.createSpyObj('PrivacyConsentService', [
-      'optionalAiMatching',
+      'allowsAiMatching',
     ]);
-    privacySpy.optionalAiMatching.and.returnValue(true);
+    privacySpy.allowsAiMatching.and.returnValue(true);
     service = new MatchCandidatesService(
       httpClientSpy,
       privacySpy as unknown as PrivacyConsentService
@@ -56,7 +56,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should reject when AI matching consent is disabled', async () => {
-    privacySpy.optionalAiMatching.and.returnValue(false);
+    privacySpy.allowsAiMatching.and.returnValue(false);
 
     await expectAsync(
       firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))

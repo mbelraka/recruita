@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { FullState } from '../../../../models/full-state.model';
 import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../../constants/match-error-codes';
-import { loadApplicants } from '../../../applicants/state/applicants.actions';
 import {
   evaluateCandidates,
   resetMatchState,
@@ -32,7 +31,7 @@ export class MatchCandidatesComponent implements OnInit {
   public readonly error$ = this._store.select(selectMatchError);
   public readonly results$ = this._store.select(selectMatchResults);
   public readonly topResults$ = this._store.select(selectTopMatchResults);
-  public readonly allowsAiMatching$ = this._privacy.optionalAiMatching$();
+  public readonly allowsAiMatching$ = this._privacy.allowsAiMatching$();
 
   public constructor(
     private readonly _store: Store<FullState>,
@@ -40,7 +39,7 @@ export class MatchCandidatesComponent implements OnInit {
   ) {}
 
   public ngOnInit(): void {
-    this._store.dispatch(loadApplicants());
+    this.jobDescriptionInput = '';
     this._store.dispatch(resetMatchState());
   }
 

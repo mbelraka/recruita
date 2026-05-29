@@ -4,6 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
@@ -13,9 +14,14 @@ import { RemoteTranslateService } from './remote-translate.service';
 
 function createPrivacyStub(
   translation: boolean
-): Pick<PrivacyConsentService, 'optionalRemoteTranslation'> & object {
+): Pick<
+  PrivacyConsentService,
+  'optionalRemoteTranslation' | 'optionalRemoteTranslation$'
+> &
+  object {
   return {
     optionalRemoteTranslation: () => translation,
+    optionalRemoteTranslation$: () => of(translation),
   };
 }
 
@@ -123,6 +129,10 @@ describe('RemoteTranslateService', () => {
         done();
       });
       http.expectNone((r) => r.url === myMemoryUrl);
+    });
+
+    it('should not expose cached translations when consent is off', () => {
+      expect(service.getCached(query, from, to)).toBeUndefined();
     });
   });
 });

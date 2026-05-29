@@ -1,7 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { firstValueFrom, of, ReplaySubject, throwError } from 'rxjs';
+import {
+  firstValueFrom,
+  lastValueFrom,
+  of,
+  ReplaySubject,
+  throwError,
+  take,
+  toArray,
+} from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
@@ -154,11 +162,15 @@ describe('MainEffects', () => {
 
   it('persists privacy consent by creating the admin profile', async () => {
     api.save.and.returnValue(of({ ...profile, privacyNoticeAccepted: true }));
+    const emittedPromise = lastValueFrom(
+      effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
+    );
+
     actions$.next(
       persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
     );
 
-    const action = await firstValueFrom(effects.persistPrivacyConsentOutcome$);
+    const emitted = await emittedPromise;
     expect(api.save).toHaveBeenCalledWith(
       {
         id: APP_CONFIG.PROFILE.DEFAULT_ID,
@@ -170,7 +182,19 @@ describe('MainEffects', () => {
       },
       null
     );
-    expect(action).toEqual(
+    expect(emitted[0]).toEqual(
+      profileUpdated({
+        profile: {
+          id: APP_CONFIG.PROFILE.DEFAULT_ID,
+          privacyNoticeAccepted: true,
+          lastLanguage: Languages.English,
+          optionalRemoteTranslation: false,
+          optionalGeocoding: false,
+          optionalAiMatching: false,
+        },
+      })
+    );
+    expect(emitted[1]).toEqual(
       persistPrivacyConsentOutcomeSuccess({
         profile: { ...profile, privacyNoticeAccepted: true },
       })
@@ -196,9 +220,12 @@ describe('MainEffects', () => {
         optionalAiMatching: true,
       })
     );
+    const emittedPromise = lastValueFrom(
+      effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
+    );
     actions$.next(persistPrivacyConsentOutcome({ result: { mode: 'all' } }));
 
-    const action = await firstValueFrom(effects.persistPrivacyConsentOutcome$);
+    const emitted = await emittedPromise;
     expect(api.save).toHaveBeenCalledWith(
       {
         id: APP_CONFIG.PROFILE.DEFAULT_ID,
@@ -210,17 +237,23 @@ describe('MainEffects', () => {
       },
       profile
     );
-    expect(action.type).toBe(persistPrivacyConsentOutcomeSuccess.type);
+    expect(emitted[1].type).toBe(persistPrivacyConsentOutcomeSuccess.type);
   });
 
-  it('does not update store when the privacy API save fails', async () => {
+  it('reloads profile when the privacy API save fails', async () => {
     api.save.and.returnValue(throwError(() => new Error('offline')));
+    const emittedPromise = lastValueFrom(
+      effects.persistPrivacyConsentOutcome$.pipe(take(3), toArray())
+    );
+
     actions$.next(
       persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
     );
 
-    const action = await firstValueFrom(effects.persistPrivacyConsentOutcome$);
-    expect(action.type).toBe(persistPrivacyConsentOutcomeFailure.type);
+    const emitted = await emittedPromise;
+    expect(emitted[0].type).toBe(profileUpdated.type);
+    expect(emitted[1].type).toBe(loadProfile.type);
+    expect(emitted[2].type).toBe(persistPrivacyConsentOutcomeFailure.type);
   });
 
   it('persists language changes to the profile', async () => {

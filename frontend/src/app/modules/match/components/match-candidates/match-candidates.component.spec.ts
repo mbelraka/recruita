@@ -37,8 +37,8 @@ describe('MatchCandidatesComponent', () => {
         {
           provide: PrivacyConsentService,
           useValue: {
-            optionalAiMatching: () => true,
-            optionalAiMatching$: () => of(true),
+            allowsAiMatching: () => true,
+            allowsAiMatching$: () => of(true),
           } as PrivacyConsentService,
         },
       ],

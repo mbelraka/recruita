@@ -59,7 +59,7 @@
       "changeConsent": "Change consent choices",
       "exportJson": "Download session data (JSON)",
       "eraseLocal": "Reset session",
-      "eraseHint": "Reloading resets consent and in-memory UI state — it does not delete applicants stored on the server.",
+      "eraseHint": "Reloading clears in-memory consent and UI state. Applicants and profile settings stored on the server are unchanged.",
       "eraseConfirm": "Reset this session? Consent and in-memory preferences will clear and the page will reload."
     }
   },

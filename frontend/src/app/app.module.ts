@@ -27,6 +27,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { AppComponent } from './app.component';
 import { APP_CONFIG } from './config/app.config';
 import { Languages } from './enums/language.enum';
+import { AppStateModule } from './modules/core/app-state.module';
 import { appReducer } from './state/app.reducer';
 import { AppEffects } from './state/app.effects';
 import { NotificationSnackBarComponent } from './components/notification-snack-bar/notification-snack-bar.component';
@@ -55,6 +56,7 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     NotificationSnackBarComponent,
     SharedModule,
     AppRoutingModule,
+    AppStateModule,
     // Configure the NgRx Store
     StoreModule.forRoot(
       { app: appReducer },

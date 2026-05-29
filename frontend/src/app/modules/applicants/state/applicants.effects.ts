@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, exhaustMap, map, of, switchMap } from 'rxjs';
+import { catchError, concatMap, exhaustMap, map, of, switchMap } from 'rxjs';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
@@ -30,6 +30,10 @@ import {
   searchLocationSuggestionsSuccess,
 } from './applicants.actions';
 
+/**
+ * Flattening: switchMap cancels stale reads (list, geocode); exhaustMap ignores duplicate
+ * mutations while one is in flight; concatMap chains create/update/delete → list → notify.
+ */
 @Injectable()
 export class ApplicantsEffects {
   public constructor(
@@ -41,6 +45,7 @@ export class ApplicantsEffects {
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadApplicants),
+      // Latest refresh wins — drop an in-flight list when loadApplicants fires again.
       switchMap(() =>
         this._applicantApi.list().pipe(
           map((applicants) => loadApplicantsSuccess({ applicants })),
@@ -55,6 +60,7 @@ export class ApplicantsEffects {
   searchLocationSuggestions$ = createEffect(() =>
     this._actions$.pipe(
       ofType(searchLocationSuggestions),
+      // Latest query wins — cancel stale geocode requests as the user types.
       switchMap(({ query, language }) =>
         this._citySearchService.searchCityLabels(query, language).pipe(
           map((suggestions) =>
@@ -69,10 +75,11 @@ export class ApplicantsEffects {
   addApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(addApplicant),
+      // Ignore double-submit while create + refresh is running.
       exhaustMap(({ applicant }) =>
         this._applicantApi.create(applicant).pipe(
-          switchMap(() => this._applicantApi.list()),
-          switchMap((applicants) =>
+          concatMap(() => this._applicantApi.list()),
+          concatMap((applicants) =>
             concatWithNotification(addApplicantSuccess({ applicants }), {
               type: AppNotificationType.Success,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantCreatedSuccess,
@@ -95,8 +102,8 @@ export class ApplicantsEffects {
       ofType(updateApplicant),
       exhaustMap(({ applicant }) =>
         this._applicantApi.update(applicant).pipe(
-          switchMap(() => this._applicantApi.list()),
-          switchMap((applicants) =>
+          concatMap(() => this._applicantApi.list()),
+          concatMap((applicants) =>
             concatWithNotification(updateApplicantSuccess({ applicants }), {
               type: AppNotificationType.Success,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantUpdatedSuccess,
@@ -126,8 +133,8 @@ export class ApplicantsEffects {
       ofType(deleteApplicant),
       exhaustMap(({ id }) =>
         this._applicantApi.delete(id).pipe(
-          switchMap(() => this._applicantApi.list()),
-          switchMap((applicants) =>
+          concatMap(() => this._applicantApi.list()),
+          concatMap((applicants) =>
             concatWithNotification(deleteApplicantSuccess({ applicants }), {
               type: AppNotificationType.Info,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantDeletedSuccess,

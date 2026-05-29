@@ -7,3 +7,12 @@ export const PRIVACY_DATA_EXPORT_NOTE =
 
 /** SPA base path after resetting the session (Angular `base href` default). */
 export const PRIVACY_POST_ERASE_APP_PATH = '/';
+
+/** Persisted on the admin profile when the user completes a consent dialog flow. */
+export const PRIVACY_NOTICE_ACCEPTED = true as const;
+
+/** MatDialog panel options for the consent gate / editor. */
+export const PRIVACY_CONSENT_DIALOG_PANEL = {
+  disableClose: true,
+  width: 'min(560px, 94vw)',
+} as const;

@@ -2,7 +2,9 @@ import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import type { Profile } from '../modules/main/models/profile.model';
 import {
+  buildPrivacyConsentSaveRequest,
   buildSaveProfileRequest,
+  profileFromSaveRequest,
   profilePrivacyChoicesFrom,
 } from './build-save-profile-request.util';
 
@@ -48,6 +50,33 @@ describe('build-save-profile-request.util', () => {
       optionalRemoteTranslation: true,
       optionalGeocoding: false,
       optionalAiMatching: true,
+    });
+  });
+
+  it('buildPrivacyConsentSaveRequest marks notice accepted and merges choices', () => {
+    expect(
+      buildPrivacyConsentSaveRequest(profile, Languages.English, {
+        optionalRemoteTranslation: false,
+        optionalGeocoding: true,
+        optionalAiMatching: false,
+      })
+    ).toEqual({
+      id: APP_CONFIG.PROFILE.DEFAULT_ID,
+      privacyNoticeAccepted: true,
+      lastLanguage: Languages.English,
+      optionalRemoteTranslation: false,
+      optionalGeocoding: true,
+      optionalAiMatching: false,
+    });
+  });
+
+  it('profileFromSaveRequest maps a save payload to a profile row', () => {
+    const request = buildSaveProfileRequest(profile, {
+      lastLanguage: Languages.French,
+    });
+    expect(profileFromSaveRequest(request)).toEqual({
+      ...profile,
+      lastLanguage: Languages.French,
     });
   });
 });

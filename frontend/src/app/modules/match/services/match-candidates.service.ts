@@ -32,6 +32,10 @@ import { MatchCandidateResult } from '../models/match-candidate-result.model';
 import { MatchScoreItem } from '../models/match-score-item.model';
 import { ParsedMatchScoreItem } from '../models/parsed-match-score-item.model';
 import {
+  firstDefinedTrimmedString,
+  firstDefinedValue,
+} from '../utilities/first-defined-property.util';
+import {
   createMatchLlmCorrelationId,
   toPrivacyPreservingCandidatePayload,
 } from '../utilities/match-candidate-privacy.util';
@@ -63,7 +67,7 @@ export class MatchCandidatesService {
         () => new Error(MatchErrorMessage.NoApplicantsAvailable)
       );
     }
-    if (!this._privacy.optionalAiMatching()) {
+    if (!this._privacy.allowsAiMatching()) {
       return throwError(() => new Error(MATCH_ERROR_PRIVACY_AI_DISABLED));
     }
     const stableApplicants = this._sortApplicantsForMatching(applicants);
@@ -179,37 +183,20 @@ export class MatchCandidatesService {
   }
 
   private _primaryRecommendationPlainText(item: MatchScoreItem): string {
-    for (const key of MATCH_SCORE_RECOMMENDATION_TEXT_KEYS) {
-      const value = item[key];
-      if (value !== undefined && value !== null) {
-        return String(value).trim();
-      }
-    }
-    return '';
+    return (
+      firstDefinedTrimmedString(item, MATCH_SCORE_RECOMMENDATION_TEXT_KEYS) ??
+      ''
+    );
   }
 
   private _extractId(item: MatchScoreItem): string | null {
-    for (const key of MATCH_SCORE_CORRELATION_ID_KEYS) {
-      const raw = item[key];
-      if (raw === undefined || raw === null) {
-        continue;
-      }
-      const normalized = String(raw).trim();
-      return normalized || null;
-    }
-    return null;
+    return (
+      firstDefinedTrimmedString(item, MATCH_SCORE_CORRELATION_ID_KEYS) ?? null
+    );
   }
 
   private _extractName(item: MatchScoreItem): string | undefined {
-    for (const key of MATCH_SCORE_NAME_KEYS) {
-      const raw = item[key];
-      if (raw === undefined || raw === null) {
-        continue;
-      }
-      const normalized = String(raw).trim();
-      return normalized || undefined;
-    }
-    return undefined;
+    return firstDefinedTrimmedString(item, MATCH_SCORE_NAME_KEYS);
   }
 
   private _normalizeName(value: string | undefined): string {
@@ -219,14 +206,9 @@ export class MatchCandidatesService {
   private _parseScore(
     item: Omit<MatchScoreItem, 'id'> & { id?: string | number | null }
   ): number {
-    let raw: unknown = this.config.SCORE.MIN;
-    for (const key of MATCH_SCORE_PRIMARY_VALUE_KEYS) {
-      const v = item[key];
-      if (v !== undefined && v !== null) {
-        raw = v;
-        break;
-      }
-    }
+    const raw =
+      firstDefinedValue(item, MATCH_SCORE_PRIMARY_VALUE_KEYS) ??
+      this.config.SCORE.MIN;
     return this._parseNumericScore(raw);
   }
 
@@ -357,13 +339,11 @@ export class MatchCandidatesService {
   }
 
   private _getRawScores(response: MatchApiResponse): MatchScoreItem[] {
-    for (const key of MATCH_API_SCORE_COLLECTION_KEYS) {
-      const list = response[key];
-      if (list !== undefined && list !== null) {
-        return Array.isArray(list) ? list : [];
-      }
+    const list = firstDefinedValue(response, MATCH_API_SCORE_COLLECTION_KEYS);
+    if (list === undefined) {
+      return [];
     }
-    return [];
+    return Array.isArray(list) ? list : [];
   }
 
   private _toParsedScoreItem(

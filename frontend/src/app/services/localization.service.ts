@@ -23,7 +23,7 @@ export class LocalizationService implements OnDestroy {
     this.translate.addLangs([...APP_CONFIG.LOCALIZATION.SUPPORTED_LANGUAGES]);
     this.translate.setDefaultLang(APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE);
 
-    // Subscribe to store updates to keep translations and date locale in sync
+    // Latest language wins — cancel a stale translate.use when the user switches again.
     this.store
       .select(selectAppLanguage)
       .pipe(

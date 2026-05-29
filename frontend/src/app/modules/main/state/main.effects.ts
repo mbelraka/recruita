@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import {
   catchError,
   concat,
+  concatMap,
   EMPTY,
   exhaustMap,
   filter,
@@ -22,7 +23,11 @@ import { FullState } from '../../../models/full-state.model';
 import { ProfileApiService } from '../../../services/profile-api.service';
 import { setLanguage } from '../../../state/app.actions';
 import { selectAppLanguage } from '../../../state/app.selectors';
-import { buildSaveProfileRequest } from '../../../utilities/build-save-profile-request.util';
+import {
+  buildPrivacyConsentSaveRequest,
+  buildSaveProfileRequest,
+  profileFromSaveRequest,
+} from '../../../utilities/build-save-profile-request.util';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import { isLanguage } from '../../../utilities/language.utils';
 import {
@@ -41,6 +46,10 @@ import {
 } from './profile.actions';
 import { selectProfile, selectProfileLoaded } from './main.selectors';
 
+/**
+ * Flattening: switchMap cancels stale work; exhaustMap ignores duplicates while busy;
+ * concatMap runs ordered steps (optimistic update → API, or success → language restore).
+ */
 @Injectable()
 export class MainEffects {
   public constructor(
@@ -53,9 +62,11 @@ export class MainEffects {
   loadProfile$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadProfile),
+      // Latest reload wins — cancel an in-flight fetch when loadProfile fires again.
       switchMap(() =>
         this._api.getById(APP_CONFIG.PROFILE.DEFAULT_ID).pipe(
-          switchMap((profile) =>
+          // Dispatch success, then language restore, in order.
+          concatMap((profile) =>
             concat(
               of(loadProfileSuccess({ profile })),
               isLanguage(profile.lastLanguage)
@@ -83,6 +94,7 @@ export class MainEffects {
   persistPrivacyConsentOutcome$ = createEffect(() =>
     this._actions$.pipe(
       ofType(persistPrivacyConsentOutcome),
+      // Ignore duplicate dialog outcomes while a save is already running.
       exhaustMap(({ result }) => {
         if (!isPrivacyConsentDialogCloseResult(result)) {
           return EMPTY;
@@ -93,29 +105,34 @@ export class MainEffects {
         return this._store.select(selectProfile).pipe(
           take(1),
           withLatestFrom(this._store.select(selectAppLanguage)),
-          switchMap(([profile, language]) =>
-            this._api
-              .save(
-                buildSaveProfileRequest(profile, {
-                  privacyNoticeAccepted: true,
-                  lastLanguage: language,
-                  ...choices,
-                }),
-                profile
-              )
-              .pipe(
+          // Optimistic store update, then persist to API, strictly ordered.
+          concatMap(([profile, language]) => {
+            const request = buildPrivacyConsentSaveRequest(
+              profile,
+              language,
+              choices
+            );
+            const optimisticProfile = profileFromSaveRequest(request);
+
+            return concat(
+              of(profileUpdated({ profile: optimisticProfile })),
+              this._api.save(request, profile).pipe(
                 map((saved) =>
                   persistPrivacyConsentOutcomeSuccess({ profile: saved })
                 ),
                 catchError((error: unknown) =>
-                  of(
-                    persistPrivacyConsentOutcomeFailure({
-                      error: getErrorMessage(error),
-                    })
+                  concat(
+                    of(loadProfile()),
+                    of(
+                      persistPrivacyConsentOutcomeFailure({
+                        error: getErrorMessage(error),
+                      })
+                    )
                   )
                 )
               )
-          )
+            );
+          })
         );
       })
     )
@@ -124,12 +141,13 @@ export class MainEffects {
   persistLastLanguage$ = createEffect(() =>
     this._actions$.pipe(
       ofType(setLanguage),
-      exhaustMap(({ language }) =>
+      // Latest language selection wins — including profile restore after load.
+      switchMap(({ language }) =>
         this._store.select(selectProfileLoaded).pipe(
           filter((loaded) => loaded),
           take(1),
           withLatestFrom(this._store.select(selectProfile)),
-          switchMap(([, profile]) => {
+          concatMap(([, profile]) => {
             if (profile?.lastLanguage === language) {
               return EMPTY;
             }

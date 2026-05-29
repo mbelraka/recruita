@@ -2,14 +2,11 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import type { PrivacyConsentFormState } from '../../../models/privacy-consent-form-state.model';
-import { profilePrivacyChoicesFrom } from '../../../utilities/build-save-profile-request.util';
+import {
+  DEFAULT_DISABLED_PRIVACY_CHOICES,
+  profilePrivacyChoicesFrom,
+} from '../../../utilities/build-save-profile-request.util';
 import { MainState } from '../models/main-state.model';
-
-const DEFAULT_PROFILE_PRIVACY_CHOICES: PrivacyConsentFormState = {
-  optionalRemoteTranslation: false,
-  optionalGeocoding: false,
-  optionalAiMatching: false,
-};
 
 export const selectMainState = createFeatureSelector<MainState>(
   StateFeatures.Main
@@ -40,7 +37,7 @@ export const selectProfilePrivacyChoices = createSelector(
   (profile): PrivacyConsentFormState =>
     profile
       ? profilePrivacyChoicesFrom(profile)
-      : DEFAULT_PROFILE_PRIVACY_CHOICES
+      : DEFAULT_DISABLED_PRIVACY_CHOICES
 );
 
 export const selectOptionalRemoteTranslation = createSelector(
@@ -62,4 +59,10 @@ export const selectPrivacyConsentComplete = createSelector(
   selectProfileLoaded,
   selectPrivacyNoticeAccepted,
   (loaded, accepted) => loaded && accepted
+);
+
+export const selectAllowsAiMatching = createSelector(
+  selectPrivacyConsentComplete,
+  selectOptionalAiMatching,
+  (consentComplete, aiMatching) => consentComplete && aiMatching
 );

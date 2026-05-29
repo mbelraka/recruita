@@ -1,8 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   catchError,
+  distinctUntilChanged,
+  filter,
   finalize,
   map,
   Observable,
@@ -15,6 +18,10 @@ import {
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import { MyMemoryResponse } from '../models/mymemory-translate-response.model';
+import {
+  buildRemoteTranslationCacheKey,
+  buildRemoteTranslationLangPair,
+} from '../utilities/remote-translate-cache.util';
 import { PrivacyConsentService } from './privacy-consent.service';
 
 /**
@@ -25,11 +32,21 @@ import { PrivacyConsentService } from './privacy-consent.service';
 export class RemoteTranslateService {
   private readonly _cache = new Map<string, string>();
   private readonly _inFlight = new Map<string, Observable<string>>();
+  private readonly _destroyRef = inject(DestroyRef);
 
   public constructor(
     private readonly _http: HttpClient,
     private readonly _privacy: PrivacyConsentService
-  ) {}
+  ) {
+    this._privacy
+      .optionalRemoteTranslation$()
+      .pipe(
+        distinctUntilChanged(),
+        filter((enabled) => !enabled),
+        takeUntilDestroyed(this._destroyRef)
+      )
+      .subscribe(() => this._clearCache());
+  }
 
   /**
    * Synchronous read of a completed translation (see {@link translate}).
@@ -47,7 +64,10 @@ export class RemoteTranslateService {
     if (from === to) {
       return raw;
     }
-    return this._cache.get(this._cacheKey(from, to, raw));
+    if (!this._privacy.optionalRemoteTranslation()) {
+      return undefined;
+    }
+    return this._cache.get(buildRemoteTranslationCacheKey(from, to, raw));
   }
 
   /**
@@ -63,7 +83,7 @@ export class RemoteTranslateService {
     if (raw === null) {
       return null;
     }
-    return this._cacheKey(from, to, raw);
+    return buildRemoteTranslationCacheKey(from, to, raw);
   }
 
   public translate(
@@ -82,7 +102,7 @@ export class RemoteTranslateService {
       return of(raw);
     }
 
-    const key = this._cacheKey(from, to, raw);
+    const key = buildRemoteTranslationCacheKey(from, to, raw);
     const fromCache = this._cache.get(key);
     if (fromCache !== undefined) {
       return of(fromCache);
@@ -104,31 +124,43 @@ export class RemoteTranslateService {
     to: Languages,
     cacheKey: string
   ): Observable<string> {
-    const { MYMEMORY_URL, REQUEST_TIMEOUT_MS } = APP_CONFIG.TRANSLATION;
+    const {
+      MYMEMORY_URL,
+      REQUEST_TIMEOUT_MS,
+      QUERY_PARAM_TEXT,
+      QUERY_PARAM_LANGPAIR,
+      IN_FLIGHT_SHARE_REPLAY_BUFFER_SIZE,
+    } = APP_CONFIG.TRANSLATION;
     const params = new HttpParams()
-      .set('q', raw)
-      .set('langpair', `${from}|${to}`);
+      .set(QUERY_PARAM_TEXT, raw)
+      .set(QUERY_PARAM_LANGPAIR, buildRemoteTranslationLangPair(from, to));
 
     return this._http.get<MyMemoryResponse>(MYMEMORY_URL, { params }).pipe(
       timeout(REQUEST_TIMEOUT_MS),
       map((res) => (res?.responseData?.translatedText?.trim() ?? '') || raw),
       tap((translated) => {
-        this._cache.set(cacheKey, translated);
+        if (this._privacy.optionalRemoteTranslation()) {
+          this._cache.set(cacheKey, translated);
+        }
       }),
       catchError(() => of(raw)),
       finalize(() => {
         this._inFlight.delete(cacheKey);
       }),
-      shareReplay({ bufferSize: 1, refCount: true })
+      shareReplay({
+        bufferSize: IN_FLIGHT_SHARE_REPLAY_BUFFER_SIZE,
+        refCount: true,
+      })
     );
+  }
+
+  private _clearCache(): void {
+    this._cache.clear();
+    this._inFlight.clear();
   }
 
   private _normalizeText(text: string | null | undefined): string | null {
     const trimmed = text?.trim() ?? '';
     return trimmed ? trimmed : null;
-  }
-
-  private _cacheKey(from: Languages, to: Languages, raw: string): string {
-    return `${from}|${to}|${raw}`;
   }
 }

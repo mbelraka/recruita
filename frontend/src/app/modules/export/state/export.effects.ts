@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, from, mergeMap, switchMap } from 'rxjs';
+import { catchError, concatMap, exhaustMap, from } from 'rxjs';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
@@ -18,14 +18,19 @@ import {
 } from './export.actions';
 import { ExportFormats } from '../enums/export-formats.enum';
 
+/**
+ * Flattening: exhaustMap ignores duplicate export clicks while a download runs;
+ * concatMap emits success notification only after the export promise settles.
+ */
 @Injectable()
 export class ExportEffects {
   public exportApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(exportApplicants),
-      switchMap(({ format }) =>
+      // Ignore duplicate export clicks while a file download is in progress.
+      exhaustMap(({ format }) =>
         from(this._triggerExport(format)).pipe(
-          mergeMap(() =>
+          concatMap(() =>
             concatWithNotification(exportSuccess(), {
               type: AppNotificationType.Success,
               messageKey: NOTIFICATION_MESSAGE_KEYS.exportSuccess,

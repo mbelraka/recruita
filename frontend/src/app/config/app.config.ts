@@ -263,6 +263,8 @@ export const APP_CONFIG = {
   MATCH: {
     TOP_CANDIDATES_COUNT: 3,
     REQUEST_TIMEOUT_MS: 30000,
+    /** Extra headroom for NgRx effect `timeout` above the HTTP client deadline (ms). */
+    EFFECT_TIMEOUT_GRACE_MS: 1000,
     /** User-facing copy: `MatchErrorMessage`. */
     SCORE: {
       MIN: 0,
@@ -318,6 +320,11 @@ export const APP_CONFIG = {
   TRANSLATION: {
     MYMEMORY_URL: 'https://api.mymemory.translated.net/get',
     REQUEST_TIMEOUT_MS: 8000,
+    QUERY_PARAM_TEXT: 'q',
+    QUERY_PARAM_LANGPAIR: 'langpair',
+    LANGPAIR_SEPARATOR: '|',
+    CACHE_KEY_SEGMENT_SEPARATOR: '|',
+    IN_FLIGHT_SHARE_REPLAY_BUFFER_SIZE: 1,
   } as const,
 
   getLocale: (language: Languages): string => {
