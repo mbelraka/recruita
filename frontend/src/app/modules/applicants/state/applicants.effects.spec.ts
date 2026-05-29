@@ -18,12 +18,14 @@ import {
   updateApplicantFailure,
 } from './applicants.actions';
 import { ApplicantsEffects } from './applicants.effects';
+import { invalidateMatchResults } from '../../match/state/match.actions';
 
 describe('ApplicantsEffects', () => {
   let actions$: ReplaySubject<
     ReturnType<
       | typeof loadApplicants
       | typeof addApplicant
+      | typeof addApplicantSuccess
       | typeof updateApplicant
       | typeof deleteApplicant
     >
@@ -82,15 +84,14 @@ describe('ApplicantsEffects', () => {
     expect(action).toEqual(loadApplicantsFailure({ error: 'offline' }));
   });
 
-  it('creates an applicant and refreshes the roster', async () => {
+  it('creates an applicant from the API response without refetching the roster', async () => {
     api.create.and.returnValue(of(sample));
-    api.list.and.returnValue(of([sample]));
     actions$.next(addApplicant({ applicant: sample }));
 
     const action = await firstValueFrom(effects.addApplicant$);
     expect(api.create).toHaveBeenCalledWith(sample);
-    expect(api.list).toHaveBeenCalled();
-    expect(action).toEqual(addApplicantSuccess({ applicants: [sample] }));
+    expect(api.list).not.toHaveBeenCalled();
+    expect(action).toEqual(addApplicantSuccess({ applicant: sample }));
   });
 
   it('dispatches addApplicantFailure when create fails', async () => {
@@ -119,5 +120,14 @@ describe('ApplicantsEffects', () => {
 
     const action = await firstValueFrom(effects.deleteApplicant$);
     expect(action).toEqual(deleteApplicantFailure({ error: 'delete failed' }));
+  });
+
+  it('invalidates match results after a successful applicant mutation', async () => {
+    actions$.next(addApplicantSuccess({ applicant: sample }));
+
+    const action = await firstValueFrom(
+      effects.invalidateMatchOnApplicantChange$
+    );
+    expect(action).toEqual(invalidateMatchResults());
   });
 });

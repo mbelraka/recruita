@@ -88,6 +88,10 @@ public class ApiProperties {
       return applicantsPath + "/{id}";
     }
 
+    public String getApplicantsFullPath() {
+      return applicantsPath + "/full";
+    }
+
     public String getProfilesPathWithId() {
       return profilesPath + "/{id}";
     }

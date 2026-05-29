@@ -1,6 +1,7 @@
 package com.recruita.api.api.controller;
 
 import com.recruita.api.api.dto.applicant.ApplicantDto;
+import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.service.ApplicantApplicationService;
 import jakarta.validation.Valid;
@@ -31,8 +32,18 @@ public class ApplicantController {
   }
 
   @GetMapping(path = "#{@apiRoutePaths.applicantsPath}")
-  public List<ApplicantDto> listApplicants() {
-    return applicantApplicationService.listAll();
+  public List<ApplicantSummaryDto> listApplicantSummaries() {
+    return applicantApplicationService.listSummaries();
+  }
+
+  @GetMapping(path = "#{@apiRoutePaths.applicantsFullPath}")
+  public List<ApplicantDto> listApplicantsFull() {
+    return applicantApplicationService.listFull();
+  }
+
+  @GetMapping(path = "#{@apiRoutePaths.applicantsPathWithId}")
+  public ApplicantDto getApplicant(@PathVariable String id) {
+    return applicantApplicationService.findById(id);
   }
 
   @PostMapping(path = "#{@apiRoutePaths.applicantsPath}")

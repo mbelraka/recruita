@@ -6,15 +6,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatDialog } from '@angular/material/dialog';
 
 import { Store } from '@ngrx/store';
-import { filter, tap } from 'rxjs';
 
-import { NewApplicantComponent } from '../new-applicant/new-applicant.component';
-import { NewApplicantDialogCloseResult } from '../../models/new-applicant-dialog-close-result.model';
-import { NewApplicantDialogData } from '../../models/new-applicant-dialog-data.model';
 import {
   FADE_IN_OUT_BASE_CLASS,
   FADE_IN_OUT_ENTER_CLASS,
@@ -23,16 +17,16 @@ import {
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
 import { isViewType, ViewTypes } from '../../enums/view-types.enum';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import { Applicant } from '../../models/applicant.model';
+import { ApplicantEditDialogService } from '../../services/applicant-edit-dialog.service';
 import {
-  addApplicant,
   setFilterByCountry,
   setFilterBySkill,
   setFilterByStatus,
   setGlobalFilter,
   setSortBy,
   setViewType,
-  updateApplicant,
 } from '../../state/applicants.actions';
 import {
   selectFilterByCountry,
@@ -54,7 +48,7 @@ import {
 })
 export class ApplicantsComponent {
   private readonly _destroyRef = inject(DestroyRef);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _editDialog = inject(ApplicantEditDialogService);
   private readonly _store = inject(Store<FullState>);
 
   private readonly _newApplicantFabShellEl = viewChild<ElementRef<HTMLElement>>(
@@ -95,6 +89,8 @@ export class ApplicantsComponent {
 
   public readonly gridSortFieldOptions =
     APP_CONFIG.APPLICANTS.GRID_SORT_FIELD_OPTIONS;
+
+  protected readonly defaultSortDirection = SortDirection.Asc;
 
   public constructor() {
     this._store.dispatch(setFilterBySkill({ skill: null }));
@@ -200,7 +196,7 @@ export class ApplicantsComponent {
 
   public onGridSortFieldChange(
     value: string | null | undefined,
-    sortDirection: 'asc' | 'desc'
+    sortDirection: SortDirection
   ): void {
     if (value === null || value === undefined || value === '') {
       this._store.dispatch(setSortBy({ sortBy: null }));
@@ -222,42 +218,8 @@ export class ApplicantsComponent {
   }
 
   public openForm(applicant?: Applicant): void {
-    this._dialog
-      .open(NewApplicantComponent, {
-        ...APP_CONFIG.DIALOG_CONFIG,
-        ...(applicant
-          ? { data: { applicant } satisfies NewApplicantDialogData }
-          : {}),
-      })
-      .afterClosed()
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        tap((): void => {
-          this._onNewApplicantDialogClosed();
-        }),
-        filter((result): result is NewApplicantDialogCloseResult =>
-          Boolean(result)
-        )
-      )
-      .subscribe((result: NewApplicantDialogCloseResult): void => {
-        if (this._isApplicantDialogUpdate(result)) {
-          this._store.dispatch(
-            updateApplicant({ applicant: result.applicant })
-          );
-        } else {
-          this._store.dispatch(addApplicant({ applicant: result }));
-        }
-      });
-  }
-
-  private _isApplicantDialogUpdate(
-    result: NewApplicantDialogCloseResult
-  ): result is { applicant: Applicant; isUpdate: true } {
-    return (
-      typeof result === 'object' &&
-      result !== null &&
-      'isUpdate' in result &&
-      result.isUpdate === true
+    this._editDialog.openCreateOrEdit(this._destroyRef, applicant, () =>
+      this._onNewApplicantDialogClosed()
     );
   }
 

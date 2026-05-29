@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantListComponent } from './applicant-list.component';
 import { Applicant } from '../../models/applicant.model';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import * as ApplicantsActions from '../../state/applicants.actions';
 import * as Selectors from '../../state/applicants.selectors';
 
@@ -34,7 +35,8 @@ describe('ApplicantListComponent', () => {
       if (selector === Selectors.selectFilterByStatus) return of(null);
       if (selector === Selectors.selectFilterByCountry) return of(null);
       if (selector === Selectors.selectSortBy) return of(null);
-      if (selector === Selectors.selectSortDirection) return of('asc' as const);
+      if (selector === Selectors.selectSortDirection)
+        return of(SortDirection.Asc);
       return of(null);
     });
 
@@ -105,7 +107,10 @@ describe('ApplicantListComponent', () => {
       const sortEvt: Sort = { active: 'name', direction: 'asc' };
       component.onSortChange(sortEvt);
       expect(mockStore.dispatch).toHaveBeenCalledWith(
-        ApplicantsActions.setSortBy({ sortBy: 'name', sortDirection: 'asc' })
+        ApplicantsActions.setSortBy({
+          sortBy: 'name',
+          sortDirection: SortDirection.Asc,
+        })
       );
     });
 
@@ -115,7 +120,7 @@ describe('ApplicantListComponent', () => {
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         ApplicantsActions.setSortBy({
           sortBy: 'availableFrom',
-          sortDirection: 'desc',
+          sortDirection: SortDirection.Desc,
         })
       );
     });

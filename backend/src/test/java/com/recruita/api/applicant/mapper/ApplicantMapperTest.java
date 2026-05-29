@@ -14,6 +14,30 @@ class ApplicantMapperTest {
   private final ApplicantMapper mapper = new ApplicantMapper();
 
   @Test
+  void mapsEntityToSummaryDtoWithoutNotes() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setName("Alex");
+    entity.setNotes("internal");
+
+    var summary = mapper.toSummaryDto(entity);
+
+    assertEquals("a-1", summary.id());
+    assertEquals("Alex", summary.name());
+  }
+
+  @Test
+  void mapsEntityWithNullSkillsToEmptyListInSummaryDto() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setSkills(null);
+
+    var summary = mapper.toSummaryDto(entity);
+
+    assertEquals(List.of(), summary.skills());
+  }
+
+  @Test
   void mapsEntityToDto() {
     ApplicantEntity entity = new ApplicantEntity();
     entity.setId("a-1");

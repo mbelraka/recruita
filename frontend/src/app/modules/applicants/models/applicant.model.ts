@@ -1,3 +1,5 @@
+import { APPLICANT } from '../constants/applicant.constants';
+
 export class Applicant {
   public readonly id!: string;
   public readonly name?: string;
@@ -20,7 +22,8 @@ export class Applicant {
     const { firstName, lastName, yearsOfExperience, availableFrom, ...rest } =
       init;
     Object.assign(this, rest);
-    const fromLegacy = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+    const fromLegacy =
+      `${firstName ?? APPLICANT.EMPTY_TEXT}${APPLICANT.NAME_PART_SEPARATOR}${lastName ?? APPLICANT.EMPTY_TEXT}`.trim();
     if (fromLegacy && !this.name?.trim()) {
       (this as { name?: string }).name = fromLegacy;
     }
@@ -48,7 +51,7 @@ export class Applicant {
       !!this.email?.trim() &&
       !!this.phone?.trim() &&
       Array.isArray(this.skills) &&
-      this.skills.length > 0
+      this.skills.length >= APPLICANT.MIN_SKILL_COUNT
     );
   }
 

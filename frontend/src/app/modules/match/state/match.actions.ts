@@ -9,6 +9,11 @@ export const setJobDescription = createAction(
 
 export const resetMatchState = createAction('[Match] Reset State');
 
+/** Clears evaluation results when applicant data changes; keeps the job description. */
+export const invalidateMatchResults = createAction(
+  '[Match] Invalidate Results'
+);
+
 export const evaluateCandidates = createAction('[Match] Evaluate Candidates');
 
 export const evaluateCandidatesSuccess = createAction(

@@ -141,7 +141,10 @@
               [value]="gridSortMatSelectValue(sortBy)"
               [attr.aria-labelledby]="'applicants-grid-sort-label'"
               (selectionChange)="
-                onGridSortFieldChange($event.value, sortDirection ?? 'asc')
+                onGridSortFieldChange(
+                  $event.value,
+                  sortDirection ?? defaultSortDirection
+                )
               "
               [placeholder]="'applicants.sortDefault' | translate"
             >

@@ -2,6 +2,7 @@ import { createSelector } from '@ngrx/store';
 
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { ApplicationStatus } from '../enums/application-status.enum';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { ApplicantState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
@@ -10,10 +11,11 @@ import { adapter } from './applicants.reducer';
 const APPLICATION_STATUS_ORDER = Object.values(ApplicationStatus);
 const EMPTY_APPLICANT_STATE: ApplicantState = adapter.getInitialState({
   loading: false,
+  loaded: false,
   error: null,
   filter: '',
   sortBy: 'name',
-  sortDirection: 'asc',
+  sortDirection: SortDirection.Asc,
   filterBySkill: null,
   filterByStatus: null,
   filterByCountry: null,
@@ -63,9 +65,15 @@ export const selectLoading = createSelector(
   (state): boolean => state.loading
 );
 
+export const selectApplicantsLoaded = createSelector(
+  selectApplicantStateSafe,
+  (state): boolean => state.loaded
+);
+
 export const selectApplicantsReady = createSelector(
+  selectApplicantsLoaded,
   selectLoading,
-  (loading) => !loading
+  (loaded, loading) => loaded && !loading
 );
 
 // Select View Type
@@ -146,7 +154,7 @@ export const selectSortBy = createSelector(
 
 export const selectSortDirection = createSelector(
   selectApplicantStateSafe,
-  (state): 'asc' | 'desc' => state.sortDirection ?? 'asc'
+  (state): SortDirection => state.sortDirection ?? SortDirection.Asc
 );
 
 function compareApplicantValues(
@@ -264,12 +272,12 @@ const applyFilters = (
 const applySorting = (
   applicants: Applicant[],
   sortBy: keyof Applicant | null,
-  sortDirection: 'asc' | 'desc'
+  sortDirection: SortDirection
 ): Applicant[] => {
   if (!sortBy) {
     return applicants;
   }
-  const mult = sortDirection === 'desc' ? -1 : 1;
+  const mult = sortDirection === SortDirection.Desc ? -1 : 1;
   return [...applicants].sort(
     (a, b) => mult * compareApplicantValues(a, b, sortBy)
   );

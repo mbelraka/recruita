@@ -10,7 +10,14 @@ import { Router } from '@angular/router';
 
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { distinctUntilChanged, map, Observable, startWith } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  fromEvent,
+  map,
+  Observable,
+  startWith,
+} from 'rxjs';
 
 import { NavLink } from 'src/app/modules/main/models/nav-link.model';
 
@@ -68,6 +75,7 @@ export class RootComponent implements OnInit {
   public ngOnInit(): void {
     this._store.dispatch(loadProfile());
     this._initApplicantsState();
+    this._initSyncOnTabVisible();
     this._initCurrentRouteStream();
     this._syncLanguageSelectWithStore();
   }
@@ -84,6 +92,23 @@ export class RootComponent implements OnInit {
 
   private _initApplicantsState(): void {
     this._store.dispatch(loadApplicants());
+  }
+
+  /** Re-fetch profile and applicants when the user returns to this tab. */
+  private _initSyncOnTabVisible(): void {
+    if (!APP_CONFIG.SYNC.REFRESH_ON_TAB_VISIBLE) {
+      return;
+    }
+
+    fromEvent(document, 'visibilitychange')
+      .pipe(
+        filter(() => document.visibilityState === 'visible'),
+        takeUntilDestroyed(this._destroyRef)
+      )
+      .subscribe(() => {
+        this._store.dispatch(loadProfile());
+        this._store.dispatch(loadApplicants());
+      });
   }
 
   private _syncLanguageSelectWithStore(): void {

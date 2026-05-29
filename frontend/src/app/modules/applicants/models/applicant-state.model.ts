@@ -1,7 +1,8 @@
 import { EntityState } from '@ngrx/entity';
 
-import { Applicant } from './applicant.model';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
+import { Applicant } from './applicant.model';
 
 /**
  * Represents the state for managing applicants.
@@ -9,6 +10,9 @@ import { ViewTypes } from '../enums/view-types.enum';
 export interface ApplicantState extends EntityState<Applicant> {
   /** Indicates if a loading operation is in progress. */
   loading: boolean;
+
+  /** True after the roster has loaded successfully at least once. */
+  loaded: boolean;
 
   /** Stores error messages, if any. */
   error: string | null;
@@ -20,7 +24,7 @@ export interface ApplicantState extends EntityState<Applicant> {
   sortBy: keyof Applicant | null;
 
   /** Sort direction when `sortBy` is set. */
-  sortDirection: 'asc' | 'desc';
+  sortDirection: SortDirection;
 
   /** Filters applicants by a specific skill. */
   filterBySkill: string | null;

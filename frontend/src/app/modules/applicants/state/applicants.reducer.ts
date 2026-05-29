@@ -3,6 +3,7 @@ import { createReducer, on } from '@ngrx/store';
 
 import { ApplicantState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import {
   addApplicant,
@@ -26,6 +27,7 @@ import {
   searchLocationSuggestionsSuccess,
   searchLocationSuggestionsFailure,
   clearLocationSuggestions,
+  loadApplicantDetailSuccess,
 } from './applicants.actions';
 
 // Create an Entity Adapter
@@ -38,10 +40,11 @@ export const adapter: EntityAdapter<Applicant> = createEntityAdapter<Applicant>(
 // Initial State
 const initialApplicantState: ApplicantState = adapter.getInitialState({
   loading: false,
+  loaded: false,
   error: null,
   filter: '',
   sortBy: 'name',
-  sortDirection: 'asc',
+  sortDirection: SortDirection.Asc,
   filterBySkill: null,
   filterByStatus: null,
   filterByCountry: null,
@@ -63,12 +66,14 @@ export const applicantsReducer = createReducer(
     adapter.setAll(applicants, {
       ...state,
       loading: false,
+      loaded: true,
       error: null,
     })
   ),
   on(loadApplicantsFailure, (state, { error }) => ({
     ...state,
     loading: false,
+    loaded: false,
     error,
   })),
 
@@ -77,8 +82,8 @@ export const applicantsReducer = createReducer(
     ...state,
     loading: true,
   })),
-  on(addApplicantSuccess, (state, { applicants }) =>
-    adapter.setAll(applicants, {
+  on(addApplicantSuccess, (state, { applicant }) =>
+    adapter.addOne(applicant, {
       ...state,
       loading: false,
       error: null,
@@ -95,8 +100,8 @@ export const applicantsReducer = createReducer(
     ...state,
     loading: true,
   })),
-  on(updateApplicantSuccess, (state, { applicants }) =>
-    adapter.setAll(applicants, {
+  on(updateApplicantSuccess, (state, { applicant }) =>
+    adapter.upsertOne(applicant, {
       ...state,
       loading: false,
       error: null,
@@ -113,8 +118,8 @@ export const applicantsReducer = createReducer(
     ...state,
     loading: true,
   })),
-  on(deleteApplicantSuccess, (state, { applicants }) =>
-    adapter.setAll(applicants, {
+  on(deleteApplicantSuccess, (state, { id }) =>
+    adapter.removeOne(id, {
       ...state,
       loading: false,
       error: null,
@@ -133,10 +138,10 @@ export const applicantsReducer = createReducer(
   })),
 
   // **Set Sort By**
-  on(setSortBy, (state, { sortBy, sortDirection = 'asc' }) => ({
+  on(setSortBy, (state, { sortBy, sortDirection = SortDirection.Asc }) => ({
     ...state,
     sortBy,
-    sortDirection: sortBy == null ? 'asc' : sortDirection,
+    sortDirection: sortBy == null ? SortDirection.Asc : sortDirection,
   })),
 
   // **Set View Type**
@@ -172,5 +177,9 @@ export const applicantsReducer = createReducer(
   on(clearLocationSuggestions, (state) => ({
     ...state,
     locationSuggestions: [] as string[],
-  }))
+  })),
+
+  on(loadApplicantDetailSuccess, (state, { applicant }) =>
+    adapter.upsertOne(applicant, state)
+  )
 );

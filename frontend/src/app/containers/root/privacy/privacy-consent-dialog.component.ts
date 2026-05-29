@@ -13,6 +13,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { PrivacyConsentDialogMode } from '../../../enums/privacy-consent-dialog-mode.enum';
 import type { PrivacyConsentDialogCloseResult } from '../../../models/privacy-consent-dialog-close-result.model';
 import type { PrivacyConsentDialogData } from '../../../models/privacy-consent-dialog-data.model';
 
@@ -66,21 +67,25 @@ export class PrivacyConsentDialogComponent {
   }
 
   protected selectNecessary(): void {
-    this._dialogRef.close({ mode: 'necessary' } as const);
+    this._dialogRef.close({
+      mode: PrivacyConsentDialogMode.Necessary,
+    } satisfies PrivacyConsentDialogCloseResult);
   }
 
   protected selectAllOptional(): void {
-    this._dialogRef.close({ mode: 'all' } as const);
+    this._dialogRef.close({
+      mode: PrivacyConsentDialogMode.All,
+    } satisfies PrivacyConsentDialogCloseResult);
   }
 
   protected saveSelection(): void {
     this._dialogRef.close({
-      mode: 'custom',
+      mode: PrivacyConsentDialogMode.Custom,
       choices: {
         optionalRemoteTranslation: this.optionalRemoteTranslation,
         optionalGeocoding: this.optionalGeocoding,
         optionalAiMatching: this.optionalAiMatching,
       },
-    } as const);
+    } satisfies PrivacyConsentDialogCloseResult);
   }
 }

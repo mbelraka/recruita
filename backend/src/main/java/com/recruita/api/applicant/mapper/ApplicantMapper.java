@@ -1,6 +1,7 @@
 package com.recruita.api.applicant.mapper;
 
 import com.recruita.api.api.dto.applicant.ApplicantDto;
+import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.persistence.entity.ApplicantEntity;
 import java.util.List;
@@ -24,6 +25,24 @@ public class ApplicantMapper {
         entity.getNotes(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
+  }
+
+  public ApplicantSummaryDto toSummaryDto(ApplicantEntity entity) {
+    return new ApplicantSummaryDto(
+        entity.getId(),
+        entity.getName(),
+        entity.getEmail(),
+        entity.getPhone(),
+        entity.getLocation(),
+        entity.getYearsOfExperience(),
+        entity.getApplicationStatus(),
+        entity.getCurrentJobTitle(),
+        entity.getAvailableFrom(),
+        entity.getSkills());
+  }
+
+  public List<ApplicantSummaryDto> toSummaryDtoList(List<ApplicantEntity> entities) {
+    return entities.stream().map(this::toSummaryDto).toList();
   }
 
   public List<ApplicantDto> toDtoList(List<ApplicantEntity> entities) {

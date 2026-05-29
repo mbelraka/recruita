@@ -12,6 +12,11 @@ import { Store } from '@ngrx/store';
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
+import {
+  SortDirection,
+  sortDirectionFromMaterial,
+  toMaterialSortDirection,
+} from '../../enums/sort-direction.enum';
 import { setSortBy } from '../../state/applicants.actions';
 import {
   selectFilterByCountry,
@@ -67,7 +72,7 @@ export class ApplicantListComponent {
 
   public readonly sortDirection = toSignal(
     this._store.select(selectSortDirection),
-    { initialValue: 'asc' as 'asc' | 'desc' }
+    { initialValue: SortDirection.Asc }
   );
 
   public readonly matSortActiveColumn = computed(() => {
@@ -78,11 +83,11 @@ export class ApplicantListComponent {
     return k === 'availableFrom' ? 'availability' : String(k);
   });
 
-  public readonly matSortDirForUi = computed((): 'asc' | 'desc' | '' => {
+  public readonly matSortDirForUi = computed(() => {
     if (!this.sortBy()) {
-      return '';
+      return toMaterialSortDirection(undefined);
     }
-    return this.sortDirection();
+    return toMaterialSortDirection(this.sortDirection());
   });
 
   private readonly _pagination = createPaginatedViewState(
@@ -154,7 +159,11 @@ export class ApplicantListComponent {
       return;
     }
     this._store.dispatch(
-      setSortBy({ sortBy: key, sortDirection: sort.direction })
+      setSortBy({
+        sortBy: key,
+        sortDirection:
+          sortDirectionFromMaterial(sort.direction) ?? SortDirection.Asc,
+      })
     );
   }
 

@@ -1,3 +1,4 @@
+import { PrivacyConsentDialogMode } from '../enums/privacy-consent-dialog-mode.enum';
 import type { PrivacyConsentDialogCloseResult } from '../models/privacy-consent-dialog-close-result.model';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
 
@@ -34,10 +35,13 @@ export function isPrivacyConsentDialogCloseResult(
     return false;
   }
   const mode = (value as { mode: unknown }).mode;
-  if (mode === 'necessary' || mode === 'all') {
+  if (
+    mode === PrivacyConsentDialogMode.Necessary ||
+    mode === PrivacyConsentDialogMode.All
+  ) {
     return true;
   }
-  if (mode !== 'custom') {
+  if (mode !== PrivacyConsentDialogMode.Custom) {
     return false;
   }
   if (!('choices' in value)) {
@@ -51,11 +55,11 @@ export function privacyChoicesFromDialogResult(
   result: PrivacyConsentDialogCloseResult
 ): PrivacyConsentFormState {
   switch (result.mode) {
-    case 'necessary':
+    case PrivacyConsentDialogMode.Necessary:
       return ALL_DISABLED;
-    case 'all':
+    case PrivacyConsentDialogMode.All:
       return ALL_ENABLED;
-    case 'custom':
+    case PrivacyConsentDialogMode.Custom:
       return result.choices;
     default: {
       const _exhaustive: never = result;

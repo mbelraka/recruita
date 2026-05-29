@@ -1,6 +1,7 @@
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { ViewTypes } from '../../applicants/enums/view-types.enum';
+import { SortDirection } from '../../applicants/enums/sort-direction.enum';
 import { MatchFeatureState } from '../models/match-state.model';
 import {
   selectEvaluatedCandidatesCount,
@@ -62,7 +63,7 @@ describe('match selectors', () => {
       error: null,
       filter: '',
       sortBy: null,
-      sortDirection: 'asc',
+      sortDirection: SortDirection.Asc,
       filterBySkill: null,
       filterByStatus: null,
       filterByCountry: null,

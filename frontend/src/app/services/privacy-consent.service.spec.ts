@@ -8,6 +8,7 @@ import { Languages } from '../enums/language.enum';
 import { PRIVACY_CONSENT_VERSION } from '../constants/privacy.constants';
 import { adapter } from '../modules/applicants/state/applicants.reducer';
 import { ViewTypes } from '../modules/applicants/enums/view-types.enum';
+import { SortDirection } from '../modules/applicants/enums/sort-direction.enum';
 import { initialMainState } from '../modules/main/state/main.reducer';
 import { initialAppState } from '../state/app.reducer';
 
@@ -36,7 +37,7 @@ describe('PrivacyConsentService', () => {
       error: null,
       filter: '',
       sortBy: 'name',
-      sortDirection: 'asc',
+      sortDirection: SortDirection.Asc,
       filterBySkill: null,
       filterByStatus: null,
       filterByCountry: null,

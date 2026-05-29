@@ -1,4 +1,5 @@
 import { ApplicationStatus } from '../enums/application-status.enum';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { ApplicantState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
@@ -62,10 +63,11 @@ describe('Applicants Selectors', () => {
       '4': mockApplicants[3],
     },
     loading: false,
+    loaded: true,
     error: null,
     filter: '',
     sortBy: 'name',
-    sortDirection: 'asc',
+    sortDirection: SortDirection.Asc,
     filterBySkill: null,
     filterByStatus: null,
     filterByCountry: null,
@@ -80,6 +82,20 @@ describe('Applicants Selectors', () => {
   describe('Feature Selectors', () => {
     it('should select loading state', () => {
       expect(fromSelectors.selectLoading(appState)).toBeFalse();
+    });
+
+    it('should select applicants ready only after a successful load', () => {
+      expect(fromSelectors.selectApplicantsReady(appState)).toBeTrue();
+      expect(
+        fromSelectors.selectApplicantsReady({
+          applicants: { ...initialState, loaded: false, loading: false },
+        })
+      ).toBeFalse();
+      expect(
+        fromSelectors.selectApplicantsReady({
+          applicants: { ...initialState, loaded: true, loading: true },
+        })
+      ).toBeFalse();
     });
 
     it('should select view type', () => {
@@ -124,7 +140,9 @@ describe('Applicants Selectors', () => {
     });
 
     it('should select sort direction', () => {
-      expect(fromSelectors.selectSortDirection(appState)).toBe('asc');
+      expect(fromSelectors.selectSortDirection(appState)).toBe(
+        SortDirection.Asc
+      );
     });
   });
 
@@ -150,7 +168,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         'name',
-        'asc'
+        SortDirection.Asc
       );
       expect(sorted[0].name).toBe('Alice Smith');
     });
@@ -159,7 +177,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         'name',
-        'desc'
+        SortDirection.Desc
       );
       expect(sorted[0].name).toBe('John Doe');
     });
@@ -168,7 +186,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         'yearsOfExperience',
-        'asc'
+        SortDirection.Asc
       );
       expect(sorted[0].name).toBe('Jane Doe'); // undefined
       expect(sorted[1].name).toBe('Bob'); // null
@@ -180,7 +198,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         'availableFrom',
-        'asc'
+        SortDirection.Asc
       );
       expect(sorted[0].name).toBe('Alice Smith'); // NaN (mapped to undefined in model)
       expect(sorted[1].name).toBe('Bob'); // null (mapped to undefined in model)
@@ -192,7 +210,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         'skills',
-        'asc'
+        SortDirection.Asc
       );
       expect(sorted.length).toBe(4);
     });
@@ -201,7 +219,7 @@ describe('Applicants Selectors', () => {
       const sorted = fromSelectors.selectSortedApplicants.projector(
         mockApplicants,
         null,
-        'asc'
+        SortDirection.Asc
       );
       expect(sorted).toEqual(mockApplicants);
     });

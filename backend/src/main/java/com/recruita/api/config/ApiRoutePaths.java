@@ -11,6 +11,7 @@ public class ApiRoutePaths {
   private final String matchPath;
   private final String matchLegacyPath;
   private final String applicantsPath;
+  private final String applicantsFullPath;
   private final String applicantsPathWithId;
   private final String profilesPath;
   private final String profilesPathWithId;
@@ -21,6 +22,7 @@ public class ApiRoutePaths {
     this.matchPath = routes.getMatchPath();
     this.matchLegacyPath = routes.getMatchLegacyPath();
     this.applicantsPath = routes.getApplicantsPath();
+    this.applicantsFullPath = routes.getApplicantsFullPath();
     this.applicantsPathWithId = routes.getApplicantsPathWithId();
     this.profilesPath = routes.getProfilesPath();
     this.profilesPathWithId = routes.getProfilesPathWithId();
@@ -40,6 +42,10 @@ public class ApiRoutePaths {
 
   public String getApplicantsPath() {
     return applicantsPath;
+  }
+
+  public String getApplicantsFullPath() {
+    return applicantsFullPath;
   }
 
   public String getApplicantsPathWithId() {

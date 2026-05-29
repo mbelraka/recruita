@@ -11,6 +11,7 @@ import {
   toArray,
 } from 'rxjs';
 
+import { PrivacyConsentDialogMode } from '../../../enums/privacy-consent-dialog-mode.enum';
 import { APP_CONFIG } from '../../../config/app.config';
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
@@ -167,7 +168,9 @@ describe('MainEffects', () => {
     );
 
     actions$.next(
-      persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
+      persistPrivacyConsentOutcome({
+        result: { mode: PrivacyConsentDialogMode.Necessary },
+      })
     );
 
     const emitted = await emittedPromise;
@@ -223,7 +226,11 @@ describe('MainEffects', () => {
     const emittedPromise = lastValueFrom(
       effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
     );
-    actions$.next(persistPrivacyConsentOutcome({ result: { mode: 'all' } }));
+    actions$.next(
+      persistPrivacyConsentOutcome({
+        result: { mode: PrivacyConsentDialogMode.All },
+      })
+    );
 
     const emitted = await emittedPromise;
     expect(api.save).toHaveBeenCalledWith(
@@ -247,7 +254,9 @@ describe('MainEffects', () => {
     );
 
     actions$.next(
-      persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
+      persistPrivacyConsentOutcome({
+        result: { mode: PrivacyConsentDialogMode.Necessary },
+      })
     );
 
     const emitted = await emittedPromise;

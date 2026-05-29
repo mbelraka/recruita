@@ -8,13 +8,14 @@ import {
 } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantsComponent } from './applicants.component';
 import { ViewTypes } from '../../enums/view-types.enum';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import { Applicant } from '../../models/applicant.model';
+import { ApplicantEditDialogService } from '../../services/applicant-edit-dialog.service';
 import * as ApplicantsActions from '../../state/applicants.actions';
 
 type ApplicantsComponentPrivate = {
@@ -27,25 +28,16 @@ describe('ApplicantsComponent', () => {
   let component: ApplicantsComponent;
   let fixture: ComponentFixture<ApplicantsComponent>;
   let mockStore: jasmine.SpyObj<Store>;
-  let mockDialog: jasmine.SpyObj<MatDialog>;
-  let mockDialogRef: jasmine.SpyObj<MatDialogRef<unknown>>;
-  let afterClosedSubject: Subject<unknown>;
+  let mockEditDialog: jasmine.SpyObj<ApplicantEditDialogService>;
   let componentPrivate: ApplicantsComponentPrivate;
 
   beforeEach(async () => {
     mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
     mockStore.select.and.returnValue(of(null));
-
-    afterClosedSubject = new Subject<unknown>();
-    mockDialogRef = jasmine.createSpyObj<MatDialogRef<unknown>>(
-      'MatDialogRef',
-      ['afterClosed']
+    mockEditDialog = jasmine.createSpyObj<ApplicantEditDialogService>(
+      'ApplicantEditDialogService',
+      ['openCreateOrEdit']
     );
-    mockDialogRef.afterClosed.and.returnValue(
-      afterClosedSubject.asObservable()
-    );
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockDialog.open.and.returnValue(mockDialogRef);
 
     await TestBed.configureTestingModule({
       declarations: [ApplicantsComponent],
@@ -53,7 +45,7 @@ describe('ApplicantsComponent', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: Store, useValue: mockStore },
-        { provide: MatDialog, useValue: mockDialog },
+        { provide: ApplicantEditDialogService, useValue: mockEditDialog },
       ],
     }).compileComponents();
 
@@ -223,14 +215,17 @@ describe('ApplicantsComponent', () => {
     });
 
     it('should handle grid sort change', () => {
-      component.onGridSortFieldChange('name', 'asc');
+      component.onGridSortFieldChange('name', SortDirection.Asc);
       expect(mockStore.dispatch).toHaveBeenCalledWith(
-        ApplicantsActions.setSortBy({ sortBy: 'name', sortDirection: 'asc' })
+        ApplicantsActions.setSortBy({
+          sortBy: 'name',
+          sortDirection: SortDirection.Asc,
+        })
       );
     });
 
     it('should handle grid sort clear', () => {
-      component.onGridSortFieldChange(null, 'asc');
+      component.onGridSortFieldChange(null, SortDirection.Asc);
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         ApplicantsActions.setSortBy({ sortBy: null })
       );
@@ -238,7 +233,7 @@ describe('ApplicantsComponent', () => {
 
     it('should ignore unknown grid sort options', () => {
       mockStore.dispatch.calls.reset();
-      component.onGridSortFieldChange('unknown', 'asc');
+      component.onGridSortFieldChange('unknown', SortDirection.Asc);
       expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
   });
@@ -259,38 +254,26 @@ describe('ApplicantsComponent', () => {
   });
 
   describe('Dialog interactions', () => {
-    it('should open new applicant dialog and handle new applicant result', () => {
+    it('delegates create flow to ApplicantEditDialogService', () => {
       component.openForm();
-      expect(mockDialog.open).toHaveBeenCalled();
 
-      const newApplicant = new Applicant({ name: 'John' });
-      afterClosedSubject.next(newApplicant);
-
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        ApplicantsActions.addApplicant({ applicant: newApplicant })
+      expect(mockEditDialog.openCreateOrEdit).toHaveBeenCalledWith(
+        jasmine.any(Object),
+        undefined,
+        jasmine.any(Function)
       );
     });
 
-    it('should open new applicant dialog and handle update applicant result', () => {
+    it('delegates edit flow to ApplicantEditDialogService', () => {
       const existingApplicant = new Applicant({ id: '1', name: 'John' });
+
       component.openForm(existingApplicant);
-      expect(mockDialog.open).toHaveBeenCalled();
 
-      const updatedApplicant = new Applicant({ id: '1', name: 'John Updated' });
-      afterClosedSubject.next({ applicant: updatedApplicant, isUpdate: true });
-
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        ApplicantsActions.updateApplicant({ applicant: updatedApplicant })
+      expect(mockEditDialog.openCreateOrEdit).toHaveBeenCalledWith(
+        jasmine.any(Object),
+        existingApplicant,
+        jasmine.any(Function)
       );
-    });
-
-    it('should close the dialog without dispatching when no result is returned', () => {
-      mockStore.dispatch.calls.reset();
-
-      component.openForm();
-      afterClosedSubject.next(undefined);
-
-      expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
   });
 });

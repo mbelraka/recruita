@@ -21,6 +21,11 @@ export const APP_CONFIG = {
     MAX_STATE_HISTORY: 25,
   } as const,
 
+  /** Client ↔ server resync when the tab becomes visible again. */
+  SYNC: {
+    REFRESH_ON_TAB_VISIBLE: true,
+  } as const,
+
   /**
    * In-app transactional feedback (NgRx `showNotification` + Material snackbar).
    * Copy lives in `assets/i18n` under `notifications.*` — see `notification-message-keys.ts`.
@@ -181,6 +186,7 @@ export const APP_CONFIG = {
   APPLICANTS: {
     API: {
       BASE_PATH: '/api/applicants',
+      FULL_LIST_PATH: '/api/applicants/full',
       REQUEST_TIMEOUT_MS: 15000,
       /** User-facing copy: `ApplicantApiErrorMessage`. */
     } as const,
@@ -202,6 +208,10 @@ export const APP_CONFIG = {
     LOCATION_GEOCODE_RESULT_COUNT: '10',
     /** Open-Meteo geocode query: `format` (response shape). */
     LOCATION_GEOCODE_FORMAT: 'json',
+    /** Minimum trimmed query length before geocoding runs. */
+    LOCATION_GEOCODE_MIN_QUERY_LENGTH: 2,
+    /** Max cached geocode queries per session (query + language key). */
+    LOCATION_GEOCODE_CACHE_MAX_ENTRIES: 64,
     /**
      * Applicant grid card enter animation: `delay = min(index, cap) * stepMs` so long lists don’t
      * stagger for many seconds.

@@ -17,6 +17,7 @@ import { Store } from '@ngrx/store';
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import {
   selectFilterByCountry,
   selectFilterBySkill,
@@ -78,7 +79,7 @@ export class ApplicantGridComponent implements AfterViewInit {
 
   public readonly sortDirection = toSignal(
     this._store.select(selectSortDirection),
-    { initialValue: 'asc' as 'asc' | 'desc' }
+    { initialValue: SortDirection.Asc }
   );
 
   /** Matches `repeat(auto-fill, minmax(264px, 1fr))` + 16px gap in SCSS. */

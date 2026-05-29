@@ -7,6 +7,7 @@ import {
   persistPrivacyConsentOutcomeSuccess,
   profileUpdated,
 } from './profile.actions';
+import { PrivacyConsentDialogMode } from '../../../enums/privacy-consent-dialog-mode.enum';
 import { Languages } from '../../../enums/language.enum';
 import {
   initialMainState,
@@ -94,7 +95,9 @@ describe('mainReducer', () => {
     };
     const pending = mainReducer(
       initialMainState,
-      persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
+      persistPrivacyConsentOutcome({
+        result: { mode: PrivacyConsentDialogMode.Necessary },
+      })
     );
     expect(pending.profile.loading).toBeTrue();
 

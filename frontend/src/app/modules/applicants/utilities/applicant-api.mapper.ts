@@ -1,11 +1,14 @@
 import { Applicant } from '../models/applicant.model';
-import {
-  ApplicantApiRecord,
-  ApplicantApiWriteRecord,
-} from '../models/applicant-api.model';
+import { ApplicantApiRecord } from '../models/applicant-api-record.model';
+import { ApplicantApiSummaryRecord } from '../models/applicant-api-summary-record.model';
+import { ApplicantApiWriteRecord } from '../models/applicant-api-write-record.model';
 
-export function applicantFromApi(record: ApplicantApiRecord): Applicant {
-  return new Applicant({
+type ApplicantInit = NonNullable<ConstructorParameters<typeof Applicant>[0]>;
+
+function applicantInitFromApiSummary(
+  record: ApplicantApiSummaryRecord
+): ApplicantInit {
+  return {
     id: record.id,
     name: record.name,
     email: record.email,
@@ -18,8 +21,26 @@ export function applicantFromApi(record: ApplicantApiRecord): Applicant {
       ? new Date(record.availableFrom)
       : undefined,
     skills: record.skills ? [...record.skills] : [],
+  };
+}
+
+export function applicantFromApiSummary(
+  record: ApplicantApiSummaryRecord
+): Applicant {
+  return new Applicant(applicantInitFromApiSummary(record));
+}
+
+export function applicantFromApi(record: ApplicantApiRecord): Applicant {
+  return new Applicant({
+    ...applicantInitFromApiSummary(record),
     notes: record.notes,
   });
+}
+
+export function applicantsFromApiSummary(
+  records: readonly ApplicantApiSummaryRecord[]
+): Applicant[] {
+  return records.map(applicantFromApiSummary);
 }
 
 export function applicantsFromApi(

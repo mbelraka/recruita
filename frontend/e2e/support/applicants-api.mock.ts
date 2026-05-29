@@ -1,23 +1,33 @@
-import { buildDemoApplicants } from '../src/app/utilities/seed/demo-applicants';
-import { applicantToApiWrite } from '../src/app/modules/applicants/utilities/applicant-api.mapper';
+import { ApplicantApiWriteRecord } from '../../src/app/modules/applicants/models/applicant-api-write-record.model';
+import { applicantToApiWrite } from '../../src/app/modules/applicants/utilities/applicant-api.mapper';
+import { buildDemoApplicants } from '../../src/app/utilities/seed/demo-applicants';
 
-const initialRecords = buildDemoApplicants().map(applicantToApiWrite);
+const initialRecords: ApplicantApiWriteRecord[] =
+  buildDemoApplicants().map(applicantToApiWrite);
+
+function toSummary(record: ApplicantApiWriteRecord) {
+  const { notes: _notes, ...summary } = record;
+  return summary;
+}
 
 /** In-memory mock for `/api/applicants` when Playwright runs without Docker. */
 export function installApplicantsApiMock(
   page: import('@playwright/test').Page
 ): void {
-  const records = new Map(
-    initialRecords.map((record) => [record.id, { ...record }] as const)
+  const records = new Map<string, ApplicantApiWriteRecord>(
+    initialRecords.map((record) => [record.id, { ...record }])
   );
 
   page.route('**/api/applicants**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    const suffix = url.pathname.replace(/\/api\/applicants\/?/, '');
-    const id = suffix ? decodeURIComponent(suffix) : '';
+    const pathname = url.pathname.replace(/\/$/, '');
+    const isFullList = pathname.endsWith('/full');
+    const id = isFullList
+      ? ''
+      : decodeURIComponent(pathname.replace(/.*\/api\/applicants\/?/, ''));
 
-    if (request.method() === 'GET' && !id) {
+    if (request.method() === 'GET' && isFullList) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -26,8 +36,35 @@ export function installApplicantsApiMock(
       return;
     }
 
-    if (request.method() === 'POST' && !id) {
-      const body = request.postDataJSON() as (typeof initialRecords)[number];
+    if (request.method() === 'GET' && !id) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([...records.values()].map(toSummary)),
+      });
+      return;
+    }
+
+    if (request.method() === 'GET' && id) {
+      const record = records.get(id);
+      if (!record) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Not found.' }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(record),
+      });
+      return;
+    }
+
+    if (request.method() === 'POST' && !id && !isFullList) {
+      const body = request.postDataJSON() as ApplicantApiWriteRecord;
       records.set(body.id, { ...body });
       await route.fulfill({
         status: 201,
@@ -38,7 +75,7 @@ export function installApplicantsApiMock(
     }
 
     if (request.method() === 'PUT' && id) {
-      const body = request.postDataJSON() as (typeof initialRecords)[number];
+      const body = request.postDataJSON() as ApplicantApiWriteRecord;
       records.set(id, { ...body, id });
       await route.fulfill({
         status: 200,

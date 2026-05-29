@@ -5,6 +5,7 @@ import {
   evaluateCandidates,
   evaluateCandidatesFailure,
   evaluateCandidatesSuccess,
+  invalidateMatchResults,
   setJobDescription,
 } from './match.actions';
 import { matchReducer } from './match.reducer';
@@ -83,6 +84,21 @@ describe('matchReducer', () => {
     );
     expect(state.loading).toBeFalse();
     expect(state.error).toBe('boom');
+    expect(state.results).toEqual([]);
+  });
+
+  it('should clear results on invalidateMatchResults but keep the job description', () => {
+    const prev = {
+      ...matchReducer(undefined, { type: 'unknown' } as never),
+      jobDescription: 'Backend engineer',
+      loading: true,
+      error: 'stale',
+      results: [makeResult('a1')],
+    };
+    const state = matchReducer(prev, invalidateMatchResults());
+    expect(state.jobDescription).toBe('Backend engineer');
+    expect(state.loading).toBeFalse();
+    expect(state.error).toBeNull();
     expect(state.results).toEqual([]);
   });
 });

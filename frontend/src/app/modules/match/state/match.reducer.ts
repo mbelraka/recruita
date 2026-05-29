@@ -6,6 +6,7 @@ import {
   evaluateCandidates,
   evaluateCandidatesFailure,
   evaluateCandidatesSuccess,
+  invalidateMatchResults,
   resetMatchState,
   setJobDescription,
 } from './match.actions';
@@ -21,6 +22,15 @@ const initialMatchState: MatchFeatureState = {
 export const matchReducer = createReducer(
   initialMatchState,
   on(resetMatchState, (): MatchFeatureState => ({ ...initialMatchState })),
+  on(
+    invalidateMatchResults,
+    (state): MatchFeatureState => ({
+      ...state,
+      loading: false,
+      error: null,
+      results: [],
+    })
+  ),
   on(
     setJobDescription,
     (state, { jobDescription }): MatchFeatureState => ({

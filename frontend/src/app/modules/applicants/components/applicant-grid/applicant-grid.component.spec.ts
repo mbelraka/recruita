@@ -8,6 +8,7 @@ import { EMPTY, of } from 'rxjs';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantGridComponent } from './applicant-grid.component';
 import { Applicant } from '../../models/applicant.model';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import * as Selectors from '../../state/applicants.selectors';
 
 describe('ApplicantGridComponent', () => {
@@ -31,7 +32,8 @@ describe('ApplicantGridComponent', () => {
       if (selector === Selectors.selectFilterByStatus) return of(null);
       if (selector === Selectors.selectFilterByCountry) return of(null);
       if (selector === Selectors.selectSortBy) return of(null);
-      if (selector === Selectors.selectSortDirection) return of('asc' as const);
+      if (selector === Selectors.selectSortDirection)
+        return of(SortDirection.Asc);
       return of(null);
     });
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);

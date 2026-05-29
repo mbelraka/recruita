@@ -3,6 +3,7 @@ import {
   applicantFromApi,
   applicantToApiWrite,
   applicantsFromApi,
+  applicantsFromApiSummary,
 } from './applicant-api.mapper';
 
 describe('applicant-api.mapper', () => {
@@ -38,6 +39,26 @@ describe('applicant-api.mapper', () => {
     expect(payload.id).toBe('a-2');
     expect(payload.availableFrom).toBe('2026-07-15');
     expect(payload.skills).toEqual(['Java']);
+  });
+
+  it('maps arrays of API summary records without notes', () => {
+    const applicants = applicantsFromApiSummary([
+      { id: 'a-1', skills: [] },
+      { id: 'a-2', skills: ['Go'] },
+    ]);
+
+    expect(applicants.map((a) => a.id)).toEqual(['a-1', 'a-2']);
+    expect(applicants[0].notes).toBeUndefined();
+  });
+
+  it('maps full API records with notes', () => {
+    const applicant = applicantFromApi({
+      id: 'a-4',
+      skills: [],
+      notes: 'Internal',
+    });
+
+    expect(applicant.notes).toBe('Internal');
   });
 
   it('maps arrays of API records', () => {

@@ -10,6 +10,7 @@ import {
   concatWithErrorNotification,
   concatWithNotification,
 } from '../../../utilities/notification.utils';
+import { invalidateMatchResults } from '../../match/state/match.actions';
 import { ApplicantApiService } from '../services/applicant-api.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
@@ -32,7 +33,7 @@ import {
 
 /**
  * Flattening: switchMap cancels stale reads (list, geocode); exhaustMap ignores duplicate
- * mutations while one is in flight; concatMap chains create/update/delete → list → notify.
+ * mutations while one is in flight; concatMap chains mutation → notify.
  */
 @Injectable()
 export class ApplicantsEffects {
@@ -75,15 +76,17 @@ export class ApplicantsEffects {
   addApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(addApplicant),
-      // Ignore double-submit while create + refresh is running.
+      // Ignore double-submit while create is running.
       exhaustMap(({ applicant }) =>
         this._applicantApi.create(applicant).pipe(
-          concatMap(() => this._applicantApi.list()),
-          concatMap((applicants) =>
-            concatWithNotification(addApplicantSuccess({ applicants }), {
-              type: AppNotificationType.Success,
-              messageKey: NOTIFICATION_MESSAGE_KEYS.applicantCreatedSuccess,
-            })
+          concatMap((created) =>
+            concatWithNotification(
+              addApplicantSuccess({ applicant: created }),
+              {
+                type: AppNotificationType.Success,
+                messageKey: NOTIFICATION_MESSAGE_KEYS.applicantCreatedSuccess,
+              }
+            )
           ),
           catchError((error: unknown) => {
             const errMsg = getErrorMessage(error);
@@ -102,12 +105,14 @@ export class ApplicantsEffects {
       ofType(updateApplicant),
       exhaustMap(({ applicant }) =>
         this._applicantApi.update(applicant).pipe(
-          concatMap(() => this._applicantApi.list()),
-          concatMap((applicants) =>
-            concatWithNotification(updateApplicantSuccess({ applicants }), {
-              type: AppNotificationType.Success,
-              messageKey: NOTIFICATION_MESSAGE_KEYS.applicantUpdatedSuccess,
-            })
+          concatMap((updated) =>
+            concatWithNotification(
+              updateApplicantSuccess({ applicant: updated }),
+              {
+                type: AppNotificationType.Success,
+                messageKey: NOTIFICATION_MESSAGE_KEYS.applicantUpdatedSuccess,
+              }
+            )
           ),
           catchError((error: unknown) => {
             const errMsg = getErrorMessage(error);
@@ -133,9 +138,8 @@ export class ApplicantsEffects {
       ofType(deleteApplicant),
       exhaustMap(({ id }) =>
         this._applicantApi.delete(id).pipe(
-          concatMap(() => this._applicantApi.list()),
-          concatMap((applicants) =>
-            concatWithNotification(deleteApplicantSuccess({ applicants }), {
+          concatMap(() =>
+            concatWithNotification(deleteApplicantSuccess({ id }), {
               type: AppNotificationType.Info,
               messageKey: NOTIFICATION_MESSAGE_KEYS.applicantDeletedSuccess,
             })
@@ -149,6 +153,18 @@ export class ApplicantsEffects {
           })
         )
       )
+    )
+  );
+
+  /** Drop stale AI match scores when the applicant roster changes. */
+  invalidateMatchOnApplicantChange$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(
+        addApplicantSuccess,
+        updateApplicantSuccess,
+        deleteApplicantSuccess
+      ),
+      map(() => invalidateMatchResults())
     )
   );
 }

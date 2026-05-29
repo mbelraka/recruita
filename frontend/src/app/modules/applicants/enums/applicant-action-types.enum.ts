@@ -21,4 +21,5 @@ export enum ApplicantActionTypes {
   SearchLocationSuggestionsSuccess = '[Applicants] Search Location Suggestions Success',
   SearchLocationSuggestionsFailure = '[Applicants] Search Location Suggestions Failure',
   ClearLocationSuggestions = '[Applicants] Clear Location Suggestions',
+  LoadApplicantDetailSuccess = '[Applicants] Load Applicant Detail Success',
 }

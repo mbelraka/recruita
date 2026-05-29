@@ -1,4 +1,5 @@
 import { ApplicationStatus } from '../enums/application-status.enum';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { ApplicantState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
@@ -22,10 +23,11 @@ describe('Applicants Reducer', () => {
   beforeEach(() => {
     initialState = adapter.getInitialState({
       loading: false,
+      loaded: false,
       error: null,
       filter: '',
       sortBy: 'name',
-      sortDirection: 'asc',
+      sortDirection: SortDirection.Asc,
       filterBySkill: null,
       filterByStatus: null,
       filterByCountry: null,
@@ -59,6 +61,7 @@ describe('Applicants Reducer', () => {
       const state = applicantsReducer(initialState, action);
 
       expect(state.loading).toBeFalse();
+      expect(state.loaded).toBeTrue();
       expect(state.error).toBeNull();
       expect(state.entities['1']).toEqual(mockApplicant);
     });
@@ -69,6 +72,7 @@ describe('Applicants Reducer', () => {
       const state = applicantsReducer(initialState, action);
 
       expect(state.loading).toBeFalse();
+      expect(state.loaded).toBeFalse();
       expect(state.error).toBe(error);
     });
   });
@@ -85,7 +89,7 @@ describe('Applicants Reducer', () => {
 
     it('should update applicants and set loading to false on success', () => {
       const action = ApplicantsActions.addApplicantSuccess({
-        applicants: [mockApplicant],
+        applicant: mockApplicant,
       });
       const state = applicantsReducer(initialState, action);
 
@@ -115,7 +119,7 @@ describe('Applicants Reducer', () => {
 
     it('should update applicants and set loading to false on success', () => {
       const action = ApplicantsActions.updateApplicantSuccess({
-        applicants: [mockApplicant],
+        applicant: mockApplicant,
       });
       const state = applicantsReducer(initialState, action);
 
@@ -142,10 +146,14 @@ describe('Applicants Reducer', () => {
     });
 
     it('should update applicants and set loading to false on success', () => {
+      const seeded = applicantsReducer(
+        initialState,
+        ApplicantsActions.addApplicantSuccess({ applicant: mockApplicant })
+      );
       const action = ApplicantsActions.deleteApplicantSuccess({
-        applicants: [],
+        id: '1',
       });
-      const state = applicantsReducer(initialState, action);
+      const state = applicantsReducer(seeded, action);
 
       expect(state.loading).toBeFalse();
       expect(state.entities).toEqual({});
@@ -172,12 +180,12 @@ describe('Applicants Reducer', () => {
     it('should set sort by', () => {
       const action = ApplicantsActions.setSortBy({
         sortBy: 'name',
-        sortDirection: 'desc',
+        sortDirection: SortDirection.Desc,
       });
       const state = applicantsReducer(initialState, action);
 
       expect(state.sortBy).toBe('name');
-      expect(state.sortDirection).toBe('desc');
+      expect(state.sortDirection).toBe(SortDirection.Desc);
     });
 
     it('should set sortDirection to asc if sortBy is null', () => {
@@ -187,17 +195,17 @@ describe('Applicants Reducer', () => {
       const state = applicantsReducer(initialState, action);
 
       expect(state.sortBy).toBeNull();
-      expect(state.sortDirection).toBe('asc');
+      expect(state.sortDirection).toBe(SortDirection.Asc);
     });
 
     it('should use default sort direction asc if not provided', () => {
       const action = ApplicantsActions.setSortBy({
         sortBy: 'location',
-      } as any); // cast because sortDirection is optional but technically sortDirection?: 'asc' | 'desc'
+      });
       const state = applicantsReducer(initialState, action);
 
       expect(state.sortBy).toBe('location');
-      expect(state.sortDirection).toBe('asc');
+      expect(state.sortDirection).toBe(SortDirection.Asc);
     });
 
     it('should set view type', () => {
@@ -230,6 +238,27 @@ describe('Applicants Reducer', () => {
       const state = applicantsReducer(initialState, action);
 
       expect(state.filterByCountry).toBe('USA');
+    });
+  });
+
+  describe('loadApplicantDetailSuccess action', () => {
+    it('upserts the full applicant record', () => {
+      const seeded = applicantsReducer(
+        initialState,
+        ApplicantsActions.loadApplicantsSuccess({
+          applicants: [mockApplicant],
+        })
+      );
+      const withNotes = new Applicant({
+        ...mockApplicant,
+        notes: 'Updated notes',
+      });
+      const action = ApplicantsActions.loadApplicantDetailSuccess({
+        applicant: withNotes,
+      });
+      const state = applicantsReducer(seeded, action);
+
+      expect(state.entities['1']?.notes).toBe('Updated notes');
     });
   });
 

@@ -1,3 +1,4 @@
+import { PrivacyConsentDialogMode } from '../enums/privacy-consent-dialog-mode.enum';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
 
 import {
@@ -37,19 +38,25 @@ describe('privacy-consent-dialog-outcome.util', () => {
 
   describe('privacyChoicesFromDialogResult', () => {
     it('maps dialog modes to stored consent flags', () => {
-      expect(privacyChoicesFromDialogResult({ mode: 'necessary' })).toEqual({
+      expect(
+        privacyChoicesFromDialogResult({
+          mode: PrivacyConsentDialogMode.Necessary,
+        })
+      ).toEqual({
         optionalRemoteTranslation: false,
         optionalGeocoding: false,
         optionalAiMatching: false,
       });
-      expect(privacyChoicesFromDialogResult({ mode: 'all' })).toEqual({
+      expect(
+        privacyChoicesFromDialogResult({ mode: PrivacyConsentDialogMode.All })
+      ).toEqual({
         optionalRemoteTranslation: true,
         optionalGeocoding: true,
         optionalAiMatching: true,
       });
       expect(
         privacyChoicesFromDialogResult({
-          mode: 'custom',
+          mode: PrivacyConsentDialogMode.Custom,
           choices: {
             optionalRemoteTranslation: true,
             optionalGeocoding: false,

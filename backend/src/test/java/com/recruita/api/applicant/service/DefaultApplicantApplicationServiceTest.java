@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultApplicantApplicationServiceTest {
@@ -34,16 +35,45 @@ class DefaultApplicantApplicationServiceTest {
   }
 
   @Test
-  void listAllReturnsMappedApplicants() {
+  void listSummariesReturnsMappedApplicantsWithoutNotes() {
     ApplicantEntity entity = new ApplicantEntity();
     entity.setId("a-1");
     entity.setName("Alex");
-    when(repository.findAll()).thenReturn(List.of(entity));
+    entity.setNotes("secret");
+    when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
 
-    var applicants = service.listAll();
+    var applicants = service.listSummaries();
 
     assertEquals(1, applicants.size());
     assertEquals("a-1", applicants.get(0).id());
+    verify(repository).findAll(Sort.by(Sort.Direction.DESC, "updatedAt"));
+  }
+
+  @Test
+  void listFullReturnsMappedApplicantsWithNotes() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setName("Alex");
+    entity.setNotes("secret");
+    when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
+
+    var applicants = service.listFull();
+
+    assertEquals(1, applicants.size());
+    assertEquals("secret", applicants.get(0).notes());
+  }
+
+  @Test
+  void findByIdReturnsMappedApplicant() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setName("Alex");
+    when(repository.findById("a-1")).thenReturn(Optional.of(entity));
+
+    var applicant = service.findById("a-1");
+
+    assertEquals("a-1", applicant.id());
+    assertEquals("Alex", applicant.name());
   }
 
   @Test
@@ -118,5 +148,12 @@ class DefaultApplicantApplicationServiceTest {
     assertEquals("new", created.id());
     assertEquals("Pat", created.name());
     assertEquals(List.of("sql"), created.skills());
+  }
+
+  @Test
+  void findByIdRequiresExistingApplicant() {
+    when(repository.findById("missing")).thenReturn(Optional.empty());
+
+    assertThrows(ApplicantNotFoundException.class, () -> service.findById("missing"));
   }
 }

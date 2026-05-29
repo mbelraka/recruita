@@ -2,6 +2,7 @@ import { createAction, props } from '@ngrx/store';
 
 import { Applicant } from '../models/applicant.model';
 import { ApplicantActionTypes } from '../enums/applicant-action-types.enum';
+import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { Languages } from '../../../enums/language.enum';
 
@@ -23,7 +24,7 @@ export const addApplicant = createAction(
 );
 export const addApplicantSuccess = createAction(
   ApplicantActionTypes.AddApplicantSuccess,
-  props<{ applicants: Applicant[] }>()
+  props<{ applicant: Applicant }>()
 );
 export const addApplicantFailure = createAction(
   ApplicantActionTypes.AddApplicantFailure,
@@ -37,7 +38,7 @@ export const updateApplicant = createAction(
 );
 export const updateApplicantSuccess = createAction(
   ApplicantActionTypes.UpdateApplicantSuccess,
-  props<{ applicants: Applicant[] }>()
+  props<{ applicant: Applicant }>()
 );
 export const updateApplicantFailure = createAction(
   ApplicantActionTypes.UpdateApplicantFailure,
@@ -51,7 +52,7 @@ export const deleteApplicant = createAction(
 );
 export const deleteApplicantSuccess = createAction(
   ApplicantActionTypes.DeleteApplicantSuccess,
-  props<{ applicants: Applicant[] }>()
+  props<{ id: string }>()
 );
 export const deleteApplicantFailure = createAction(
   ApplicantActionTypes.DeleteApplicantFailure,
@@ -68,7 +69,7 @@ export const setSortBy = createAction(
   ApplicantActionTypes.SetSortBy,
   props<{
     sortBy: keyof Applicant | null;
-    sortDirection?: 'asc' | 'desc';
+    sortDirection?: SortDirection;
   }>()
 );
 
@@ -106,4 +107,9 @@ export const searchLocationSuggestionsFailure = createAction(
 );
 export const clearLocationSuggestions = createAction(
   ApplicantActionTypes.ClearLocationSuggestions
+);
+
+export const loadApplicantDetailSuccess = createAction(
+  ApplicantActionTypes.LoadApplicantDetailSuccess,
+  props<{ applicant: Applicant }>()
 );

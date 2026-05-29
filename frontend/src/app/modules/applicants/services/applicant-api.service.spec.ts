@@ -52,6 +52,29 @@ describe('ApplicantApiService', () => {
     expect(applicants[0].id).toBe('a-1');
     expect(applicants[0].name).toBe('Alex');
     expect(applicants[0].availableFrom).toEqual(new Date('2026-06-01'));
+    expect(applicants[0].notes).toBeUndefined();
+  });
+
+  it('lists full applicants with notes for export refresh', async () => {
+    const promise = firstValueFrom(service.listFull());
+
+    const req = httpMock.expectOne(APP_CONFIG.APPLICANTS.API.FULL_LIST_PATH);
+    expect(req.request.method).toBe('GET');
+    req.flush([{ id: 'a-1', name: 'Alex', skills: [], notes: 'detail' }]);
+
+    const applicants = await promise;
+    expect(applicants[0].notes).toBe('detail');
+  });
+
+  it('loads a single applicant by id', async () => {
+    const promise = firstValueFrom(service.getById('a-1'));
+
+    const req = httpMock.expectOne(`${basePath}/a-1`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ id: 'a-1', name: 'Alex', skills: [], notes: 'notes' });
+
+    const applicant = await promise;
+    expect(applicant.notes).toBe('notes');
   });
 
   it('creates an applicant', async () => {
