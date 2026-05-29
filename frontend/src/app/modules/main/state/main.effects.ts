@@ -19,18 +19,13 @@ import {
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
 import { APP_CONFIG } from '../../../config/app.config';
 import { FullState } from '../../../models/full-state.model';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { ProfileApiService } from '../../../services/profile-api.service';
 import { setLanguage } from '../../../state/app.actions';
 import { selectAppLanguage } from '../../../state/app.selectors';
-import {
-  buildSaveProfileRequest,
-  profilePrivacyChoicesFrom,
-} from '../../../utilities/build-save-profile-request.util';
+import { buildSaveProfileRequest } from '../../../utilities/build-save-profile-request.util';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import { isLanguage } from '../../../utilities/language.utils';
 import {
-  commitPrivacyConsentDialogOutcome,
   isPrivacyConsentDialogCloseResult,
   privacyChoicesFromDialogResult,
 } from '../../../utilities/privacy-consent-dialog-outcome.util';
@@ -51,7 +46,6 @@ export class MainEffects {
   public constructor(
     private readonly _actions$: Actions,
     private readonly _api: ProfileApiService,
-    private readonly _privacy: PrivacyConsentService,
     private readonly _privacyDialog: PrivacyConsentDialogService,
     private readonly _store: Store<FullState>
   ) {}
@@ -77,21 +71,6 @@ export class MainEffects {
     )
   );
 
-  hydratePrivacyFromProfile$ = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(loadProfileSuccess),
-        tap(({ profile }) => {
-          if (profile.privacyNoticeAccepted) {
-            this._privacy.hydrateFromProfile(
-              profilePrivacyChoicesFrom(profile)
-            );
-          }
-        })
-      ),
-    { dispatch: false }
-  );
-
   openPrivacyGateAfterProfileLoad$ = createEffect(
     () =>
       this._actions$.pipe(
@@ -109,7 +88,6 @@ export class MainEffects {
           return EMPTY;
         }
 
-        commitPrivacyConsentDialogOutcome(this._privacy, result);
         const choices = privacyChoicesFromDialogResult(result);
 
         return this._store.select(selectProfile).pipe(

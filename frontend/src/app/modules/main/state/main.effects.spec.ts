@@ -9,7 +9,6 @@ import { PrivacyConsentDialogService } from '../../../containers/root/privacy/pr
 import { Languages } from '../../../enums/language.enum';
 import { setLanguage } from '../../../state/app.actions';
 import { initialMainState } from './main.reducer';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { ProfileApiService } from '../../../services/profile-api.service';
 import {
   loadProfile,
@@ -26,7 +25,7 @@ describe('MainEffects', () => {
   let actions$: ReplaySubject<unknown>;
   let effects: MainEffects;
   let api: jasmine.SpyObj<ProfileApiService>;
-  let privacy: PrivacyConsentService;
+  let privacyDialog: jasmine.SpyObj<PrivacyConsentDialogService>;
   let store: MockStore;
 
   const profile = {
@@ -57,7 +56,6 @@ describe('MainEffects', () => {
     TestBed.configureTestingModule({
       providers: [
         MainEffects,
-        PrivacyConsentService,
         provideMockActions(() => actions$),
         provideMockStore({
           initialState: mockStoreState(),
@@ -77,7 +75,9 @@ describe('MainEffects', () => {
     });
 
     effects = TestBed.inject(MainEffects);
-    privacy = TestBed.inject(PrivacyConsentService);
+    privacyDialog = TestBed.inject(
+      PrivacyConsentDialogService
+    ) as jasmine.SpyObj<PrivacyConsentDialogService>;
     store = TestBed.inject(MockStore);
   });
 
@@ -126,34 +126,29 @@ describe('MainEffects', () => {
     subscription.unsubscribe();
   });
 
-  it('hydrates privacy choices from an accepted profile', () => {
-    const subscription = effects.hydratePrivacyFromProfile$.subscribe();
+  it('opens the privacy gate after profile load', () => {
+    const subscription = effects.openPrivacyGateAfterProfileLoad$.subscribe();
 
     actions$.next(
       loadProfileSuccess({
         profile: {
           ...profile,
           privacyNoticeAccepted: true,
-          optionalRemoteTranslation: true,
-          optionalGeocoding: false,
           optionalAiMatching: true,
         },
       })
     );
 
-    expect(privacy.optionalRemoteTranslation()).toBeTrue();
-    expect(privacy.optionalGeocoding()).toBeFalse();
-    expect(privacy.optionalAiMatching()).toBeTrue();
-    expect(privacy.isConsentCompleteAndCurrent()).toBeTrue();
+    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
     subscription.unsubscribe();
   });
 
-  it('does not hydrate privacy when the profile has not accepted the notice', () => {
-    const subscription = effects.hydratePrivacyFromProfile$.subscribe();
+  it('opens the privacy gate after profile load failure', () => {
+    const subscription = effects.openPrivacyGateAfterProfileLoad$.subscribe();
 
-    actions$.next(loadProfileSuccess({ profile }));
+    actions$.next(loadProfileFailure({ error: 'offline' }));
 
-    expect(privacy.isConsentCompleteAndCurrent()).toBeFalse();
+    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
     subscription.unsubscribe();
   });
 
@@ -180,7 +175,6 @@ describe('MainEffects', () => {
         profile: { ...profile, privacyNoticeAccepted: true },
       })
     );
-    expect(privacy.isConsentCompleteAndCurrent()).toBeTrue();
   });
 
   it('updates the admin profile when it is already in state', async () => {
@@ -217,10 +211,9 @@ describe('MainEffects', () => {
       profile
     );
     expect(action.type).toBe(persistPrivacyConsentOutcomeSuccess.type);
-    expect(privacy.optionalAiMatching()).toBeTrue();
   });
 
-  it('still commits consent when the API save fails', async () => {
+  it('does not update store when the privacy API save fails', async () => {
     api.save.and.returnValue(throwError(() => new Error('offline')));
     actions$.next(
       persistPrivacyConsentOutcome({ result: { mode: 'necessary' } })
@@ -228,7 +221,6 @@ describe('MainEffects', () => {
 
     const action = await firstValueFrom(effects.persistPrivacyConsentOutcome$);
     expect(action.type).toBe(persistPrivacyConsentOutcomeFailure.type);
-    expect(privacy.isConsentCompleteAndCurrent()).toBeTrue();
   });
 
   it('persists language changes to the profile', async () => {
@@ -262,6 +254,48 @@ describe('MainEffects', () => {
     expect(action).toEqual(
       profileUpdated({
         profile: { ...profile, lastLanguage: Languages.German },
+      })
+    );
+  });
+
+  it('preserves stored privacy choices when persisting language', async () => {
+    const acceptedProfile = {
+      ...profile,
+      privacyNoticeAccepted: true,
+      optionalRemoteTranslation: true,
+      optionalGeocoding: true,
+      optionalAiMatching: true,
+    };
+    store.setState(
+      mockStoreState({
+        ...initialMainState,
+        profile: {
+          ...initialMainState.profile,
+          profile: acceptedProfile,
+          loaded: true,
+        },
+      })
+    );
+    api.save.and.returnValue(
+      of({ ...acceptedProfile, lastLanguage: Languages.German })
+    );
+    actions$.next(setLanguage({ language: Languages.German }));
+
+    const action = await firstValueFrom(effects.persistLastLanguage$);
+    expect(api.save).toHaveBeenCalledWith(
+      {
+        id: APP_CONFIG.PROFILE.DEFAULT_ID,
+        privacyNoticeAccepted: true,
+        lastLanguage: Languages.German,
+        optionalRemoteTranslation: true,
+        optionalGeocoding: true,
+        optionalAiMatching: true,
+      },
+      acceptedProfile
+    );
+    expect(action).toEqual(
+      profileUpdated({
+        profile: { ...acceptedProfile, lastLanguage: Languages.German },
       })
     );
   });

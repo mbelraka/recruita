@@ -1,6 +1,5 @@
 import type { PrivacyConsentDialogCloseResult } from '../models/privacy-consent-dialog-close-result.model';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
-import { PrivacyConsentService } from '../services/privacy-consent.service';
 
 const ALL_DISABLED: PrivacyConsentFormState = {
   optionalRemoteTranslation: false,
@@ -58,31 +57,6 @@ export function privacyChoicesFromDialogResult(
       return ALL_ENABLED;
     case 'custom':
       return result.choices;
-    default: {
-      const _exhaustive: never = result;
-      return _exhaustive;
-    }
-  }
-}
-
-/** Maps a dialog close payload to the corresponding {@link PrivacyConsentService} persist calls. */
-export function commitPrivacyConsentDialogOutcome(
-  privacy: PrivacyConsentService,
-  result: unknown
-): void {
-  if (!isPrivacyConsentDialogCloseResult(result)) {
-    return;
-  }
-  switch (result.mode) {
-    case 'necessary':
-      privacy.saveNecessaryOnly();
-      return;
-    case 'all':
-      privacy.saveAcceptAllOptional();
-      return;
-    case 'custom':
-      privacy.saveCustom(result.choices);
-      return;
     default: {
       const _exhaustive: never = result;
       return _exhaustive;

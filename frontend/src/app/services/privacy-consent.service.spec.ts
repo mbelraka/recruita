@@ -1,49 +1,68 @@
 import { TestBed } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { firstValueFrom } from 'rxjs';
 
 import { StateFeatures } from '../containers/root/enums/state-features.enum';
+import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import { PRIVACY_CONSENT_VERSION } from '../constants/privacy.constants';
 import { adapter } from '../modules/applicants/state/applicants.reducer';
 import { ViewTypes } from '../modules/applicants/enums/view-types.enum';
+import { initialMainState } from '../modules/main/state/main.reducer';
 import { initialAppState } from '../state/app.reducer';
 
 import { PrivacyConsentService } from './privacy-consent.service';
 
 describe('PrivacyConsentService', () => {
   let service: PrivacyConsentService;
+  let store: MockStore;
+
+  const profile = {
+    id: APP_CONFIG.PROFILE.DEFAULT_ID,
+    privacyNoticeAccepted: true,
+    lastLanguage: Languages.English,
+    optionalRemoteTranslation: true,
+    optionalGeocoding: false,
+    optionalAiMatching: true,
+  };
+
+  const mockStoreState = (
+    mainState: typeof initialMainState = initialMainState
+  ) => ({
+    app: initialAppState,
+    [StateFeatures.Main]: mainState,
+    [StateFeatures.Applicants]: adapter.getInitialState({
+      loading: false,
+      error: null,
+      filter: '',
+      sortBy: 'name',
+      sortDirection: 'asc',
+      filterBySkill: null,
+      filterByStatus: null,
+      filterByCountry: null,
+      viewType: ViewTypes.GRID,
+      locationSuggestions: [],
+    }),
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         PrivacyConsentService,
         provideMockStore({
-          initialState: {
-            app: initialAppState,
-            [StateFeatures.Applicants]: adapter.getInitialState({
-              loading: false,
-              error: null,
-              filter: '',
-              sortBy: 'name',
-              sortDirection: 'asc',
-              filterBySkill: null,
-              filterByStatus: null,
-              filterByCountry: null,
-              viewType: ViewTypes.GRID,
-              locationSuggestions: [],
-            }),
-          },
+          initialState: mockStoreState(),
         }),
       ],
     });
     service = TestBed.inject(PrivacyConsentService);
+    store = TestBed.inject(MockStore);
   });
 
-  it('isConsentCompleteAndCurrent is false when nothing stored', () => {
+  it('isConsentCompleteAndCurrent is false when profile is not loaded', () => {
     expect(service.isConsentCompleteAndCurrent()).toBeFalse();
   });
 
-  it('formStateFromSnapshot defaults when no consent', () => {
+  it('formStateFromSnapshot defaults when profile is missing', () => {
     expect(service.formStateFromSnapshot()).toEqual({
       optionalRemoteTranslation: false,
       optionalGeocoding: false,
@@ -51,42 +70,20 @@ describe('PrivacyConsentService', () => {
     });
   });
 
-  it('formStateFromSnapshot mirrors stored consent', () => {
-    service.saveCustom({
-      optionalRemoteTranslation: true,
-      optionalGeocoding: false,
-      optionalAiMatching: true,
-    });
-    expect(service.formStateFromSnapshot()).toEqual({
-      optionalRemoteTranslation: true,
-      optionalGeocoding: false,
-      optionalAiMatching: true,
-    });
-  });
-
-  it('saveNecessaryOnly clears optional toggles', () => {
-    service.saveNecessaryOnly();
-    const snap = service.snapshot();
-
-    expect(snap?.complete).toBeTrue();
-    expect(snap?.version).toBe(PRIVACY_CONSENT_VERSION);
-    expect(snap?.optionalRemoteTranslation).toBeFalse();
-    expect(snap?.optionalGeocoding).toBeFalse();
-    expect(snap?.optionalAiMatching).toBeFalse();
+  it('reads consent flags from the profile in store', () => {
+    store.setState(
+      mockStoreState({
+        ...initialMainState,
+        profile: {
+          ...initialMainState.profile,
+          profile,
+          loaded: true,
+        },
+      })
+    );
 
     expect(service.isConsentCompleteAndCurrent()).toBeTrue();
-    expect(service.optionalAiMatching()).toBeFalse();
-  });
-
-  it('saveAcceptAllOptional enables all optional flags', () => {
-    service.saveAcceptAllOptional();
-    expect(service.optionalAiMatching()).toBeTrue();
-    expect(service.optionalGeocoding()).toBeTrue();
-    expect(service.optionalRemoteTranslation()).toBeTrue();
-  });
-
-  it('saveCustom persists mixed choices', () => {
-    service.saveCustom({
+    expect(service.formStateFromSnapshot()).toEqual({
       optionalRemoteTranslation: true,
       optionalGeocoding: false,
       optionalAiMatching: true,
@@ -96,82 +93,38 @@ describe('PrivacyConsentService', () => {
     expect(service.optionalAiMatching()).toBeTrue();
   });
 
-  it('resetConsentDecision clears consent and snapshot', () => {
-    service.saveNecessaryOnly();
-    expect(service.snapshot()).not.toBeNull();
+  it('optionalAiMatching$ emits profile-backed consent changes', async () => {
+    expect(await firstValueFrom(service.optionalAiMatching$())).toBeFalse();
 
-    service.resetConsentDecision();
+    store.setState(
+      mockStoreState({
+        ...initialMainState,
+        profile: {
+          ...initialMainState.profile,
+          profile,
+          loaded: true,
+        },
+      })
+    );
 
-    expect(service.snapshot()).toBeNull();
+    expect(await firstValueFrom(service.optionalAiMatching$())).toBeTrue();
   });
 
-  it('isConsentCompleteAndCurrent is false when consent is incomplete', () => {
-    (
-      service as unknown as {
-        _persist: (record: {
-          version: number;
-          savedAtIso: string;
-          complete: boolean;
-          optionalRemoteTranslation: boolean;
-          optionalGeocoding: boolean;
-          optionalAiMatching: boolean;
-        }) => void;
-      }
-    )._persist({
-      version: PRIVACY_CONSENT_VERSION,
-      savedAtIso: '2026-01-01T00:00:00.000Z',
-      complete: false,
-      optionalRemoteTranslation: false,
-      optionalGeocoding: false,
-      optionalAiMatching: false,
-    });
+  it('buildDataExportJson$ includes consent version when profile accepted notice', async () => {
+    store.setState(
+      mockStoreState({
+        ...initialMainState,
+        profile: {
+          ...initialMainState.profile,
+          profile,
+          loaded: true,
+        },
+      })
+    );
 
-    expect(service.isConsentCompleteAndCurrent()).toBeFalse();
-  });
-
-  it('isConsentCompleteAndCurrent is false when consent version is stale', () => {
-    (
-      service as unknown as {
-        _persist: (record: {
-          version: number;
-          savedAtIso: string;
-          complete: boolean;
-          optionalRemoteTranslation: boolean;
-          optionalGeocoding: boolean;
-          optionalAiMatching: boolean;
-        }) => void;
-      }
-    )._persist({
-      version: 0,
-      savedAtIso: '2026-01-01T00:00:00.000Z',
-      complete: true,
-      optionalRemoteTranslation: true,
-      optionalGeocoding: true,
-      optionalAiMatching: true,
-    });
-
-    expect(service.isConsentCompleteAndCurrent()).toBeFalse();
-  });
-
-  it('hydrateFromProfile restores stored consent choices', () => {
-    service.hydrateFromProfile({
-      optionalRemoteTranslation: true,
-      optionalGeocoding: false,
-      optionalAiMatching: true,
-    });
-    expect(service.isConsentCompleteAndCurrent()).toBeTrue();
-    expect(service.optionalRemoteTranslation()).toBeTrue();
-    expect(service.optionalGeocoding()).toBeFalse();
-    expect(service.optionalAiMatching()).toBeTrue();
-  });
-
-  it('buildDataExportJson$ includes consent version and language', async () => {
-    service.saveAcceptAllOptional();
-    const json = await new Promise<string>((resolve) => {
-      service.buildDataExportJson$().subscribe(resolve);
-    });
+    const json = await firstValueFrom(service.buildDataExportJson$());
     const parsed = JSON.parse(json) as {
-      privacyConsentVersion: number;
+      privacyConsentVersion: number | null;
       language: Languages;
       applicants: unknown[];
       profile: null;
@@ -184,19 +137,32 @@ describe('PrivacyConsentService', () => {
   });
 
   it('buildDataExportJson$ includes provided profile snapshot', async () => {
-    service.saveNecessaryOnly();
-    const json = await new Promise<string>((resolve) => {
-      service
-        .buildDataExportJson$({
-          id: 'p-1',
-          privacyNoticeAccepted: true,
-          lastLanguage: Languages.German,
-          optionalRemoteTranslation: false,
-          optionalGeocoding: true,
-          optionalAiMatching: false,
-        })
-        .subscribe(resolve);
-    });
+    store.setState(
+      mockStoreState({
+        ...initialMainState,
+        profile: {
+          ...initialMainState.profile,
+          profile: {
+            ...profile,
+            optionalRemoteTranslation: false,
+            optionalGeocoding: true,
+            optionalAiMatching: false,
+          },
+          loaded: true,
+        },
+      })
+    );
+
+    const json = await firstValueFrom(
+      service.buildDataExportJson$({
+        id: 'p-1',
+        privacyNoticeAccepted: true,
+        lastLanguage: Languages.German,
+        optionalRemoteTranslation: false,
+        optionalGeocoding: true,
+        optionalAiMatching: false,
+      })
+    );
     const parsed = JSON.parse(json) as {
       profile: {
         id: string;

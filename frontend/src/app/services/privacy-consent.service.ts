@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, combineLatest, map, take } from 'rxjs';
+import { Observable, combineLatest, map, take } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app.config';
 import {
@@ -12,88 +12,63 @@ import {
 import { FullState } from '../models/full-state.model';
 import type { PrivacyConsentFormState } from '../models/privacy-consent-form-state.model';
 import type { Profile } from '../modules/main/models/profile.model';
-import type { StoredPrivacyConsent } from '../models/stored-privacy-consent.model';
 import { selectAllApplicants } from '../modules/applicants/state/applicants.selectors';
+import {
+  selectOptionalAiMatching,
+  selectOptionalGeocoding,
+  selectOptionalRemoteTranslation,
+  selectPrivacyConsentComplete,
+  selectProfilePrivacyChoices,
+} from '../modules/main/state/main.selectors';
 import { selectAppLanguage } from '../state/app.selectors';
 
+/** Privacy consent reads from the shared admin profile in NgRx (synced with the API). */
 @Injectable({ providedIn: 'root' })
 export class PrivacyConsentService {
-  private static readonly _ALL_DISABLED: PrivacyConsentFormState = {
-    optionalRemoteTranslation: false,
-    optionalGeocoding: false,
-    optionalAiMatching: false,
-  };
-
-  private static readonly _ALL_ENABLED: PrivacyConsentFormState = {
-    optionalRemoteTranslation: true,
-    optionalGeocoding: true,
-    optionalAiMatching: true,
-  };
-
   private readonly _store = inject(Store<FullState>);
-  private readonly _consent$ = new BehaviorSubject<StoredPrivacyConsent | null>(
-    null
+  private readonly _privacyConsentComplete = this._store.selectSignal(
+    selectPrivacyConsentComplete
+  );
+  private readonly _profilePrivacyChoices = this._store.selectSignal(
+    selectProfilePrivacyChoices
+  );
+  private readonly _optionalRemoteTranslation = this._store.selectSignal(
+    selectOptionalRemoteTranslation
+  );
+  private readonly _optionalGeocoding = this._store.selectSignal(
+    selectOptionalGeocoding
+  );
+  private readonly _optionalAiMatching = this._store.selectSignal(
+    selectOptionalAiMatching
   );
 
-  public consent$(): Observable<StoredPrivacyConsent | null> {
-    return this._consent$.asObservable();
-  }
-
-  public snapshot(): StoredPrivacyConsent | null {
-    return this._consent$.value;
-  }
-
-  /** Completed flow and policy version is current. */
+  /** Profile loaded and privacy notice accepted (persisted on the admin profile row). */
   public isConsentCompleteAndCurrent(): boolean {
-    const c = this.snapshot();
-    return !!c && c.complete === true && c.version === PRIVACY_CONSENT_VERSION;
+    return this._privacyConsentComplete();
   }
 
   public optionalRemoteTranslation(): boolean {
-    return this.snapshot()?.optionalRemoteTranslation === true;
+    return this._optionalRemoteTranslation();
   }
 
   public optionalGeocoding(): boolean {
-    return this.snapshot()?.optionalGeocoding === true;
+    return this._optionalGeocoding();
   }
 
   public optionalAiMatching(): boolean {
-    return this.snapshot()?.optionalAiMatching === true;
+    return this._optionalAiMatching();
   }
 
-  /** Form snapshot for dialogs (defaults when no consent on file yet). */
+  public optionalAiMatching$(): Observable<boolean> {
+    return this._store.select(selectOptionalAiMatching);
+  }
+
+  /** Form snapshot for dialogs (defaults when profile is not loaded yet). */
   public formStateFromSnapshot(): PrivacyConsentFormState {
-    const c = this.snapshot();
-    return {
-      optionalRemoteTranslation: c?.optionalRemoteTranslation ?? false,
-      optionalGeocoding: c?.optionalGeocoding ?? false,
-      optionalAiMatching: c?.optionalAiMatching ?? false,
-    };
+    return this._profilePrivacyChoices();
   }
 
-  public saveNecessaryOnly(): void {
-    this._persistComplete(PrivacyConsentService._ALL_DISABLED);
-  }
-
-  public saveAcceptAllOptional(): void {
-    this._persistComplete(PrivacyConsentService._ALL_ENABLED);
-  }
-
-  public saveCustom(choices: PrivacyConsentFormState): void {
-    this._persistComplete(choices);
-  }
-
-  /** Restore consent choices saved on the shared profile row. */
-  public hydrateFromProfile(choices: PrivacyConsentFormState): void {
-    this._persistComplete(choices);
-  }
-
-  /** Clear consent so the gate is shown again after next choice. */
-  public resetConsentDecision(): void {
-    this._consent$.next(null);
-  }
-
-  /** Reload the app to reset in-memory session state (consent, NgRx slices). */
+  /** Reload the app to reset session state (NgRx slices reloaded from the API). */
   public eraseSessionDataAndReload(): void {
     if (typeof window !== 'undefined') {
       window.location.assign(PRIVACY_POST_ERASE_APP_PATH);
@@ -106,9 +81,10 @@ export class PrivacyConsentService {
     return combineLatest([
       this._store.select(selectAllApplicants),
       this._store.select(selectAppLanguage),
+      this._store.select(selectPrivacyConsentComplete),
     ]).pipe(
       take(1),
-      map(([applicants, language]) =>
+      map(([applicants, language, consentComplete]) =>
         JSON.stringify(
           {
             exportedAt: new Date().toISOString(),
@@ -116,27 +92,14 @@ export class PrivacyConsentService {
             profile,
             applicants,
             language,
-            privacyConsentVersion: this.snapshot()?.version ?? null,
+            privacyConsentVersion: consentComplete
+              ? PRIVACY_CONSENT_VERSION
+              : null,
           },
           null,
           APP_CONFIG.EXPORT.JSON_INDENT_SPACES
         )
       )
     );
-  }
-
-  private _persist(record: StoredPrivacyConsent): void {
-    this._consent$.next(record);
-  }
-
-  private _persistComplete(choices: PrivacyConsentFormState): void {
-    this._persist({
-      version: PRIVACY_CONSENT_VERSION,
-      savedAtIso: new Date().toISOString(),
-      complete: true,
-      optionalRemoteTranslation: choices.optionalRemoteTranslation,
-      optionalGeocoding: choices.optionalGeocoding,
-      optionalAiMatching: choices.optionalAiMatching,
-    });
   }
 }

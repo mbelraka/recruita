@@ -3,6 +3,7 @@
   @let error = error$ | async;
   @let topCandidates = topResults$ | async;
   @let allCandidates = results$ | async;
+  @let allowsAiMatching = allowsAiMatching$ | async;
 
   <div class="match-candidates__content content flex min-h-0 flex-1">
     <section class="match-candidates__panel match-candidates__panel--job">
@@ -42,7 +43,9 @@
               class="match-candidates__evaluate-button"
               mat-flat-button
               type="button"
-              [disabled]="!jobDescriptionInput.trim() || !allowsAiMatching()"
+              [disabled]="
+                !jobDescriptionInput.trim() || allowsAiMatching !== true
+              "
               (click)="evaluateCandidates()"
             >
               <span>{{ 'match.analyzeAndMatch' | translate }}</span>

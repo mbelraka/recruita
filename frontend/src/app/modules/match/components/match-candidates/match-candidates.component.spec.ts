@@ -36,7 +36,10 @@ describe('MatchCandidatesComponent', () => {
         { provide: Store, useValue: mockStore },
         {
           provide: PrivacyConsentService,
-          useValue: { optionalAiMatching: () => true } as PrivacyConsentService,
+          useValue: {
+            optionalAiMatching: () => true,
+            optionalAiMatching$: () => of(true),
+          } as PrivacyConsentService,
         },
       ],
     }).compileComponents();

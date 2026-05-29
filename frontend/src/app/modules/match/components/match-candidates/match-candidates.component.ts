@@ -32,15 +32,12 @@ export class MatchCandidatesComponent implements OnInit {
   public readonly error$ = this._store.select(selectMatchError);
   public readonly results$ = this._store.select(selectMatchResults);
   public readonly topResults$ = this._store.select(selectTopMatchResults);
+  public readonly allowsAiMatching$ = this._privacy.optionalAiMatching$();
 
   public constructor(
     private readonly _store: Store<FullState>,
     private readonly _privacy: PrivacyConsentService
   ) {}
-
-  protected allowsAiMatching(): boolean {
-    return this._privacy.optionalAiMatching();
-  }
 
   public ngOnInit(): void {
     this._store.dispatch(loadApplicants());
