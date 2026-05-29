@@ -1,4 +1,7 @@
 {
+  "app": {
+    "siteTitle": "Recruita - Talents senza cunfins"
+  },
   "nav": {
     "main": "Principal",
     "applicants": "Candidats",

@@ -1,4 +1,7 @@
 {
+  "app": {
+    "siteTitle": "Recruita – Talente ohne Grenzen"
+  },
   "nav": {
     "main": "Start",
     "applicants": "Bewerber",

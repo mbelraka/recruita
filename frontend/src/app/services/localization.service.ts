@@ -34,7 +34,7 @@ export class LocalizationService implements OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe();
+      .subscribe(() => this.applyDocumentTitle());
   }
 
   public setLanguage(language: Languages): void {
@@ -44,6 +44,16 @@ export class LocalizationService implements OnDestroy {
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyDocumentTitle(): void {
+    const translated = this.translate.instant(
+      APP_CONFIG.APP.SITE_TITLE_I18N_KEY
+    );
+    document.title =
+      translated && translated !== APP_CONFIG.APP.SITE_TITLE_I18N_KEY
+        ? translated
+        : APP_CONFIG.APP.SITE_TITLE_FALLBACK;
   }
 
   private applyMaterialDateLocale(language: Languages): void {

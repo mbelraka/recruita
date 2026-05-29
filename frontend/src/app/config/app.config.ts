@@ -7,6 +7,12 @@ import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
 
 export const APP_CONFIG = {
+  /** Browser tab title (`index.html` fallback until i18n loads). */
+  APP: {
+    SITE_TITLE_I18N_KEY: 'app.siteTitle',
+    SITE_TITLE_FALLBACK: 'Recruita - Talent without Boundaries',
+  } as const,
+
   /** `provideHttpClient` + `withXsrfConfiguration` (Angular CSRF defaults match common backends). */
   HTTP: {
     XSRF_COOKIE_NAME: 'XSRF-TOKEN',

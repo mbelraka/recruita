@@ -1,4 +1,7 @@
 {
+  "app": {
+    "siteTitle": "Recruita - Talent without Boundaries"
+  },
   "nav": {
     "main": "Main",
     "applicants": "Applicants",

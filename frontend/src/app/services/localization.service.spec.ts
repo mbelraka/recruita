@@ -24,8 +24,10 @@ describe('LocalizationService', () => {
       'addLangs',
       'setDefaultLang',
       'use',
+      'instant',
     ]);
     mockTranslate.use.and.returnValue(of(undefined));
+    mockTranslate.instant.and.returnValue('Recruita - Talente ohne Grenzen');
     mockDateAdapter = jasmine.createSpyObj('DateAdapter', ['setLocale']);
 
     TestBed.configureTestingModule({
@@ -54,6 +56,16 @@ describe('LocalizationService', () => {
 
     expect(mockTranslate.use).toHaveBeenCalledWith(Languages.German);
     expect(mockDateAdapter.setLocale).toHaveBeenCalledWith('de-DE');
+    expect(document.title).toBe('Recruita - Talente ohne Grenzen');
+  }));
+
+  it('should fall back to configured site title when translation is missing', fakeAsync(() => {
+    mockTranslate.instant.and.returnValue('app.siteTitle');
+    service = TestBed.inject(LocalizationService);
+    stateSubject.next(Languages.English);
+    tick();
+
+    expect(document.title).toBe('Recruita - Talent without Boundaries');
   }));
 
   it('should apply locale even if date adapter is not provided', fakeAsync(() => {

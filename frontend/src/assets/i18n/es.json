@@ -1,4 +1,7 @@
 {
+  "app": {
+    "siteTitle": "Recruita - Talento sin fronteras"
+  },
   "nav": {
     "main": "Principal",
     "applicants": "Candidatos",
