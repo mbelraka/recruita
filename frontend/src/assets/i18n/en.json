@@ -173,6 +173,7 @@
   "export": {
     "generateExport": "Generate Export",
     "title": "Export applicants",
+    "fileName": "applicants",
     "csv": "CSV",
     "json": "JSON",
     "excel": "Excel",

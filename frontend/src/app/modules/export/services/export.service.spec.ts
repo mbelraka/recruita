@@ -41,6 +41,7 @@ describe('ExportService', () => {
     store.select.and.returnValues(of(applicants), of(Languages.English));
     translate.instant.and.callFake((key: string) => {
       const labels: Record<string, string> = {
+        'export.fileName': 'applicants',
         'experienceDisplay.unitYear': 'Year',
         'applicationStatus.in_review': 'In Review',
       };
@@ -70,7 +71,24 @@ describe('ExportService', () => {
     expect(blobArg.type).toBe('application/json');
     const payload = await blobArg.text();
     expect(payload).toContain('"exportIndex": 1');
+    expect(payload).not.toContain('"id"');
     expect(payload).toContain('\n  {');
+  });
+
+  it('builds localized download file names from export.fileName', () => {
+    translate.instant.and.callFake((key: string) =>
+      key === 'export.fileName' ? 'Bewerber Export' : key
+    );
+
+    const fileName = (service as any)._localizedFileName('csv');
+
+    expect(fileName).toBe('Bewerber-Export.csv');
+  });
+
+  it('falls back to configured stem when translation is empty', () => {
+    const fileName = (service as any)._localizedFileName('json');
+
+    expect(fileName).toBe('applicants.json');
   });
 
   it('returns fallback when translation key is empty', () => {
@@ -186,6 +204,7 @@ describe('ExportService', () => {
 
     expect(row.index).toBe('1');
     expect(row.name).toBe('Alice');
+    expect(row.id).toBeUndefined();
     expect(row.applicationStatus).toBe('Offer Extended');
     expect(row.availableFrom).toBe('-');
     expect(row.skills).toBe('NgRx');

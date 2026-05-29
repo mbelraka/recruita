@@ -44,12 +44,14 @@ export const APP_CONFIG = {
   } as const,
 
   EXPORT: {
-    FILE_NAMES: {
-      [ExportFormats.CSV]: 'applicants.csv',
-      [ExportFormats.JSON]: 'applicants.json',
-      [ExportFormats.EXCEL]: 'applicants.xlsx',
-      [ExportFormats.PDF]: 'applicants.pdf',
+    FILE_EXTENSIONS: {
+      [ExportFormats.CSV]: 'csv',
+      [ExportFormats.JSON]: 'json',
+      [ExportFormats.EXCEL]: 'xlsx',
+      [ExportFormats.PDF]: 'pdf',
     } as const,
+    /** Fallback download stem when `export.fileName` is unavailable. */
+    FILE_NAME_FALLBACK: 'applicants',
     MIME_TYPES: {
       [ExportFormats.CSV]: 'text/csv;charset=utf-8;',
       [ExportFormats.JSON]: 'application/json',
@@ -69,7 +71,6 @@ export const APP_CONFIG = {
       SKILLS_DELIMITER: '; ',
       DATE_SLICE_END_INDEX: 10,
       HEADERS: [
-        'id',
         'name',
         'email',
         'phone',

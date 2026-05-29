@@ -221,7 +221,24 @@ export class ExportService {
     const blob = new Blob(parts, {
       type: this._config.MIME_TYPES[format],
     });
-    saveAs(blob, this._config.FILE_NAMES[format]);
+    saveAs(blob, this._localizedFileName(format));
+  }
+
+  private _localizedFileName(format: ExportFormats): string {
+    const stem = this._sanitizeFileNameStem(
+      this._translateText('export.fileName', this._config.FILE_NAME_FALLBACK)
+    );
+    return `${stem}.${this._config.FILE_EXTENSIONS[format]}`;
+  }
+
+  private _sanitizeFileNameStem(value: string): string {
+    const sanitized = value
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    return sanitized || this._config.FILE_NAME_FALLBACK;
   }
 
   private _formatSkills(
@@ -266,11 +283,19 @@ export class ExportService {
   private _toJsonRow(
     applicant: Applicant,
     index: number
-  ): { exportIndex: number; id: string } & Partial<Applicant> {
+  ): Omit<Partial<Applicant>, 'id'> & { exportIndex: number } {
     return {
-      ...applicant,
-      id: applicant.id,
       exportIndex: index + 1,
+      name: applicant.name,
+      email: applicant.email,
+      phone: applicant.phone,
+      location: applicant.location,
+      yearsOfExperience: applicant.yearsOfExperience,
+      applicationStatus: applicant.applicationStatus,
+      currentJobTitle: applicant.currentJobTitle,
+      availableFrom: applicant.availableFrom,
+      skills: applicant.skills,
+      notes: applicant.notes,
     };
   }
 
