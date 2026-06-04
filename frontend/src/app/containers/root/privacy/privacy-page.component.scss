@@ -1,6 +1,12 @@
+@use '../../../styles/shared/breakpoints' as bp;
+
 .privacy-page {
   max-width: 52rem;
   padding-bottom: var(--app-space-xl, 1.5rem);
+
+  @include bp.bp-down(sm) {
+    padding-inline: var(--app-space-xs);
+  }
 }
 
 .privacy-page__title {

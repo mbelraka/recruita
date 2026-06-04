@@ -1,10 +1,11 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { Sort } from '@angular/material/sort';
 
+import { LayoutBreakpointService } from 'src/app/services/layout-breakpoint.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
 import { ApplicantListComponent } from './applicant-list.component';
@@ -34,7 +35,16 @@ describe('ApplicantListComponent', () => {
       declarations: [ApplicantListComponent],
       imports: [TranslateModule.forRoot(), SharedModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [{ provide: Store, useValue: mockStore }],
+      providers: [
+        { provide: Store, useValue: mockStore },
+        {
+          provide: LayoutBreakpointService,
+          useValue: {
+            widthTier: signal('lg'),
+            isCompactNav: signal(false),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicantListComponent);

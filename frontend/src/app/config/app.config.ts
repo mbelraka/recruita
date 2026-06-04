@@ -188,6 +188,7 @@ export const APP_CONFIG = {
     autoFocus: false,
     disableClose: true,
     width: '880px',
+    maxWidth: '100vw',
     maxHeight: '80vh',
     restoreFocus: false,
     panelClass: 'new-applicant-dialog-panel',

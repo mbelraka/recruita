@@ -6,7 +6,8 @@
     "main": "Start",
     "applicants": "Bewerber",
     "matchCandidates": "Kandidaten-Matching",
-    "export": "Export"
+    "export": "Export",
+    "openMenu": "Navigationsmenü öffnen"
   },
   "language": {
     "label": "Spr.",

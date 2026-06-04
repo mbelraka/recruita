@@ -1,3 +1,5 @@
+@use '../../../styles/shared/breakpoints' as bp;
+
 @keyframes main-page-heading-enter {
   from {
     opacity: 0;
@@ -141,6 +143,51 @@
         line-height: 1.3;
         color: var(--app-color-text-muted);
       }
+    }
+  }
+
+  @include bp.bp-down(md) {
+    .main-content {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--app-space-md);
+      overflow-y: auto;
+      padding-bottom: var(--app-space-sm);
+    }
+
+    .main-image-container {
+      align-self: center;
+      width: min(100%, 20rem);
+    }
+
+    .main-image {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    .overlay-title {
+      white-space: normal;
+    }
+
+    .heading .headline {
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .heading .actions {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+  }
+
+  @include bp.bp-down(sm) {
+    .heading .headline {
+      font-size: 1.75rem;
+    }
+
+    .heading .sub-headline {
+      font-size: 1rem;
     }
   }
 }

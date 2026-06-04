@@ -1,6 +1,24 @@
+@use '../shared/breakpoints' as bp;
+
 .mat-mdc-dialog-container {
   max-height: 80vh;
   --mat-dialog-container-shape: 0;
+}
+
+.new-applicant-dialog-panel {
+  @include bp.bp-down(md) {
+    .mat-mdc-dialog-container {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      max-height: 100dvh !important;
+      height: 100dvh;
+      border-radius: 0;
+    }
+
+    .mat-mdc-dialog-component-host {
+      padding: var(--app-space-sm);
+    }
+  }
 }
 
 .mat-mdc-dialog-component-host {

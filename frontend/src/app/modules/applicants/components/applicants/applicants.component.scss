@@ -1,3 +1,5 @@
+@use '../../../../styles/shared/breakpoints' as bp;
+
 .applicants-container {
   overflow: hidden;
 }
@@ -89,8 +91,42 @@
   overflow-wrap: break-word;
 }
 
+@include bp.bp-down(md) {
+  .applicants-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .applicants-header__filters-group .applicants-header-field {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .applicants-header > .applicants-header-field {
+    align-self: flex-start;
+  }
+}
+
+@include bp.bp-down(sm) {
+  .applicants-container > .header {
+    padding: var(--app-space-sm);
+  }
+
+  .applicants-view-toggle-option {
+    font-size: 0;
+
+    mat-icon {
+      margin: 0;
+    }
+  }
+}
+
 .new-applicant-fab-shell {
   --new-applicant-fab-shell-inset: var(--app-space-md, 24px);
+
+  @include bp.bp-down(sm) {
+    --new-applicant-fab-shell-inset: var(--app-space-sm);
+  }
   --new-applicant-fab-shell-pad: 12px;
 
   position: fixed;

@@ -14,8 +14,10 @@ import {
 } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 
@@ -50,8 +52,10 @@ describe('RootComponent', () => {
           { path: 'match', component: RouteStubComponent },
           { path: 'export', component: RouteStubComponent },
         ]),
+        MatButtonModule,
         MatFormFieldModule,
         MatIconModule,
+        MatMenuModule,
         MatSelectModule,
         MatTabsModule,
         TranslateModule.forRoot({

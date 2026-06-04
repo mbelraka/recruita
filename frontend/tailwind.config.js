@@ -6,6 +6,11 @@ module.exports = {
     preflight: false,
   },
   theme: {
+    screens: {
+      sm: '600px',
+      md: '960px',
+      lg: '1280px',
+    },
     extend: {
       fontFamily: {
         // Match --app-font-family / Figma (`@fontsource/manrope`).

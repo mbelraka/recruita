@@ -1,0 +1,45 @@
+// Shared layout breakpoints — keep in sync with LayoutBreakpointService and tailwind.config.js.
+
+$bp-sm-max: 599.98px;
+$bp-md-max: 959.98px;
+$bp-lg-max: 1279.98px;
+
+$bp-sm: 600px;
+$bp-md: 960px;
+$bp-lg: 1280px;
+
+@mixin bp-up($name) {
+  @if $name == sm {
+    @media (min-width: $bp-sm) {
+      @content;
+    }
+  } @else if $name == md {
+    @media (min-width: $bp-md) {
+      @content;
+    }
+  } @else if $name == lg {
+    @media (min-width: $bp-lg) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint `#{$name}`; use sm, md, or lg.";
+  }
+}
+
+@mixin bp-down($name) {
+  @if $name == sm {
+    @media (max-width: $bp-sm-max) {
+      @content;
+    }
+  } @else if $name == md {
+    @media (max-width: $bp-md-max) {
+      @content;
+    }
+  } @else if $name == lg {
+    @media (max-width: $bp-lg-max) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint `#{$name}`; use sm, md, or lg.";
+  }
+}

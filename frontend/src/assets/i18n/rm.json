@@ -6,7 +6,8 @@
     "main": "Principal",
     "applicants": "Candidats",
     "matchCandidates": "Cumparegliaziun da candidats",
-    "export": "Exportar"
+    "export": "Exportar",
+    "openMenu": "Avrir il menu da navigaziun"
   },
   "language": {
     "label": "Ling.",

@@ -3,12 +3,14 @@ import {
   computed,
   effect,
   EventEmitter,
+  inject,
   Output,
 } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 
 import { APP_CONFIG } from '../../../../config/app.config';
+import { LayoutBreakpointService } from '../../../../services/layout-breakpoint.service';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
 import {
@@ -34,6 +36,18 @@ import {
 import { createPaginatedViewState } from '../../utilities/pagination.util';
 import { toggleSkillFilter } from '../../utilities/toggle-skill-filter.util';
 
+const APPLICANT_LIST_COLUMNS_FULL = [
+  'name',
+  'currentJobTitle',
+  'yearsOfExperience',
+  'applicationStatus',
+  'email',
+  'phone',
+  APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
+  'location',
+  'skills',
+] as const;
+
 @Component({
   selector: 'app-applicant-list',
   templateUrl: './applicant-list.component.html',
@@ -42,6 +56,8 @@ import { toggleSkillFilter } from '../../utilities/toggle-skill-filter.util';
 })
 export class ApplicantListComponent {
   @Output() public readonly editApplicant = new EventEmitter<Applicant>();
+
+  private readonly _layout = inject(LayoutBreakpointService);
 
   public readonly pageSize = APP_CONFIG.APPLICANTS.LIST_ROWS_PER_PAGE;
 
@@ -78,18 +94,32 @@ export class ApplicantListComponent {
   public readonly pageNumbers = this._pagination.pageNumbers;
   public readonly pagedApplicants = this._pagination.pagedItems;
 
-  /** Columns to display in the list view. */
-  public readonly displayedColumns: string[] = [
-    'name',
-    'currentJobTitle',
-    'yearsOfExperience',
-    'applicationStatus',
-    'email',
-    'phone',
-    APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
-    'location',
-    'skills',
-  ];
+  /** Columns to display in the list view (reduced on narrower viewports). */
+  public readonly displayedColumns = computed((): string[] => {
+    switch (this._layout.widthTier()) {
+      case 'xs':
+        return ['name', 'applicationStatus', 'currentJobTitle'];
+      case 'sm':
+        return [
+          'name',
+          'currentJobTitle',
+          'yearsOfExperience',
+          'applicationStatus',
+          'email',
+        ];
+      case 'md':
+        return [
+          'name',
+          'currentJobTitle',
+          'yearsOfExperience',
+          'applicationStatus',
+          'email',
+          'location',
+        ];
+      default:
+        return [...APPLICANT_LIST_COLUMNS_FULL];
+    }
+  });
 
   public constructor(private readonly _store: Store<FullState>) {
     effect(() => {
@@ -130,7 +160,7 @@ export class ApplicantListComponent {
       return;
     }
     const key = applicantSortStoreKeyFromUiColumn(sort.active);
-    if (!this.displayedColumns.includes(sort.active)) {
+    if (!this.displayedColumns().includes(sort.active)) {
       return;
     }
     this._store.dispatch(

@@ -1,3 +1,5 @@
+@use '../../../../styles/shared/breakpoints' as bp;
+
 .match-candidates__header {
   background-color: var(--app-color-background-dark);
   padding: 16px;
@@ -303,9 +305,10 @@
   line-height: 18px;
 }
 
-@media (max-width: 960px) {
+@include bp.bp-down(md) {
   .match-candidates__content {
     grid-template-columns: 1fr;
+    gap: var(--app-space-md);
   }
 
   .match-candidates__panel--job {

@@ -6,7 +6,8 @@
     "main": "Accueil",
     "applicants": "Candidats",
     "matchCandidates": "Correspondance des candidats",
-    "export": "Export"
+    "export": "Export",
+    "openMenu": "Ouvrir le menu de navigation"
   },
   "language": {
     "label": "Lang.",

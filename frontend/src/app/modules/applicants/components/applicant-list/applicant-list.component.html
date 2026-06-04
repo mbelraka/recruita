@@ -139,10 +139,13 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr
+        mat-header-row
+        *matHeaderRowDef="displayedColumns(); sticky: true"
+      ></tr>
       <tr
         mat-row
-        *matRowDef="let row; columns: displayedColumns; let rowIndex = index"
+        *matRowDef="let row; columns: displayedColumns(); let rowIndex = index"
         class="applicant-list__row"
         [style.animation-delay.ms]="rowEnterDelayMs(rowIndex)"
         (click)="onRowClick($event, row)"

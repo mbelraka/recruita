@@ -6,7 +6,8 @@
     "main": "Principal",
     "applicants": "Candidatos",
     "matchCandidates": "Coincidencia de candidatos",
-    "export": "Exportar"
+    "export": "Exportar",
+    "openMenu": "Abrir menú de navegación"
   },
   "language": {
     "label": "Idioma",

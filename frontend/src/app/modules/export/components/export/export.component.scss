@@ -1,3 +1,5 @@
+@use '../../../../styles/shared/breakpoints' as bp;
+
 .export-container {
   width: 100%;
   height: 100%;
@@ -7,12 +9,21 @@
 .export-actions-grid {
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--app-space-md);
   flex: 1 1 auto;
-  align-content: center;
+  align-content: start;
   overflow: auto;
   min-height: 0;
+
+  @include bp.bp-up(sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include bp.bp-up(lg) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: center;
+  }
 }
 
 @keyframes export-card-enter {
@@ -58,7 +69,12 @@
 
 .export-action-card {
   aspect-ratio: 1 / 1;
-  padding: 24px;
+  padding: var(--app-space-md);
+
+  @include bp.bp-down(md) {
+    aspect-ratio: auto;
+    min-height: 12rem;
+  }
   border-radius: 0;
   background-color: #fff;
   display: flex;

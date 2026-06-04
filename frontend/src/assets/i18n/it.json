@@ -6,7 +6,8 @@
     "main": "Principale",
     "applicants": "Candidati",
     "matchCandidates": "Abbinamento candidati",
-    "export": "Esporta"
+    "export": "Esporta",
+    "openMenu": "Apri menu di navigazione"
   },
   "language": {
     "label": "Ling.",

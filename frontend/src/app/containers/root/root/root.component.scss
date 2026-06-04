@@ -1,3 +1,5 @@
+@use '../../../styles/shared/breakpoints' as bp;
+
 :host {
   display: flex;
   flex: 1 1 0%;
@@ -27,10 +29,23 @@
     .header {
       flex-shrink: 0;
       padding: var(--app-space-sm) var(--app-space-md);
+      gap: var(--app-space-xs);
 
       .header-leading {
         align-items: center;
         min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .header-nav--mobile {
+        display: none;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .language-select-form-field {
+        flex-shrink: 0;
+        width: 7.5rem;
       }
 
       .nav-container {
@@ -60,6 +75,42 @@
         width: var(--app-size-logo-width);
         height: var(--app-size-logo-height);
         margin-top: var(--app-size-logo-offset-top);
+      }
+    }
+
+    @include bp.bp-down(md) {
+      .root-content .header {
+        flex-wrap: wrap;
+        padding: var(--app-space-xs) var(--app-space-sm);
+
+        .header-nav--desktop {
+          display: none;
+        }
+
+        .header-nav--mobile {
+          display: flex;
+        }
+
+        .language-select-form-field {
+          width: 5.5rem;
+          margin-left: auto;
+        }
+
+        .logo {
+          width: 48px;
+          height: 60px;
+          margin-top: -4px;
+        }
+      }
+
+      .root-content .full-container {
+        padding-inline: var(--app-space-sm);
+      }
+
+      .root-content .footer {
+        flex-wrap: wrap;
+        padding: var(--app-space-xs) var(--app-space-sm);
+        text-align: center;
       }
     }
 
@@ -113,4 +164,9 @@
       }
     }
   }
+}
+
+.header-nav-menu-item--active {
+  font-weight: 700;
+  color: var(--app-color-secondary);
 }

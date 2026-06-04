@@ -14,7 +14,7 @@
           <span class="logo"></span>
         </a>
 
-        <div class="nav-container">
+        <div class="nav-container header-nav--desktop">
           <nav
             mat-tab-nav-bar
             class="main-nav"
@@ -36,6 +36,31 @@
             }
           </nav>
           <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+        </div>
+
+        <div class="header-nav--mobile">
+          <button
+            mat-icon-button
+            type="button"
+            class="header-nav-menu-trigger"
+            [matMenuTriggerFor]="navMenu"
+            [attr.aria-label]="'nav.openMenu' | translate"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+          <mat-menu #navMenu="matMenu" class="header-nav-menu">
+            @for (link of navLinks; track link.link) {
+              <a
+                mat-menu-item
+                routerLinkActive
+                #mobileNavLink="routerLinkActive"
+                [class.header-nav-menu-item--active]="mobileNavLink.isActive"
+                [routerLink]="link.link"
+              >
+                {{ link.translationKey | translate }}
+              </a>
+            }
+          </mat-menu>
         </div>
       </div>
 

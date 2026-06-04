@@ -6,7 +6,8 @@
     "main": "Main",
     "applicants": "Applicants",
     "matchCandidates": "Match Candidates",
-    "export": "Export"
+    "export": "Export",
+    "openMenu": "Open navigation menu"
   },
   "language": {
     "label": "Lang",
