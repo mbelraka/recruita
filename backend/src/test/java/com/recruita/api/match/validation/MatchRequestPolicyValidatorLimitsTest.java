@@ -33,8 +33,6 @@ class MatchRequestPolicyValidatorLimitsTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     assertThrows(MatchValidationException.class, () -> validator.validate(request));
@@ -47,8 +45,6 @@ class MatchRequestPolicyValidatorLimitsTest {
             "Role",
             List.of(new MatchCandidateDto("a", List.of("java", "go"), 1.0, "Dev")),
             true,
-            null,
-            null,
             null,
             null,
             null,
@@ -68,8 +64,6 @@ class MatchRequestPolicyValidatorLimitsTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     assertThrows(MatchValidationException.class, () -> validator.validate(request));
@@ -83,8 +77,6 @@ class MatchRequestPolicyValidatorLimitsTest {
             "Role",
             List.of(new MatchCandidateDto(longId, List.of("java"), 1.0, "Dev")),
             true,
-            null,
-            null,
             null,
             null,
             null,

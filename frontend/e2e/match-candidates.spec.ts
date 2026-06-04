@@ -11,7 +11,7 @@ test.describe('Match candidates flow', () => {
 
     let candidatesCount = 0;
 
-    await page.route('**/api/match-job', async (route) => {
+    await page.route('**/api/match', async (route) => {
       const payload = route.request().postDataJSON() as {
         candidates?: Array<{ id: string }>;
       };

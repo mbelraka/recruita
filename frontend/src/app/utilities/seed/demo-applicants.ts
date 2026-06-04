@@ -1,10 +1,11 @@
 import { ApplicationStatus } from '../../modules/applicants/enums/application-status.enum';
 import { Applicant } from '../../modules/applicants/models/applicant.model';
+import { createApplicant } from '../../modules/applicants/utilities/applicant-domain.util';
 
 /** Demo roster for Playwright API mocks (not loaded automatically by the app). */
 export function buildDemoApplicants(): Applicant[] {
   return [
-    new Applicant({
+    createApplicant({
       id: 'a1b2c3d4-e5f6-41a8-9b0c-1d2e3f4a5b6c',
       name: 'Alex Morgan',
       email: 'alex.morgan@example.com',
@@ -17,7 +18,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['Angular', 'TypeScript', 'NgRx'],
       notes: 'Open to hybrid arrangements.',
     }),
-    new Applicant({
+    createApplicant({
       id: 'b2c3d4e5-f6a7-42b9-8c1d-2e3f4a5b6c7d',
       name: 'Jordan Lee',
       email: 'jordan.lee@example.com',
@@ -31,7 +32,7 @@ export function buildDemoApplicants(): Applicant[] {
       notes:
         'Strong CI background; asked about on-call expectations for the platform team.',
     }),
-    new Applicant({
+    createApplicant({
       id: 'c3d4e5f6-a7b8-43ca-9d2e-3f4a5b6c7d8e',
       name: 'Samira Okonkwo',
       email: 'samira.okonkwo@example.com',
@@ -44,7 +45,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['SCSS', 'Accessibility', 'Material Design'],
       notes: 'Prefers fully remote EU time zones.',
     }),
-    new Applicant({
+    createApplicant({
       id: 'd4e5f6a7-b8c9-44db-9c0d-1e2f3a4b5c6d',
       name: 'Priya Sharma',
       email: 'priya.sharma@example.com',
@@ -58,7 +59,7 @@ export function buildDemoApplicants(): Applicant[] {
       notes:
         'Portfolio emphasizes B2B SaaS; asked about design–dev handoff process.',
     }),
-    new Applicant({
+    createApplicant({
       id: 'e5f6a7b8-c9d0-45ec-ad1e-2f3a4b5c6d7e',
       name: 'Marco Rossi',
       email: 'marco.rossi@example.com',
@@ -71,7 +72,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['People leadership', 'System design', 'Java'],
       notes: 'Negotiating start date; references checked.',
     }),
-    new Applicant({
+    createApplicant({
       id: 'f6a7b8c9-d0e1-46fd-be2f-3a4b5c6d7e8f',
       name: 'Chen Wei',
       email: 'chen.wei@example.com',
@@ -84,7 +85,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['Node.js', 'PostgreSQL', 'Docker'],
       notes: 'Role filled internally; encouraged to apply again next quarter.',
     }),
-    new Applicant({
+    createApplicant({
       id: '071b2c3d-4e5f-46a8-9b1c-2d3e4f5a6b7c',
       name: 'Nina Kowalski',
       email: 'nina.kowalski@example.com',
@@ -97,7 +98,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['Kubernetes', 'Terraform', 'AWS'],
       notes: 'Withdrew after accepting another offer.',
     }),
-    new Applicant({
+    createApplicant({
       id: '182c3d4e-5f60-47b9-8c2d-3e4f5a6b7c8d',
       name: 'Diego Alvarez',
       email: 'diego.alvarez@example.com',
@@ -110,7 +111,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['React', 'NestJS', 'GraphQL'],
       notes: 'Recently relocated from Barcelona.',
     }),
-    new Applicant({
+    createApplicant({
       id: '293d4e5f-6071-48ca-9d3e-4f5a6b7c8d9e',
       name: 'Fatoumata Diallo',
       email: 'fatoumata.diallo@example.com',
@@ -123,7 +124,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['Python', 'Spark', 'dbt'],
       notes: 'Strong ETL experience; prefers remote-first teams.',
     }),
-    new Applicant({
+    createApplicant({
       id: '304e5f60-7182-49db-a04f-5a6b7c8d9e0f',
       name: 'Yuki Tanaka',
       email: 'yuki.tanaka@example.com',
@@ -136,7 +137,7 @@ export function buildDemoApplicants(): Applicant[] {
       skills: ['Swift', 'Kotlin', 'CI/CD'],
       notes: 'Interview panel scheduled for next week.',
     }),
-    new Applicant({
+    createApplicant({
       id: '415f6071-8293-40ec-b150-6b7c8d9e0f1a',
       name: 'Anna Nielsen',
       email: 'anna.nielsen@example.com',

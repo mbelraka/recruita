@@ -1,19 +1,19 @@
 import { DestroyRef } from '@angular/core';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { of, Subject } from 'rxjs';
 
-import { Applicant } from '../models/applicant.model';
 import * as ApplicantsActions from '../state/applicants.actions';
-import { ApplicantApiService } from './applicant-api.service';
+import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantEditDialogService } from './applicant-edit-dialog.service';
 
 describe('ApplicantEditDialogService', () => {
   let service: ApplicantEditDialogService;
   let mockStore: jasmine.SpyObj<Store>;
   let mockDialog: jasmine.SpyObj<MatDialog>;
-  let mockApi: jasmine.SpyObj<ApplicantApiService>;
+  let mockCollection: jasmine.SpyObj<ApplicantEntityCollectionService>;
   let afterClosed$: Subject<unknown>;
   let destroyRef: DestroyRef;
 
@@ -24,16 +24,17 @@ describe('ApplicantEditDialogService', () => {
     mockDialog.open.and.returnValue({
       afterClosed: () => afterClosed$.asObservable(),
     } as MatDialogRef<unknown>);
-    mockApi = jasmine.createSpyObj<ApplicantApiService>('ApplicantApiService', [
-      'getById',
-    ]);
+    mockCollection = jasmine.createSpyObj<ApplicantEntityCollectionService>(
+      'ApplicantEntityCollectionService',
+      ['getByKey']
+    );
 
     TestBed.configureTestingModule({
       providers: [
         ApplicantEditDialogService,
         { provide: Store, useValue: mockStore },
         { provide: MatDialog, useValue: mockDialog },
-        { provide: ApplicantApiService, useValue: mockApi },
+        { provide: ApplicantEntityCollectionService, useValue: mockCollection },
       ],
     });
 
@@ -45,13 +46,13 @@ describe('ApplicantEditDialogService', () => {
     const onClosed = jasmine.createSpy('onClosed');
     service.openCreateOrEdit(destroyRef, undefined, onClosed);
 
-    expect(mockApi.getById).not.toHaveBeenCalled();
+    expect(mockCollection.getByKey).not.toHaveBeenCalled();
     expect(mockDialog.open).toHaveBeenCalled();
   });
 
   it('dispatches addApplicant when create dialog closes with a new applicant', () => {
     service.openCreateOrEdit(destroyRef, undefined, () => undefined);
-    const created = new Applicant({ id: 'new', name: 'Sam', skills: ['Go'] });
+    const created = createApplicant({ id: 'new', name: 'Sam', skills: ['Go'] });
     afterClosed$.next(created);
 
     expect(mockStore.dispatch).toHaveBeenCalledWith(
@@ -60,31 +61,29 @@ describe('ApplicantEditDialogService', () => {
   });
 
   it('loads detail before opening the edit dialog', () => {
-    const listApplicant = new Applicant({
+    const listApplicant = createApplicant({
       id: '1',
       name: 'John',
       skills: ['Go'],
     });
-    const detailed = new Applicant({
+    const detailed = createApplicant({
       id: '1',
       name: 'John',
       notes: 'detail',
       skills: ['Go'],
     });
-    mockApi.getById.and.returnValue(of(detailed));
+    mockCollection.getByKey.and.returnValue(of(detailed));
 
     service.openCreateOrEdit(destroyRef, listApplicant, () => undefined);
 
-    expect(mockApi.getById).toHaveBeenCalledWith('1');
-    expect(mockStore.dispatch).toHaveBeenCalledWith(
-      ApplicantsActions.loadApplicantDetailSuccess({ applicant: detailed })
-    );
+    expect(mockCollection.getByKey).toHaveBeenCalledWith('1');
+    expect(mockStore.dispatch).not.toHaveBeenCalled();
     expect(mockDialog.open).toHaveBeenCalled();
   });
 
   it('dispatches updateApplicant when edit dialog closes with an update result', () => {
     service.openCreateOrEdit(destroyRef, undefined, () => undefined);
-    const updated = new Applicant({
+    const updated = createApplicant({
       id: '1',
       name: 'John Updated',
       skills: ['Go'],

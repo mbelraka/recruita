@@ -1,4 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -6,7 +7,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
 
 import { SharedModule } from 'src/app/shared/shared.module';
-import { Applicant } from 'src/app/modules/applicants/models/applicant.model';
 import { ApplicantComponent } from './applicant.component';
 
 describe('ApplicantComponent', () => {
@@ -33,7 +33,7 @@ describe('ApplicantComponent', () => {
 
     fixture = TestBed.createComponent(ApplicantComponent);
     component = fixture.componentInstance;
-    component.applicant = new Applicant({ id: '1', name: 'John Doe' });
+    component.applicant = createApplicant({ id: '1', name: 'John Doe' });
     fixture.detectChanges();
   });
 

@@ -22,6 +22,22 @@ public class RecruitaValidationMessageSource extends AbstractMessageSource {
               MatchApiErrorMessage.CANDIDATE_ID_REQUIRED.message();
           case ApplicantValidationMessageKey.Codes.ID_REQUIRED ->
               ApplicantApiErrorMessage.ID_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.NAME_REQUIRED ->
+              ApplicantApiErrorMessage.NAME_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.EMAIL_REQUIRED ->
+              ApplicantApiErrorMessage.EMAIL_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.PHONE_REQUIRED ->
+              ApplicantApiErrorMessage.PHONE_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.LOCATION_REQUIRED ->
+              ApplicantApiErrorMessage.LOCATION_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.APPLICATION_STATUS_REQUIRED ->
+              ApplicantApiErrorMessage.APPLICATION_STATUS_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.CURRENT_JOB_TITLE_REQUIRED ->
+              ApplicantApiErrorMessage.CURRENT_JOB_TITLE_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.YEARS_OF_EXPERIENCE_REQUIRED ->
+              ApplicantApiErrorMessage.YEARS_OF_EXPERIENCE_REQUIRED.message();
+          case ApplicantValidationMessageKey.Codes.SKILLS_REQUIRED ->
+              ApplicantApiErrorMessage.SKILLS_REQUIRED.message();
           case ProfileValidationMessageKey.Codes.ID_REQUIRED ->
               ProfileApiErrorMessage.ID_REQUIRED.message();
           case ProfileValidationMessageKey.Codes.LAST_LANGUAGE_REQUIRED ->

@@ -1,4 +1,5 @@
 import { Applicant } from 'src/app/modules/applicants/models/applicant.model';
+import { createApplicant } from '../../../modules/applicants/utilities/applicant-domain.util';
 
 import { ApplicantGridCardComponent } from './applicant-grid-card.component';
 
@@ -8,7 +9,7 @@ describe('ApplicantGridCardComponent', () => {
 
   beforeEach(() => {
     component = new ApplicantGridCardComponent();
-    applicant = new Applicant({
+    applicant = createApplicant({
       id: '1',
       name: 'Jane Doe',
       email: 'jane@example.com',

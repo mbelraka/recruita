@@ -10,6 +10,7 @@ import {
 
 import { SharedModule } from 'src/app/shared/shared.module';
 import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
+import { ApplicationStatus } from '../../enums/application-status.enum';
 import { NewApplicantComponent } from './new-applicant.component';
 
 describe('NewApplicantComponent', () => {
@@ -111,7 +112,7 @@ describe('NewApplicantComponent', () => {
       phone: '+1234567890',
       location: 'NY',
       yearsOfExperience: 3,
-      applicationStatus: 'received',
+      applicationStatus: ApplicationStatus.Received,
       currentJobTitle: 'Dev',
       availableFrom: new Date(),
       notes: 'Test',
@@ -141,7 +142,7 @@ describe('NewApplicantComponent', () => {
         phone: '12345',
         location: 'UK',
         yearsOfExperience: 5,
-        applicationStatus: 'screening',
+        applicationStatus: ApplicationStatus.Screening,
         currentJobTitle: 'Designer',
         availableFrom: new Date(),
         skills: ['Figma'],

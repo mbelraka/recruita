@@ -2,6 +2,7 @@ export enum ApplicantActionTypes {
   LoadApplicants = '[Applicants] Load Applicants',
   LoadApplicantsSuccess = '[Applicants] Load Applicants Success',
   LoadApplicantsFailure = '[Applicants] Load Applicants Failure',
+  ApplicantsRosterLoaded = '[Applicants] Roster Loaded',
   AddApplicant = '[Applicants] Add Applicant',
   AddApplicantSuccess = '[Applicants] Add Applicant Success',
   AddApplicantFailure = '[Applicants] Add Applicant Failure',

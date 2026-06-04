@@ -1,44 +1,34 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { Sort } from '@angular/material/sort';
-import { of } from 'rxjs';
 
 import { SharedModule } from 'src/app/shared/shared.module';
+import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
 import { ApplicantListComponent } from './applicant-list.component';
-import { Applicant } from '../../models/applicant.model';
 import { SortDirection } from '../../enums/sort-direction.enum';
 import * as ApplicantsActions from '../../state/applicants.actions';
-import * as Selectors from '../../state/applicants.selectors';
 
 describe('ApplicantListComponent', () => {
   let component: ApplicantListComponent;
   let fixture: ComponentFixture<ApplicantListComponent>;
   let mockStore: jasmine.SpyObj<Store>;
 
-  const mockApplicant = new Applicant({
+  const mockApplicant = createApplicant({
     id: '1',
     name: 'John Doe',
     skills: ['Angular'],
   });
 
   beforeEach(async () => {
-    mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
-
-    // Return correct typed observables per selector to avoid Angular Material
-    // validation errors (e.g. sort direction must be 'asc' | 'desc' | '').
-    mockStore.select.and.callFake((selector: any) => {
-      if (selector === Selectors.selectSortedApplicants) return of([]);
-      if (selector === Selectors.selectGlobalFilter) return of('');
-      if (selector === Selectors.selectFilterBySkill) return of(null);
-      if (selector === Selectors.selectFilterByStatus) return of(null);
-      if (selector === Selectors.selectFilterByCountry) return of(null);
-      if (selector === Selectors.selectSortBy) return of(null);
-      if (selector === Selectors.selectSortDirection)
-        return of(SortDirection.Asc);
-      return of(null);
-    });
+    mockStore = jasmine.createSpyObj('Store', [
+      'selectSignal',
+      'select',
+      'dispatch',
+    ]);
+    mockApplicantViewSelectSignals(mockStore);
 
     await TestBed.configureTestingModule({
       declarations: [ApplicantListComponent],

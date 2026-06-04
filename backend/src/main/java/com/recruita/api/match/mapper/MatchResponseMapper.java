@@ -4,26 +4,18 @@ import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
 import com.recruita.api.match.domain.MatchScore;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class MatchResponseMapper {
+@Mapper(componentModel = "spring")
+public interface MatchResponseMapper {
 
-  public MatchResponseDto toDto(List<MatchScore> scores) {
-    return new MatchResponseDto(scores.stream().map(this::toDto).toList());
+  default MatchResponseDto toDto(List<MatchScore> scores) {
+    return new MatchResponseDto(scores.stream().map(this::toScoreDto).toList());
   }
 
-  private MatchScoreDto toDto(MatchScore score) {
-    return new MatchScoreDto(
-        score.correlationId(),
-        score.matchScore(),
-        score.matchingSkills(),
-        score.missingSkills(),
-        new MatchScoreDto.CandidateProfileDto(
-            score.candidateProfile().skills(),
-            score.candidateProfile().yearsExperience(),
-            score.candidateProfile().topJobTitles(),
-            score.candidateProfile().education()),
-        score.recommendation());
-  }
+  @Mapping(source = "correlationId", target = "id")
+  MatchScoreDto toScoreDto(MatchScore score);
+
+  MatchScoreDto.CandidateProfileDto toCandidateProfileDto(MatchScore.CandidateProfile profile);
 }

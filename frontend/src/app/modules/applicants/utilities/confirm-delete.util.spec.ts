@@ -1,9 +1,9 @@
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { createApplicant } from './applicant-domain.util';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
 
 import { FullState } from 'src/app/models/full-state.model';
-import { Applicant } from '../models/applicant.model';
 import * as ApplicantsActions from '../state/applicants.actions';
 import { confirmDeleteApplicant } from './confirm-delete.util';
 
@@ -12,7 +12,7 @@ describe('confirmDeleteApplicant', () => {
   let store: jasmine.SpyObj<Store<FullState>>;
   let afterClosed$: Subject<boolean | undefined>;
 
-  const applicant = new Applicant({
+  const applicant = createApplicant({
     id: 'candidate-1',
     name: '  John Doe  ',
     currentJobTitle: '  Frontend Engineer  ',
@@ -71,7 +71,7 @@ describe('confirmDeleteApplicant', () => {
   });
 
   it('should fall back to an em dash and omit a blank job title', () => {
-    const applicantWithoutLabels = new Applicant({
+    const applicantWithoutLabels = createApplicant({
       id: 'candidate-2',
       name: '   ',
       currentJobTitle: '   ',

@@ -1,22 +1,10 @@
-import { EntityState } from '@ngrx/entity';
-
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
+import { ApplicationStatus } from '../enums/application-status.enum';
 import { Applicant } from './applicant.model';
 
-/**
- * Represents the state for managing applicants.
- */
-export interface ApplicantState extends EntityState<Applicant> {
-  /** Indicates if a loading operation is in progress. */
-  loading: boolean;
-
-  /** True after the roster has loaded successfully at least once. */
-  loaded: boolean;
-
-  /** Stores error messages, if any. */
-  error: string | null;
-
+/** UI-only applicant list state; entity rows live in the NgRx Data cache. */
+export interface ApplicantUiState {
   /** Global text filter for applicants. */
   filter: string;
 
@@ -29,8 +17,8 @@ export interface ApplicantState extends EntityState<Applicant> {
   /** Filters applicants by a specific skill. */
   filterBySkill: string | null;
 
-  /** Filters by `applicationStatus` key (matches `ApplicationStatus` enum value). */
-  filterByStatus: string | null;
+  /** Filters by `applicationStatus` (matches `ApplicationStatus` enum value). */
+  filterByStatus: ApplicationStatus | null;
 
   /**
    * Filters by country derived from `location` (text after the last comma, trimmed;
@@ -44,3 +32,6 @@ export interface ApplicantState extends EntityState<Applicant> {
   /** Geocoding autocomplete labels ("City, Country") for the new-applicant location field. */
   locationSuggestions: string[];
 }
+
+/** @deprecated Use {@link ApplicantUiState}. Kept for gradual migration of imports. */
+export type ApplicantState = ApplicantUiState;

@@ -15,9 +15,7 @@ public record MatchRequestDto(
     String model,
     Double temperature,
     Double topP,
-    Integer seed,
-    String language,
-    String locale) {
+    Integer seed) {
 
   public MatchRequestDto {
     candidates = List.copyOf(candidates);

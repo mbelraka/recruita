@@ -1,13 +1,19 @@
 import { ApplicationStatus } from '../enums/application-status.enum';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
-import { ApplicantState } from '../models/applicant-state.model';
+import { ApplicantUiState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
+import {
+  buildApplicantEntityCache,
+  withEntityCache,
+} from '../../../testing/entity-cache-test.util';
+import { initialAppState } from '../../../state/app.reducer';
 import * as fromSelectors from './applicants.selectors';
 
 describe('Applicants Selectors', () => {
   const mockApplicants: Applicant[] = [
-    new Applicant({
+    createApplicant({
       id: '1',
       name: 'John Doe',
       email: 'john@example.com',
@@ -19,7 +25,7 @@ describe('Applicants Selectors', () => {
       availableFrom: new Date('2024-01-01'),
       notes: 'Good candidate',
     }),
-    new Applicant({
+    createApplicant({
       id: '2',
       name: 'Jane Doe',
       email: 'jane@test.com',
@@ -30,7 +36,7 @@ describe('Applicants Selectors', () => {
       skills: ['Figma'],
       availableFrom: new Date('2024-02-01'),
     }),
-    new Applicant({
+    createApplicant({
       id: '3',
       name: 'Alice Smith',
       email: 'alice@domain.com',
@@ -41,7 +47,7 @@ describe('Applicants Selectors', () => {
       skills: ['Leadership', 'Angular'],
       availableFrom: new Date('Full invalid!'), // Should map to NaN
     }),
-    new Applicant({
+    createApplicant({
       id: '4',
       name: 'Bob',
       email: 'bob@example.com',
@@ -54,17 +60,7 @@ describe('Applicants Selectors', () => {
     }),
   ];
 
-  const initialState: ApplicantState = {
-    ids: ['1', '2', '3', '4'],
-    entities: {
-      '1': mockApplicants[0],
-      '2': mockApplicants[1],
-      '3': mockApplicants[2],
-      '4': mockApplicants[3],
-    },
-    loading: false,
-    loaded: true,
-    error: null,
+  const uiState: ApplicantUiState = {
     filter: '',
     sortBy: 'name',
     sortDirection: SortDirection.Asc,
@@ -76,7 +72,9 @@ describe('Applicants Selectors', () => {
   };
 
   const appState = {
-    applicants: initialState,
+    app: initialAppState,
+    applicants: uiState,
+    ...withEntityCache(buildApplicantEntityCache(mockApplicants)),
   };
 
   describe('Feature Selectors', () => {
@@ -88,12 +86,26 @@ describe('Applicants Selectors', () => {
       expect(fromSelectors.selectApplicantsReady(appState)).toBeTrue();
       expect(
         fromSelectors.selectApplicantsReady({
-          applicants: { ...initialState, loaded: false, loading: false },
+          app: initialAppState,
+          applicants: uiState,
+          ...withEntityCache(
+            buildApplicantEntityCache(mockApplicants, {
+              loaded: false,
+              loading: false,
+            })
+          ),
         })
       ).toBeFalse();
       expect(
         fromSelectors.selectApplicantsReady({
-          applicants: { ...initialState, loaded: true, loading: true },
+          app: initialAppState,
+          applicants: uiState,
+          ...withEntityCache(
+            buildApplicantEntityCache(mockApplicants, {
+              loaded: true,
+              loading: true,
+            })
+          ),
         })
       ).toBeFalse();
     });
@@ -128,7 +140,7 @@ describe('Applicants Selectors', () => {
 
     it('should handle undefined location suggestions', () => {
       const stateWithoutLoc = {
-        applicants: { ...initialState, locationSuggestions: undefined },
+        applicants: { ...uiState, locationSuggestions: undefined },
       } as any;
       expect(fromSelectors.selectLocationSuggestions(stateWithoutLoc)).toEqual(
         []
@@ -227,7 +239,11 @@ describe('Applicants Selectors', () => {
 
   describe('applyFilters logic implicitly accessed', () => {
     it('should filter by global filter text', () => {
-      const state = { applicants: { ...initialState, filter: 'John' } };
+      const state = {
+        app: initialAppState,
+        applicants: { ...uiState, filter: 'John' },
+        ...withEntityCache(buildApplicantEntityCache(mockApplicants)),
+      };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
       expect(result[0].name).toBe('John Doe');
@@ -235,7 +251,9 @@ describe('Applicants Selectors', () => {
 
     it('should filter by skill filter', () => {
       const state = {
-        applicants: { ...initialState, filterBySkill: 'Angular' },
+        app: initialAppState,
+        applicants: { ...uiState, filterBySkill: 'Angular' },
+        ...withEntityCache(buildApplicantEntityCache(mockApplicants)),
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(2);
@@ -243,10 +261,12 @@ describe('Applicants Selectors', () => {
 
     it('should filter by status filter', () => {
       const state = {
+        app: initialAppState,
         applicants: {
-          ...initialState,
+          ...uiState,
           filterByStatus: ApplicationStatus.InterviewScheduled,
         },
+        ...withEntityCache(buildApplicantEntityCache(mockApplicants)),
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
@@ -255,7 +275,9 @@ describe('Applicants Selectors', () => {
 
     it('should filter by country filter', () => {
       const state = {
-        applicants: { ...initialState, filterByCountry: 'France' },
+        app: initialAppState,
+        applicants: { ...uiState, filterByCountry: 'France' },
+        ...withEntityCache(buildApplicantEntityCache(mockApplicants)),
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);

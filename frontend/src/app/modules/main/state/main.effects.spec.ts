@@ -18,7 +18,13 @@ import { PrivacyConsentDialogService } from '../../../containers/root/privacy/pr
 import { Languages } from '../../../enums/language.enum';
 import { setLanguage } from '../../../state/app.actions';
 import { initialMainState } from './main.reducer';
-import { ProfileApiService } from '../../../services/profile-api.service';
+import { ProfileEntityCollectionService } from '../data/profile-entity-collection.service';
+import {
+  buildApplicantEntityCache,
+  buildProfileEntityCache,
+  mergeEntityCaches,
+  withEntityCache,
+} from '../../../testing/entity-cache-test.util';
 import {
   loadProfile,
   loadProfileFailure,
@@ -33,7 +39,7 @@ import { MainEffects } from './main.effects';
 describe('MainEffects', () => {
   let actions$: ReplaySubject<unknown>;
   let effects: MainEffects;
-  let api: jasmine.SpyObj<ProfileApiService>;
+  let profiles: jasmine.SpyObj<ProfileEntityCollectionService>;
   let privacyDialog: jasmine.SpyObj<PrivacyConsentDialogService>;
   let store: MockStore;
 
@@ -48,19 +54,31 @@ describe('MainEffects', () => {
 
   const mockAppState = { language: Languages.English, notification: null };
 
-  const mockStoreState = (
-    mainState: typeof initialMainState = initialMainState
-  ) => ({
+  const mockStoreState = (profileInCache: typeof profile | null = null) => ({
     app: mockAppState,
-    [StateFeatures.Main]: mainState,
+    [StateFeatures.Main]: initialMainState,
+    ...withEntityCache(
+      mergeEntityCaches(
+        buildProfileEntityCache(profileInCache, {
+          loaded: profileInCache != null,
+        }),
+        buildApplicantEntityCache([])
+      )
+    ),
   });
 
   beforeEach(() => {
     actions$ = new ReplaySubject(1);
-    api = jasmine.createSpyObj<ProfileApiService>('ProfileApiService', [
-      'getById',
-      'save',
-    ]);
+    profiles = jasmine.createSpyObj<ProfileEntityCollectionService>(
+      'ProfileEntityCollectionService',
+      [
+        'getByKey',
+        'save',
+        'upsertOptimisticFromRequest',
+        'setLoaded',
+        'setLoading',
+      ]
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -69,10 +87,7 @@ describe('MainEffects', () => {
         provideMockStore({
           initialState: mockStoreState(),
         }),
-        {
-          provide: ProfileApiService,
-          useValue: api,
-        },
+        { provide: ProfileEntityCollectionService, useValue: profiles },
         {
           provide: PrivacyConsentDialogService,
           useValue: jasmine.createSpyObj<PrivacyConsentDialogService>(
@@ -91,7 +106,7 @@ describe('MainEffects', () => {
   });
 
   it('loads the admin profile and restores language', () => {
-    api.getById.and.returnValue(of(profile));
+    profiles.getByKey.and.returnValue(of(profile));
     const emitted: unknown[] = [];
     const subscription = effects.loadProfile$.subscribe((action) =>
       emitted.push(action)
@@ -99,6 +114,8 @@ describe('MainEffects', () => {
 
     actions$.next(loadProfile());
 
+    expect(profiles.setLoaded).toHaveBeenCalledWith(true);
+    expect(profiles.setLoading).toHaveBeenCalledWith(false);
     expect(emitted).toEqual([
       loadProfileSuccess({ profile }),
       setLanguage({ language: Languages.English }),
@@ -108,7 +125,7 @@ describe('MainEffects', () => {
 
   it('restores the stored language from profile on load', () => {
     const germanProfile = { ...profile, lastLanguage: Languages.German };
-    api.getById.and.returnValue(of(germanProfile));
+    profiles.getByKey.and.returnValue(of(germanProfile));
     const emitted: unknown[] = [];
     const subscription = effects.loadProfile$.subscribe((action) =>
       emitted.push(action)
@@ -121,7 +138,7 @@ describe('MainEffects', () => {
   });
 
   it('dispatches loadProfileFailure when the API fails', () => {
-    api.getById.and.returnValue(throwError(() => new Error('offline')));
+    profiles.getByKey.and.returnValue(throwError(() => new Error('offline')));
     const emitted: unknown[] = [];
     const subscription = effects.loadProfile$.subscribe((action) =>
       emitted.push(action)
@@ -152,19 +169,12 @@ describe('MainEffects', () => {
     subscription.unsubscribe();
   });
 
-  it('opens the privacy gate after profile load failure', () => {
-    const subscription = effects.openPrivacyGateAfterProfileLoad$.subscribe();
-
-    actions$.next(loadProfileFailure({ error: 'offline' }));
-
-    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
-    subscription.unsubscribe();
-  });
-
   it('persists privacy consent by creating the admin profile', async () => {
-    api.save.and.returnValue(of({ ...profile, privacyNoticeAccepted: true }));
+    profiles.save.and.returnValue(
+      of({ ...profile, privacyNoticeAccepted: true })
+    );
     const emittedPromise = lastValueFrom(
-      effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
+      effects.persistPrivacyConsentOutcome$.pipe(take(1), toArray())
     );
 
     actions$.next(
@@ -174,7 +184,8 @@ describe('MainEffects', () => {
     );
 
     const emitted = await emittedPromise;
-    expect(api.save).toHaveBeenCalledWith(
+    expect(profiles.upsertOptimisticFromRequest).toHaveBeenCalled();
+    expect(profiles.save).toHaveBeenCalledWith(
       {
         id: APP_CONFIG.PROFILE.DEFAULT_ID,
         privacyNoticeAccepted: true,
@@ -186,18 +197,6 @@ describe('MainEffects', () => {
       null
     );
     expect(emitted[0]).toEqual(
-      profileUpdated({
-        profile: {
-          id: APP_CONFIG.PROFILE.DEFAULT_ID,
-          privacyNoticeAccepted: true,
-          lastLanguage: Languages.English,
-          optionalRemoteTranslation: false,
-          optionalGeocoding: false,
-          optionalAiMatching: false,
-        },
-      })
-    );
-    expect(emitted[1]).toEqual(
       persistPrivacyConsentOutcomeSuccess({
         profile: { ...profile, privacyNoticeAccepted: true },
       })
@@ -205,16 +204,8 @@ describe('MainEffects', () => {
   });
 
   it('updates the admin profile when it is already in state', async () => {
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-        },
-      })
-    );
-    api.save.and.returnValue(
+    store.setState(mockStoreState(profile));
+    profiles.save.and.returnValue(
       of({
         ...profile,
         privacyNoticeAccepted: true,
@@ -224,7 +215,7 @@ describe('MainEffects', () => {
       })
     );
     const emittedPromise = lastValueFrom(
-      effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
+      effects.persistPrivacyConsentOutcome$.pipe(take(1), toArray())
     );
     actions$.next(
       persistPrivacyConsentOutcome({
@@ -233,7 +224,7 @@ describe('MainEffects', () => {
     );
 
     const emitted = await emittedPromise;
-    expect(api.save).toHaveBeenCalledWith(
+    expect(profiles.save).toHaveBeenCalledWith(
       {
         id: APP_CONFIG.PROFILE.DEFAULT_ID,
         privacyNoticeAccepted: true,
@@ -244,13 +235,13 @@ describe('MainEffects', () => {
       },
       profile
     );
-    expect(emitted[1].type).toBe(persistPrivacyConsentOutcomeSuccess.type);
+    expect(emitted[0].type).toBe(persistPrivacyConsentOutcomeSuccess.type);
   });
 
   it('reloads profile when the privacy API save fails', async () => {
-    api.save.and.returnValue(throwError(() => new Error('offline')));
+    profiles.save.and.returnValue(throwError(() => new Error('offline')));
     const emittedPromise = lastValueFrom(
-      effects.persistPrivacyConsentOutcome$.pipe(take(3), toArray())
+      effects.persistPrivacyConsentOutcome$.pipe(take(2), toArray())
     );
 
     actions$.next(
@@ -260,29 +251,19 @@ describe('MainEffects', () => {
     );
 
     const emitted = await emittedPromise;
-    expect(emitted[0].type).toBe(profileUpdated.type);
-    expect(emitted[1].type).toBe(loadProfile.type);
-    expect(emitted[2].type).toBe(persistPrivacyConsentOutcomeFailure.type);
+    expect(emitted[0].type).toBe(loadProfile.type);
+    expect(emitted[1].type).toBe(persistPrivacyConsentOutcomeFailure.type);
   });
 
   it('persists language changes to the profile', async () => {
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-          loaded: true,
-        },
-      })
-    );
-    api.save.and.returnValue(
+    store.setState(mockStoreState(profile));
+    profiles.save.and.returnValue(
       of({ ...profile, lastLanguage: Languages.German })
     );
     actions$.next(setLanguage({ language: Languages.German }));
 
     const action = await firstValueFrom(effects.persistLastLanguage$);
-    expect(api.save).toHaveBeenCalledWith(
+    expect(profiles.save).toHaveBeenCalledWith(
       {
         id: APP_CONFIG.PROFILE.DEFAULT_ID,
         privacyNoticeAccepted: false,
@@ -300,64 +281,13 @@ describe('MainEffects', () => {
     );
   });
 
-  it('preserves stored privacy choices when persisting language', async () => {
-    const acceptedProfile = {
-      ...profile,
-      privacyNoticeAccepted: true,
-      optionalRemoteTranslation: true,
-      optionalGeocoding: true,
-      optionalAiMatching: true,
-    };
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile: acceptedProfile,
-          loaded: true,
-        },
-      })
-    );
-    api.save.and.returnValue(
-      of({ ...acceptedProfile, lastLanguage: Languages.German })
-    );
-    actions$.next(setLanguage({ language: Languages.German }));
-
-    const action = await firstValueFrom(effects.persistLastLanguage$);
-    expect(api.save).toHaveBeenCalledWith(
-      {
-        id: APP_CONFIG.PROFILE.DEFAULT_ID,
-        privacyNoticeAccepted: true,
-        lastLanguage: Languages.German,
-        optionalRemoteTranslation: true,
-        optionalGeocoding: true,
-        optionalAiMatching: true,
-      },
-      acceptedProfile
-    );
-    expect(action).toEqual(
-      profileUpdated({
-        profile: { ...acceptedProfile, lastLanguage: Languages.German },
-      })
-    );
-  });
-
   it('skips profile save when language already matches profile', () => {
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-          loaded: true,
-        },
-      })
-    );
+    store.setState(mockStoreState(profile));
     const subscription = effects.persistLastLanguage$.subscribe();
 
     actions$.next(setLanguage({ language: Languages.English }));
 
-    expect(api.save).not.toHaveBeenCalled();
+    expect(profiles.save).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
 });

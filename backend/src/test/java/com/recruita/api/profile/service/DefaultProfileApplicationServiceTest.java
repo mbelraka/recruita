@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,7 +31,8 @@ class DefaultProfileApplicationServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new DefaultProfileApplicationService(repository, new ProfileMapper());
+    service =
+        new DefaultProfileApplicationService(repository, Mappers.getMapper(ProfileMapper.class));
   }
 
   @Test
@@ -63,6 +65,17 @@ class DefaultProfileApplicationServiceTest {
             service.create(
                 new SaveProfileRequestDto("dup", true, UiLanguage.EN, false, false, false)));
     verify(repository, never()).save(any());
+  }
+
+  @Test
+  void updateRejectsMismatchedPathId() {
+    assertThrows(
+        ProfileConflictException.class,
+        () ->
+            service.update(
+                "p-1",
+                new SaveProfileRequestDto("other", true, UiLanguage.EN, false, false, false)));
+    verify(repository, never()).findById(any());
   }
 
   @Test

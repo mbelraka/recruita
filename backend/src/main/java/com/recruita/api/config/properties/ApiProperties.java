@@ -8,6 +8,7 @@ public class ApiProperties {
 
   @Valid @NotNull private RouteProperties routes = new RouteProperties();
   @Valid @NotNull private ProblemDetailProperties problemDetail = new ProblemDetailProperties();
+  @Valid @NotNull private ValidationProperties validation = new ValidationProperties();
 
   public RouteProperties getRoutes() {
     return routes;
@@ -23,6 +24,26 @@ public class ApiProperties {
 
   public void setProblemDetail(ProblemDetailProperties problemDetail) {
     this.problemDetail = problemDetail;
+  }
+
+  public ValidationProperties getValidation() {
+    return validation;
+  }
+
+  public void setValidation(ValidationProperties validation) {
+    this.validation = validation;
+  }
+
+  public static class ValidationProperties {
+    @NotBlank private String defaultMessage = "Request validation failed.";
+
+    public String getDefaultMessage() {
+      return defaultMessage;
+    }
+
+    public void setDefaultMessage(String defaultMessage) {
+      this.defaultMessage = defaultMessage;
+    }
   }
 
   public static class ProblemDetailProperties {

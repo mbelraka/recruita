@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
+import { ApplicationStatus } from '../enums/application-status.enum';
 import { Applicant } from '../models/applicant.model';
 import { ApplicantActionTypes } from '../enums/applicant-action-types.enum';
 import { SortDirection } from '../enums/sort-direction.enum';
@@ -15,6 +16,9 @@ export const loadApplicantsSuccess = createAction(
 export const loadApplicantsFailure = createAction(
   ApplicantActionTypes.LoadApplicantsFailure,
   props<{ error: string }>()
+);
+export const applicantsRosterLoaded = createAction(
+  ApplicantActionTypes.ApplicantsRosterLoaded
 );
 
 // Add Applicant
@@ -85,7 +89,7 @@ export const setFilterBySkill = createAction(
 
 export const setFilterByStatus = createAction(
   ApplicantActionTypes.SetFilterByStatus,
-  props<{ status: string | null }>()
+  props<{ status: ApplicationStatus | null }>()
 );
 
 export const setFilterByCountry = createAction(

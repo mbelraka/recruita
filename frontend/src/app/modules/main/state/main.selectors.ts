@@ -1,30 +1,37 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createSelector } from '@ngrx/store';
 
-import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
+import { APP_CONFIG } from '../../../config/app.config';
+import {
+  selectEntityCollection,
+  selectEntityCollectionLoaded,
+} from '../../../core/entity-data/entity-cache.selectors';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
 import type { PrivacyConsentFormState } from '../../../models/privacy-consent-form-state.model';
 import {
   DEFAULT_DISABLED_PRIVACY_CHOICES,
   profilePrivacyChoicesFrom,
 } from '../../../utilities/build-save-profile-request.util';
-import { MainState } from '../models/main-state.model';
+import type { Profile } from '../models/profile.model';
 
-export const selectMainState = createFeatureSelector<MainState>(
-  StateFeatures.Main
-);
-
-export const selectMainProfileState = createSelector(
-  selectMainState,
-  (state) => state.profile
+const selectProfileCollection = selectEntityCollection<Profile>(
+  RecruitaEntityNames.Profile
 );
 
 export const selectProfile = createSelector(
-  selectMainProfileState,
-  (state) => state.profile
+  selectProfileCollection,
+  (collection) => collection?.entities?.[APP_CONFIG.PROFILE.DEFAULT_ID] ?? null
 );
 
+/** True after a successful fetch or when the admin profile row is already in the cache. */
 export const selectProfileLoaded = createSelector(
-  selectMainProfileState,
-  (state) => state.loaded
+  selectProfileCollection,
+  selectEntityCollectionLoaded(RecruitaEntityNames.Profile),
+  (collection, loadedFlag) => {
+    if (loadedFlag) {
+      return true;
+    }
+    return !!collection?.entities?.[APP_CONFIG.PROFILE.DEFAULT_ID];
+  }
 );
 
 export const selectPrivacyNoticeAccepted = createSelector(

@@ -19,6 +19,7 @@ import { FullState } from '../../../../models/full-state.model';
 import { isViewType, ViewTypes } from '../../enums/view-types.enum';
 import { SortDirection } from '../../enums/sort-direction.enum';
 import { Applicant } from '../../models/applicant.model';
+import { isApplicationStatus } from '../../utilities/application-status.util';
 import { ApplicantEditDialogService } from '../../services/applicant-edit-dialog.service';
 import {
   setFilterByCountry,
@@ -169,9 +170,13 @@ export class ApplicantsComponent {
   }
 
   public onStatusFilterChange(value: string | null | undefined): void {
-    this._store.dispatch(
-      setFilterByStatus({ status: value === undefined ? null : value })
-    );
+    const status =
+      value === undefined || value === null || value === ''
+        ? null
+        : isApplicationStatus(value)
+          ? value
+          : null;
+    this._store.dispatch(setFilterByStatus({ status }));
   }
 
   public onCountryFilterChange(value: string | null | undefined): void {
@@ -186,9 +191,6 @@ export class ApplicantsComponent {
   ): string {
     if (!sortBy) {
       return '';
-    }
-    if (sortBy === 'availableFrom') {
-      return 'availability';
     }
     const match = this.gridSortFieldOptions.find((o) => o.sortKey === sortBy);
     return match?.value ?? '';

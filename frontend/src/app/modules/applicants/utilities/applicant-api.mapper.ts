@@ -2,39 +2,25 @@ import { Applicant } from '../models/applicant.model';
 import { ApplicantApiRecord } from '../models/applicant-api-record.model';
 import { ApplicantApiSummaryRecord } from '../models/applicant-api-summary-record.model';
 import { ApplicantApiWriteRecord } from '../models/applicant-api-write-record.model';
+import { createApplicant } from './applicant-domain.util';
 
-type ApplicantInit = NonNullable<ConstructorParameters<typeof Applicant>[0]>;
-
-function applicantInitFromApiSummary(
-  record: ApplicantApiSummaryRecord
-): ApplicantInit {
-  return {
-    id: record.id,
-    name: record.name,
-    email: record.email,
-    phone: record.phone,
-    location: record.location,
-    yearsOfExperience: record.yearsOfExperience,
-    applicationStatus: record.applicationStatus,
-    currentJobTitle: record.currentJobTitle,
-    availableFrom: record.availableFrom
-      ? new Date(record.availableFrom)
-      : undefined,
-    skills: record.skills ? [...record.skills] : [],
-  };
+function applicantFromApiRecord(
+  record: ApplicantApiSummaryRecord | ApplicantApiRecord
+): Applicant {
+  return createApplicant({
+    ...record,
+    skills: [...(record.skills ?? [])],
+  });
 }
 
 export function applicantFromApiSummary(
   record: ApplicantApiSummaryRecord
 ): Applicant {
-  return new Applicant(applicantInitFromApiSummary(record));
+  return applicantFromApiRecord(record);
 }
 
 export function applicantFromApi(record: ApplicantApiRecord): Applicant {
-  return new Applicant({
-    ...applicantInitFromApiSummary(record),
-    notes: record.notes,
-  });
+  return applicantFromApiRecord(record);
 }
 
 export function applicantsFromApiSummary(

@@ -1,18 +1,30 @@
-import { provideHttpClient } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { HttpUrlGenerator } from '@ngrx/data';
 import { firstValueFrom } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { HttpApiInterceptor } from '../../../core/http/http-api.interceptor';
 import { ApplicantApiErrorMessage } from '../enums/applicant-api-error-message.enum';
-import { Applicant } from '../models/applicant.model';
-import { ApplicantApiService } from './applicant-api.service';
+import { ApplicantDataService } from './applicant-data.service';
 
-describe('ApplicantApiService', () => {
-  let service: ApplicantApiService;
+const applicantHttpUrlGenerator: HttpUrlGenerator = {
+  entityResource: () => `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/`,
+  collectionResource: () => APP_CONFIG.APPLICANTS.API.BASE_PATH,
+  registerHttpResourceUrls: () => undefined,
+};
+
+describe('ApplicantDataService', () => {
+  let service: ApplicantDataService;
   let httpMock: HttpTestingController;
 
   const basePath = APP_CONFIG.APPLICANTS.API.BASE_PATH;
@@ -20,12 +32,18 @@ describe('ApplicantApiService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ApplicantApiService,
-        provideHttpClient(),
+        ApplicantDataService,
+        { provide: HttpUrlGenerator, useValue: applicantHttpUrlGenerator },
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: HttpApiInterceptor,
+          multi: true,
+        },
         provideHttpClientTesting(),
       ],
     });
-    service = TestBed.inject(ApplicantApiService);
+    service = TestBed.inject(ApplicantDataService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
@@ -34,7 +52,7 @@ describe('ApplicantApiService', () => {
   });
 
   it('lists applicants from the API', async () => {
-    const promise = firstValueFrom(service.list());
+    const promise = firstValueFrom(service.getAll());
 
     const req = httpMock.expectOne(basePath);
     expect(req.request.method).toBe('GET');
@@ -56,7 +74,7 @@ describe('ApplicantApiService', () => {
   });
 
   it('lists full applicants with notes for export refresh', async () => {
-    const promise = firstValueFrom(service.listFull());
+    const promise = firstValueFrom(service.getAllFull());
 
     const req = httpMock.expectOne(APP_CONFIG.APPLICANTS.API.FULL_LIST_PATH);
     expect(req.request.method).toBe('GET');
@@ -69,7 +87,9 @@ describe('ApplicantApiService', () => {
   it('loads a single applicant by id', async () => {
     const promise = firstValueFrom(service.getById('a-1'));
 
-    const req = httpMock.expectOne(`${basePath}/a-1`);
+    const req = httpMock.expectOne(
+      `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
+    );
     expect(req.request.method).toBe('GET');
     req.flush({ id: 'a-1', name: 'Alex', skills: [], notes: 'notes' });
 
@@ -78,14 +98,14 @@ describe('ApplicantApiService', () => {
   });
 
   it('creates an applicant', async () => {
-    const applicant = new Applicant({
+    const applicant = createApplicant({
       id: 'new-1',
       name: 'Sam',
       skills: ['Java'],
       availableFrom: new Date('2026-07-15T12:00:00.000Z'),
     });
 
-    const promise = firstValueFrom(service.create(applicant));
+    const promise = firstValueFrom(service.add(applicant));
     const req = httpMock.expectOne(basePath);
     expect(req.request.method).toBe('POST');
     expect(req.request.body.availableFrom).toBe('2026-07-15');
@@ -96,7 +116,7 @@ describe('ApplicantApiService', () => {
   });
 
   it('maps backend error payloads to Error messages', async () => {
-    const promise = firstValueFrom(service.list());
+    const promise = firstValueFrom(service.getAll());
 
     const req = httpMock.expectOne(basePath);
     req.flush(
@@ -110,8 +130,12 @@ describe('ApplicantApiService', () => {
   });
 
   it('maps ProblemDetail-style errors on create', async () => {
-    const applicant = new Applicant({ id: 'dup', name: 'Dup', skills: ['x'] });
-    const promise = firstValueFrom(service.create(applicant));
+    const applicant = createApplicant({
+      id: 'dup',
+      name: 'Dup',
+      skills: ['x'],
+    });
+    const promise = firstValueFrom(service.add(applicant));
 
     const req = httpMock.expectOne(basePath);
     req.flush(
@@ -125,27 +149,33 @@ describe('ApplicantApiService', () => {
   });
 
   it('updates and deletes applicants', async () => {
-    const applicant = new Applicant({
+    const applicant = createApplicant({
       id: 'a-1',
       name: 'Alex',
       skills: ['Go'],
     });
 
-    const updatePromise = firstValueFrom(service.update(applicant));
-    const updateReq = httpMock.expectOne(`${basePath}/a-1`);
+    const updatePromise = firstValueFrom(
+      service.update({ id: applicant.id, changes: applicant })
+    );
+    const updateReq = httpMock.expectOne(
+      `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
+    );
     expect(updateReq.request.method).toBe('PUT');
     updateReq.flush({ id: 'a-1', name: 'Alex', skills: ['Go'] });
     await expectAsync(updatePromise).toBeResolved();
 
     const deletePromise = firstValueFrom(service.delete('a-1'));
-    const deleteReq = httpMock.expectOne(`${basePath}/a-1`);
+    const deleteReq = httpMock.expectOne(
+      `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
+    );
     expect(deleteReq.request.method).toBe('DELETE');
     deleteReq.flush(null);
     await expectAsync(deletePromise).toBeResolved();
   });
 
   it('falls back to generic errors for non-problem payloads', async () => {
-    const promise = firstValueFrom(service.list());
+    const promise = firstValueFrom(service.getAll());
 
     const req = httpMock.expectOne(basePath);
     req.flush('server exploded', {
@@ -158,7 +188,7 @@ describe('ApplicantApiService', () => {
 
   it('uses the unreachable message when no backend detail exists', async () => {
     const promise = firstValueFrom(
-      service.create(new Applicant({ id: 'x', name: 'X', skills: ['a'] }))
+      service.add(createApplicant({ id: 'x', name: 'X', skills: ['a'] }))
     );
 
     const req = httpMock.expectOne(basePath);
@@ -170,7 +200,7 @@ describe('ApplicantApiService', () => {
   });
 
   it('rethrows Error instances from the HTTP client', async () => {
-    const promise = firstValueFrom(service.list());
+    const promise = firstValueFrom(service.getAll());
     const req = httpMock.expectOne(basePath);
     req.error(new ProgressEvent('error'), {
       status: 0,

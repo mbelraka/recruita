@@ -12,17 +12,13 @@ import { NewApplicantComponent } from '../components/new-applicant/new-applicant
 import { NewApplicantDialogCloseResult } from '../models/new-applicant-dialog-close-result.model';
 import { NewApplicantDialogData } from '../models/new-applicant-dialog-data.model';
 import { Applicant } from '../models/applicant.model';
-import {
-  addApplicant,
-  loadApplicantDetailSuccess,
-  updateApplicant,
-} from '../state/applicants.actions';
-import { ApplicantApiService } from './applicant-api.service';
+import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
+import { addApplicant, updateApplicant } from '../state/applicants.actions';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicantEditDialogService {
   public constructor(
-    private readonly _applicantApi: ApplicantApiService,
+    private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _dialog: MatDialog,
     private readonly _store: Store<FullState>
   ) {}
@@ -38,16 +34,12 @@ export class ApplicantEditDialogService {
       return;
     }
 
-    this._applicantApi
-      .getById(applicant.id)
+    this._applicants
+      .getByKey(applicant.id)
       .pipe(takeUntilDestroyed(destroyRef))
       .subscribe({
-        next: (fullApplicant) => {
-          this._store.dispatch(
-            loadApplicantDetailSuccess({ applicant: fullApplicant })
-          );
-          this._openDialog(destroyRef, fullApplicant, onDialogClosed);
-        },
+        next: (fullApplicant) =>
+          this._openDialog(destroyRef, fullApplicant, onDialogClosed),
         error: () => this._openDialog(destroyRef, applicant, onDialogClosed),
       });
   }

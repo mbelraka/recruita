@@ -6,6 +6,7 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import {
+  APP_INITIALIZER,
   inject,
   LOCALE_ID,
   NgModule,
@@ -17,6 +18,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
+import { EntityDataService, HttpUrlGenerator } from '@ngrx/data';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -33,7 +35,12 @@ import { AppEffects } from './state/app.effects';
 import { NotificationSnackBarComponent } from './components/notification-snack-bar/notification-snack-bar.component';
 import { localeIdFactory } from './utilities/factories/locale-id.factory';
 import { matDateLocaleFactory } from './utilities/factories/mat-date-locale.factory';
+import { RecruitaHttpUrlGenerator } from './core/entity-data/recruita-http-url-generator.service';
+import { registerRecruitaEntityDataServices } from './core/entity-data/register-recruita-entity-data-services.initializer';
+import { ApplicantDataService } from './modules/applicants/data/applicant-data.service';
+import { ProfileDataService } from './modules/main/data/profile-data.service';
 import { AuthInterceptor } from './core/http/auth.interceptor';
+import { HttpApiInterceptor } from './core/http/http-api.interceptor';
 import { environment } from '../environments/environment';
 import { registerMaterialSymbolsOutlinedFont } from './utilities/initializers/material-symbols-outlined-font.initializer';
 
@@ -56,8 +63,7 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     NotificationSnackBarComponent,
     SharedModule,
     AppRoutingModule,
-    AppStateModule,
-    // Configure the NgRx Store
+    // Configure the NgRx Store before feature modules that register slices
     StoreModule.forRoot(
       { app: appReducer },
       {
@@ -69,6 +75,7 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     ),
     // Register NgRx Effects
     EffectsModule.forRoot([AppEffects]),
+    AppStateModule,
     // Register Redux DevTools in development
     StoreDevtoolsModule.instrument({
       maxAge: APP_CONFIG.NGRX_DEVTOOLS.MAX_STATE_HISTORY,
@@ -86,6 +93,11 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     ),
     {
       provide: HTTP_INTERCEPTORS,
+      useClass: HttpApiInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true,
     },
@@ -97,9 +109,16 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
       provide: MAT_DATE_LOCALE,
       useFactory: matDateLocaleFactory,
     },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: registerRecruitaEntityDataServices,
+      deps: [EntityDataService, ApplicantDataService, ProfileDataService],
+      multi: true,
+    },
     provideAppInitializer(() => {
       registerMaterialSymbolsOutlinedFont(inject(MatIconRegistry))();
     }),
+    { provide: HttpUrlGenerator, useClass: RecruitaHttpUrlGenerator },
   ],
   bootstrap: [AppComponent],
 })

@@ -34,6 +34,8 @@ recruita:
   api:
     problem-detail:
       error-property-key: error
+    validation:
+      default-message: Request validation failed.
     routes:
       health-path: /api/health
       match-path: /api/match

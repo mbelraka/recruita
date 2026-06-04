@@ -1,6 +1,7 @@
 package com.recruita.api.api.controller;
 
 import com.recruita.api.api.dto.match.MatchRequestDto;
+import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import com.recruita.api.match.service.MatchApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -21,16 +22,12 @@ public class MatchController {
   }
 
   @PostMapping(path = "#{@apiRoutePaths.matchPath}")
-  public Object match(@Valid @RequestBody MatchRequestDto request) {
-    return evaluate(request);
+  public MatchEvaluationResult match(@Valid @RequestBody MatchRequestDto request) {
+    return matchApplicationService.evaluate(request);
   }
 
   @PostMapping(path = "#{@apiRoutePaths.matchLegacyPath}")
-  public Object matchLegacy(@Valid @RequestBody MatchRequestDto request) {
-    return evaluate(request);
-  }
-
-  private Object evaluate(MatchRequestDto request) {
-    return matchApplicationService.evaluate(request).responseBody();
+  public MatchEvaluationResult matchLegacy(@Valid @RequestBody MatchRequestDto request) {
+    return matchApplicationService.evaluate(request);
   }
 }

@@ -37,8 +37,6 @@ class MatchApplicationServiceCacheTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     matchApplicationService.evaluate(request);

@@ -1,15 +1,14 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY } from 'rxjs';
 
 import { SharedModule } from 'src/app/shared/shared.module';
+import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
 import { ApplicantGridComponent } from './applicant-grid.component';
-import { Applicant } from '../../models/applicant.model';
-import { SortDirection } from '../../enums/sort-direction.enum';
-import * as Selectors from '../../state/applicants.selectors';
 
 describe('ApplicantGridComponent', () => {
   let component: ApplicantGridComponent;
@@ -17,25 +16,19 @@ describe('ApplicantGridComponent', () => {
   let mockStore: jasmine.SpyObj<Store>;
   let mockDialog: jasmine.SpyObj<MatDialog>;
 
-  const mockApplicant = new Applicant({
+  const mockApplicant = createApplicant({
     id: '1',
     name: 'John Doe',
     skills: ['Angular'],
   });
 
   beforeEach(async () => {
-    mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
-    mockStore.select.and.callFake((selector: any) => {
-      if (selector === Selectors.selectSortedApplicants) return of([]);
-      if (selector === Selectors.selectGlobalFilter) return of('');
-      if (selector === Selectors.selectFilterBySkill) return of(null);
-      if (selector === Selectors.selectFilterByStatus) return of(null);
-      if (selector === Selectors.selectFilterByCountry) return of(null);
-      if (selector === Selectors.selectSortBy) return of(null);
-      if (selector === Selectors.selectSortDirection)
-        return of(SortDirection.Asc);
-      return of(null);
-    });
+    mockStore = jasmine.createSpyObj('Store', [
+      'selectSignal',
+      'select',
+      'dispatch',
+    ]);
+    mockApplicantViewSelectSignals(mockStore);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockDialog.open.and.returnValue({ afterClosed: () => EMPTY } as any);
 

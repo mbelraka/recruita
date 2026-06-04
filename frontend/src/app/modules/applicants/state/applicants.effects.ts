@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { mapResponse } from '@ngrx/operators';
 import { catchError, concatMap, exhaustMap, map, of, switchMap } from 'rxjs';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
@@ -11,7 +12,7 @@ import {
   concatWithNotification,
 } from '../../../utilities/notification.utils';
 import { invalidateMatchResults } from '../../match/state/match.actions';
-import { ApplicantApiService } from '../services/applicant-api.service';
+import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
   addApplicant,
@@ -25,7 +26,7 @@ import {
   deleteApplicantSuccess,
   loadApplicants,
   loadApplicantsFailure,
-  loadApplicantsSuccess,
+  applicantsRosterLoaded,
   searchLocationSuggestions,
   searchLocationSuggestionsFailure,
   searchLocationSuggestionsSuccess,
@@ -39,17 +40,16 @@ import {
 export class ApplicantsEffects {
   public constructor(
     private readonly _actions$: Actions,
-    private readonly _applicantApi: ApplicantApiService,
+    private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _citySearchService: CitySearchService
   ) {}
 
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadApplicants),
-      // Latest refresh wins — drop an in-flight list when loadApplicants fires again.
       switchMap(() =>
-        this._applicantApi.list().pipe(
-          map((applicants) => loadApplicantsSuccess({ applicants })),
+        this._applicants.loadRoster().pipe(
+          map(() => applicantsRosterLoaded()),
           catchError((error: unknown) =>
             of(loadApplicantsFailure({ error: getErrorMessage(error) }))
           )
@@ -61,13 +61,13 @@ export class ApplicantsEffects {
   searchLocationSuggestions$ = createEffect(() =>
     this._actions$.pipe(
       ofType(searchLocationSuggestions),
-      // Latest query wins — cancel stale geocode requests as the user types.
       switchMap(({ query, language }) =>
         this._citySearchService.searchCityLabels(query, language).pipe(
-          map((suggestions) =>
-            searchLocationSuggestionsSuccess({ suggestions })
-          ),
-          catchError(() => of(searchLocationSuggestionsFailure()))
+          mapResponse({
+            next: (suggestions) =>
+              searchLocationSuggestionsSuccess({ suggestions }),
+            error: () => searchLocationSuggestionsFailure(),
+          })
         )
       )
     )
@@ -76,9 +76,8 @@ export class ApplicantsEffects {
   addApplicant$ = createEffect(() =>
     this._actions$.pipe(
       ofType(addApplicant),
-      // Ignore double-submit while create is running.
       exhaustMap(({ applicant }) =>
-        this._applicantApi.create(applicant).pipe(
+        this._applicants.add(applicant).pipe(
           concatMap((created) =>
             concatWithNotification(
               addApplicantSuccess({ applicant: created }),
@@ -104,7 +103,7 @@ export class ApplicantsEffects {
     this._actions$.pipe(
       ofType(updateApplicant),
       exhaustMap(({ applicant }) =>
-        this._applicantApi.update(applicant).pipe(
+        this._applicants.update(applicant).pipe(
           concatMap((updated) =>
             concatWithNotification(
               updateApplicantSuccess({ applicant: updated }),
@@ -137,7 +136,7 @@ export class ApplicantsEffects {
     this._actions$.pipe(
       ofType(deleteApplicant),
       exhaustMap(({ id }) =>
-        this._applicantApi.delete(id).pipe(
+        this._applicants.delete(id).pipe(
           concatMap(() =>
             concatWithNotification(deleteApplicantSuccess({ id }), {
               type: AppNotificationType.Info,

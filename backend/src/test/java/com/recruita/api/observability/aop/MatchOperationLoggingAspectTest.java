@@ -26,8 +26,6 @@ class MatchOperationLoggingAspectTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     assertThrows(MatchValidationException.class, () -> matchApplicationService.evaluate(request));

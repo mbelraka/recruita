@@ -3,38 +3,20 @@ package com.recruita.api.profile.mapper;
 import com.recruita.api.api.dto.profile.ProfileDto;
 import com.recruita.api.api.dto.profile.SaveProfileRequestDto;
 import com.recruita.api.persistence.entity.ProfileEntity;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class ProfileMapper {
+@Mapper(componentModel = "spring")
+public interface ProfileMapper {
 
-  public ProfileDto toDto(ProfileEntity entity) {
-    return new ProfileDto(
-        entity.getId(),
-        entity.isPrivacyNoticeAccepted(),
-        entity.getLastLanguage(),
-        entity.isOptionalRemoteTranslation(),
-        entity.isOptionalGeocoding(),
-        entity.isOptionalAiMatching(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
-  }
+  ProfileDto toDto(ProfileEntity entity);
 
-  public ProfileEntity toNewEntity(SaveProfileRequestDto request) {
-    ProfileEntity entity = new ProfileEntity();
-    applyRequest(entity, request);
-    return entity;
-  }
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  ProfileEntity toNewEntity(SaveProfileRequestDto request);
 
-  public void applyRequest(ProfileEntity entity, SaveProfileRequestDto request) {
-    entity.setId(request.id());
-    entity.setPrivacyNoticeAccepted(
-        request.privacyNoticeAccepted() != null && request.privacyNoticeAccepted());
-    entity.setLastLanguage(request.lastLanguage());
-    entity.setOptionalRemoteTranslation(
-        request.optionalRemoteTranslation() != null && request.optionalRemoteTranslation());
-    entity.setOptionalGeocoding(request.optionalGeocoding() != null && request.optionalGeocoding());
-    entity.setOptionalAiMatching(
-        request.optionalAiMatching() != null && request.optionalAiMatching());
-  }
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  void applyRequest(@MappingTarget ProfileEntity entity, SaveProfileRequestDto request);
 }

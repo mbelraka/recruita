@@ -5,7 +5,6 @@ import {
   EventEmitter,
   Output,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 
@@ -27,6 +26,11 @@ import {
   selectSortDirection,
   selectSortedApplicants,
 } from '../../state/applicants.selectors';
+import {
+  APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
+  applicantSortStoreKeyFromUiColumn,
+  applicantSortUiColumnFromStoreKey,
+} from '../../utilities/applicant-sort-column.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
 import { toggleSkillFilter } from '../../utilities/toggle-skill-filter.util';
 
@@ -41,47 +45,21 @@ export class ApplicantListComponent {
 
   public readonly pageSize = APP_CONFIG.APPLICANTS.LIST_ROWS_PER_PAGE;
 
-  public readonly applicants = toSignal(
-    this._store.select(selectSortedApplicants),
-    { initialValue: [] as Applicant[] }
+  public readonly applicants = this._store.selectSignal(selectSortedApplicants);
+  public readonly globalFilter = this._store.selectSignal(selectGlobalFilter);
+  public readonly activeSkillFilter =
+    this._store.selectSignal(selectFilterBySkill);
+  public readonly filterByStatus =
+    this._store.selectSignal(selectFilterByStatus);
+  public readonly filterByCountry = this._store.selectSignal(
+    selectFilterByCountry
   );
+  public readonly sortBy = this._store.selectSignal(selectSortBy);
+  public readonly sortDirection = this._store.selectSignal(selectSortDirection);
 
-  public readonly globalFilter = toSignal(
-    this._store.select(selectGlobalFilter),
-    { initialValue: '' }
+  public readonly matSortActiveColumn = computed(() =>
+    applicantSortUiColumnFromStoreKey(this.sortBy())
   );
-
-  public readonly activeSkillFilter = toSignal(
-    this._store.select(selectFilterBySkill),
-    { initialValue: null as string | null }
-  );
-
-  public readonly filterByStatus = toSignal(
-    this._store.select(selectFilterByStatus),
-    { initialValue: null as string | null }
-  );
-
-  public readonly filterByCountry = toSignal(
-    this._store.select(selectFilterByCountry),
-    { initialValue: null as string | null }
-  );
-
-  public readonly sortBy = toSignal(this._store.select(selectSortBy), {
-    initialValue: null as keyof Applicant | null,
-  });
-
-  public readonly sortDirection = toSignal(
-    this._store.select(selectSortDirection),
-    { initialValue: SortDirection.Asc }
-  );
-
-  public readonly matSortActiveColumn = computed(() => {
-    const k = this.sortBy();
-    if (!k) {
-      return '';
-    }
-    return k === 'availableFrom' ? 'availability' : String(k);
-  });
 
   public readonly matSortDirForUi = computed(() => {
     if (!this.sortBy()) {
@@ -108,7 +86,7 @@ export class ApplicantListComponent {
     'applicationStatus',
     'email',
     'phone',
-    'availability',
+    APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
     'location',
     'skills',
   ];
@@ -151,10 +129,7 @@ export class ApplicantListComponent {
       this._store.dispatch(setSortBy({ sortBy: null }));
       return;
     }
-    const key: keyof Applicant =
-      sort.active === 'availability'
-        ? 'availableFrom'
-        : (sort.active as keyof Applicant);
+    const key = applicantSortStoreKeyFromUiColumn(sort.active);
     if (!this.displayedColumns.includes(sort.active)) {
       return;
     }

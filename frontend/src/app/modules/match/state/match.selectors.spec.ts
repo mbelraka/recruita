@@ -1,7 +1,12 @@
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
-import { Applicant } from '../../applicants/models/applicant.model';
+import { createApplicant } from '../../applicants/utilities/applicant-domain.util';
 import { ViewTypes } from '../../applicants/enums/view-types.enum';
 import { SortDirection } from '../../applicants/enums/sort-direction.enum';
+import { initialAppState } from '../../../state/app.reducer';
+import {
+  buildApplicantEntityCache,
+  withEntityCache,
+} from '../../../testing/entity-cache-test.util';
 import { MatchFeatureState } from '../models/match-state.model';
 import {
   selectEvaluatedCandidatesCount,
@@ -16,7 +21,7 @@ import {
 
 describe('match selectors', () => {
   const resultA = {
-    applicant: new Applicant({ id: 'a1', name: 'Alice' }),
+    applicant: createApplicant({ id: 'a1', name: 'Alice' }),
     score: 90,
     reasoning: 'A',
     matchingSkills: ['Angular'],
@@ -31,7 +36,7 @@ describe('match selectors', () => {
     isTopCandidate: true,
   };
   const resultB = {
-    applicant: new Applicant({ id: 'a2', name: 'Bob' }),
+    applicant: createApplicant({ id: 'a2', name: 'Bob' }),
     score: 60,
     reasoning: 'B',
     matchingSkills: ['React'],
@@ -55,12 +60,9 @@ describe('match selectors', () => {
   };
 
   const fullState = {
+    app: initialAppState,
     [StateFeatures.Match]: matchState,
-    [StateFeatures.Applicants]: {
-      ids: ['a1', 'a2'],
-      entities: { a1: resultA.applicant, a2: resultB.applicant },
-      loading: false,
-      error: null,
+    applicants: {
       filter: '',
       sortBy: null,
       sortDirection: SortDirection.Asc,
@@ -70,6 +72,9 @@ describe('match selectors', () => {
       viewType: ViewTypes.GRID,
       locationSuggestions: [],
     },
+    ...withEntityCache(
+      buildApplicantEntityCache([resultA.applicant, resultB.applicant])
+    ),
   } as never;
 
   it('should select primitive match state fields', () => {

@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
@@ -31,7 +32,9 @@ class DefaultApplicantApplicationServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new DefaultApplicantApplicationService(repository, new ApplicantMapper());
+    service =
+        new DefaultApplicantApplicationService(
+            repository, Mappers.getMapper(ApplicantMapper.class));
   }
 
   @Test
@@ -74,6 +77,19 @@ class DefaultApplicantApplicationServiceTest {
 
     assertEquals("a-1", applicant.id());
     assertEquals("Alex", applicant.name());
+  }
+
+  @Test
+  void updateRejectsMismatchedPathId() {
+    assertThrows(
+        ApplicantConflictException.class,
+        () ->
+            service.update(
+                "a-1",
+                new SaveApplicantRequestDto(
+                    "other", "Updated", null, null, null, null, null, null, null, List.of(),
+                    null)));
+    verify(repository, never()).findById(any());
   }
 
   @Test

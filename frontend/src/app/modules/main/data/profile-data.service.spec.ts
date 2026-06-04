@@ -1,23 +1,46 @@
 import {
-  HttpClientTestingModule,
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import {
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { HttpUrlGenerator } from '@ngrx/data';
 
-import { APP_CONFIG } from '../config/app.config';
-import { Languages } from '../enums/language.enum';
-import { ProfileApiService } from './profile-api.service';
+import { APP_CONFIG } from '../../../config/app.config';
+import { HttpApiInterceptor } from '../../../core/http/http-api.interceptor';
+import { Languages } from '../../../enums/language.enum';
+import { ProfileDataService } from './profile-data.service';
+import type { Profile } from '../models/profile.model';
 
-describe('ProfileApiService', () => {
-  let service: ProfileApiService;
+const profileHttpUrlGenerator: HttpUrlGenerator = {
+  entityResource: () => `${APP_CONFIG.PROFILE.API.BASE_PATH}/`,
+  collectionResource: () => APP_CONFIG.PROFILE.API.BASE_PATH,
+  registerHttpResourceUrls: () => undefined,
+};
+
+describe('ProfileDataService', () => {
+  let service: ProfileDataService;
   let http: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [ProfileApiService],
+      providers: [
+        ProfileDataService,
+        { provide: HttpUrlGenerator, useValue: profileHttpUrlGenerator },
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: HttpApiInterceptor,
+          multi: true,
+        },
+        provideHttpClientTesting(),
+      ],
     });
-    service = TestBed.inject(ProfileApiService);
+    service = TestBed.inject(ProfileDataService);
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -26,7 +49,7 @@ describe('ProfileApiService', () => {
   });
 
   it('getById maps profile payload', (done) => {
-    service.getById('p-1').subscribe((profile) => {
+    service.getById('p-1').subscribe((profile: Profile) => {
       expect(profile.id).toBe('p-1');
       expect(profile.privacyNoticeAccepted).toBeTrue();
       done();
@@ -43,9 +66,9 @@ describe('ProfileApiService', () => {
     });
   });
 
-  it('create posts privacy acceptance, language, and consent options', (done) => {
+  it('createProfile posts privacy acceptance, language, and consent options', (done) => {
     service
-      .create({
+      .createProfile({
         id: 'p-1',
         privacyNoticeAccepted: true,
         lastLanguage: Languages.German,
@@ -53,7 +76,7 @@ describe('ProfileApiService', () => {
         optionalGeocoding: true,
         optionalAiMatching: false,
       })
-      .subscribe((profile) => {
+      .subscribe((profile: Profile) => {
         expect(profile.privacyNoticeAccepted).toBeTrue();
         expect(profile.lastLanguage).toBe(Languages.German);
         expect(profile.optionalRemoteTranslation).toBeTrue();
@@ -74,44 +97,22 @@ describe('ProfileApiService', () => {
     });
   });
 
-  it('save creates when no profile exists', (done) => {
+  it('updateProfile updates an existing profile row', (done) => {
     const request = {
-      id: APP_CONFIG.PROFILE.DEFAULT_ID,
-      privacyNoticeAccepted: true,
-      lastLanguage: Languages.German,
-      optionalRemoteTranslation: false,
-      optionalGeocoding: false,
-      optionalAiMatching: false,
-    };
-
-    service.save(request, null).subscribe((profile) => {
-      expect(profile.id).toBe(APP_CONFIG.PROFILE.DEFAULT_ID);
-      done();
-    });
-
-    const req = http.expectOne(APP_CONFIG.PROFILE.API.BASE_PATH);
-    expect(req.request.method).toBe('POST');
-    req.flush({ ...request, lastLanguage: 'de' });
-  });
-
-  it('save updates when the admin profile exists', (done) => {
-    const existing = {
       id: APP_CONFIG.PROFILE.DEFAULT_ID,
       privacyNoticeAccepted: false,
-      lastLanguage: Languages.English,
+      lastLanguage: Languages.French,
       optionalRemoteTranslation: false,
       optionalGeocoding: false,
       optionalAiMatching: false,
     };
-    const request = {
-      ...existing,
-      lastLanguage: Languages.French,
-    };
 
-    service.save(request, existing).subscribe((profile) => {
-      expect(profile.lastLanguage).toBe(Languages.French);
-      done();
-    });
+    service
+      .updateProfile(APP_CONFIG.PROFILE.DEFAULT_ID, request)
+      .subscribe((profile: Profile) => {
+        expect(profile.lastLanguage).toBe(Languages.French);
+        done();
+      });
 
     const req = http.expectOne(
       `${APP_CONFIG.PROFILE.API.BASE_PATH}/${APP_CONFIG.PROFILE.DEFAULT_ID}`

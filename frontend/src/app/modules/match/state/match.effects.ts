@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import {
-  Observable,
   catchError,
   combineLatest,
   concatMap,
   filter,
   map,
+  Observable,
   switchMap,
   take,
   timeout,
@@ -69,8 +69,11 @@ export class MatchEffects {
   ) {}
 
   private _evaluateAfterInputsReady$(): Observable<Action> {
-    return this._store.select(selectApplicantsReady).pipe(
-      filter((ready) => ready),
+    return combineLatest([
+      this._store.select(selectApplicantsReady),
+      this._store.select(selectAllApplicants),
+    ]).pipe(
+      filter(([ready, applicants]) => ready || applicants.length > 0),
       take(1),
       concatMap(() => this._snapshotEvaluationInputs$()),
       concatMap((inputs) => this._runEvaluation$(inputs)),

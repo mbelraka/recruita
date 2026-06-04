@@ -1,4 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, ElementRef } from '@angular/core';
+import { createApplicant } from '../../utilities/applicant-domain.util';
 import {
   ComponentFixture,
   TestBed,
@@ -13,8 +14,8 @@ import { of } from 'rxjs';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantsComponent } from './applicants.component';
 import { ViewTypes } from '../../enums/view-types.enum';
+import { ApplicationStatus } from '../../enums/application-status.enum';
 import { SortDirection } from '../../enums/sort-direction.enum';
-import { Applicant } from '../../models/applicant.model';
 import { ApplicantEditDialogService } from '../../services/applicant-edit-dialog.service';
 import * as ApplicantsActions from '../../state/applicants.actions';
 
@@ -178,9 +179,18 @@ describe('ApplicantsComponent', () => {
     });
 
     it('should filter by status', () => {
+      component.onStatusFilterChange(ApplicationStatus.Received);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        ApplicantsActions.setFilterByStatus({
+          status: ApplicationStatus.Received,
+        })
+      );
+    });
+
+    it('should ignore unknown status values', () => {
       component.onStatusFilterChange('new');
       expect(mockStore.dispatch).toHaveBeenCalledWith(
-        ApplicantsActions.setFilterByStatus({ status: 'new' })
+        ApplicantsActions.setFilterByStatus({ status: null })
       );
     });
 
@@ -265,7 +275,7 @@ describe('ApplicantsComponent', () => {
     });
 
     it('delegates edit flow to ApplicantEditDialogService', () => {
-      const existingApplicant = new Applicant({ id: '1', name: 'John' });
+      const existingApplicant = createApplicant({ id: '1', name: 'John' });
 
       component.openForm(existingApplicant);
 

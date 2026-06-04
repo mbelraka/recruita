@@ -66,6 +66,9 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
   @Override
   @Transactional
   public ApplicantDto update(String id, SaveApplicantRequestDto request) {
+    if (!id.equals(request.id())) {
+      throw new ApplicantConflictException(ApplicantApiErrorMessage.ID_MISMATCH.message());
+    }
     ApplicantEntity entity =
         repository
             .findById(id)

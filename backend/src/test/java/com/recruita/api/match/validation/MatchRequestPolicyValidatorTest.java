@@ -28,8 +28,6 @@ class MatchRequestPolicyValidatorTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     MatchValidationException ex =
@@ -47,8 +45,6 @@ class MatchRequestPolicyValidatorTest {
             "bad model!",
             null,
             null,
-            null,
-            null,
             null);
 
     MatchValidationException ex =
@@ -64,8 +60,6 @@ class MatchRequestPolicyValidatorTest {
             List.of(new MatchCandidateDto("a", List.of("java"), 3.0, "Engineer")),
             true,
             "llama-3.3-70b-versatile",
-            null,
-            null,
             null,
             null,
             null);

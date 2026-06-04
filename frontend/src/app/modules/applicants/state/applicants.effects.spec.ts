@@ -1,19 +1,19 @@
 import { TestBed } from '@angular/core/testing';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { firstValueFrom, of, ReplaySubject, throwError } from 'rxjs';
 
-import { Applicant } from '../models/applicant.model';
-import { ApplicantApiService } from '../services/applicant-api.service';
+import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
   addApplicant,
   addApplicantFailure,
   addApplicantSuccess,
+  applicantsRosterLoaded,
   deleteApplicant,
   deleteApplicantFailure,
   loadApplicants,
   loadApplicantsFailure,
-  loadApplicantsSuccess,
   updateApplicant,
   updateApplicantFailure,
 } from './applicants.actions';
@@ -31,9 +31,9 @@ describe('ApplicantsEffects', () => {
     >
   >;
   let effects: ApplicantsEffects;
-  let api: jasmine.SpyObj<ApplicantApiService>;
+  let collection: jasmine.SpyObj<ApplicantEntityCollectionService>;
 
-  const sample = new Applicant({
+  const sample = createApplicant({
     id: 'a-1',
     name: 'Alex',
     email: 'alex@example.com',
@@ -43,18 +43,16 @@ describe('ApplicantsEffects', () => {
 
   beforeEach(() => {
     actions$ = new ReplaySubject(1);
-    api = jasmine.createSpyObj<ApplicantApiService>('ApplicantApiService', [
-      'list',
-      'create',
-      'update',
-      'delete',
-    ]);
+    collection = jasmine.createSpyObj<ApplicantEntityCollectionService>(
+      'ApplicantEntityCollectionService',
+      ['loadRoster', 'add', 'update', 'delete']
+    );
 
     TestBed.configureTestingModule({
       providers: [
         ApplicantsEffects,
         provideMockActions(() => actions$),
-        { provide: ApplicantApiService, useValue: api },
+        { provide: ApplicantEntityCollectionService, useValue: collection },
         {
           provide: CitySearchService,
           useValue: jasmine.createSpyObj<CitySearchService>(
@@ -68,34 +66,38 @@ describe('ApplicantsEffects', () => {
     effects = TestBed.inject(ApplicantsEffects);
   });
 
-  it('loads applicants from the API', async () => {
-    api.list.and.returnValue(of([sample]));
+  it('loads applicants through NgRx Data', async () => {
+    collection.loadRoster.and.returnValue(of([sample]));
     actions$.next(loadApplicants());
 
     const action = await firstValueFrom(effects.loadApplicants$);
-    expect(action).toEqual(loadApplicantsSuccess({ applicants: [sample] }));
+    expect(action).toEqual(applicantsRosterLoaded());
   });
 
   it('dispatches loadApplicantsFailure when the API fails', async () => {
-    api.list.and.returnValue(throwError(() => new Error('offline')));
+    collection.loadRoster.and.returnValue(
+      throwError(() => new Error('offline'))
+    );
     actions$.next(loadApplicants());
 
     const action = await firstValueFrom(effects.loadApplicants$);
     expect(action).toEqual(loadApplicantsFailure({ error: 'offline' }));
   });
 
-  it('creates an applicant from the API response without refetching the roster', async () => {
-    api.create.and.returnValue(of(sample));
+  it('creates an applicant from the collection response without refetching the roster', async () => {
+    collection.add.and.returnValue(of(sample));
     actions$.next(addApplicant({ applicant: sample }));
 
     const action = await firstValueFrom(effects.addApplicant$);
-    expect(api.create).toHaveBeenCalledWith(sample);
-    expect(api.list).not.toHaveBeenCalled();
+    expect(collection.add).toHaveBeenCalledWith(sample);
+    expect(collection.loadRoster).not.toHaveBeenCalled();
     expect(action).toEqual(addApplicantSuccess({ applicant: sample }));
   });
 
   it('dispatches addApplicantFailure when create fails', async () => {
-    api.create.and.returnValue(throwError(() => new Error('create failed')));
+    collection.add.and.returnValue(
+      throwError(() => new Error('create failed'))
+    );
     actions$.next(addApplicant({ applicant: sample }));
 
     const action = await firstValueFrom(effects.addApplicant$);
@@ -103,7 +105,7 @@ describe('ApplicantsEffects', () => {
   });
 
   it('dispatches updateApplicantFailure when update fails', async () => {
-    api.update.and.returnValue(
+    collection.update.and.returnValue(
       throwError(() => new Error('Applicant not found.'))
     );
     actions$.next(updateApplicant({ applicant: sample }));
@@ -115,7 +117,9 @@ describe('ApplicantsEffects', () => {
   });
 
   it('dispatches deleteApplicantFailure when delete fails', async () => {
-    api.delete.and.returnValue(throwError(() => new Error('delete failed')));
+    collection.delete.and.returnValue(
+      throwError(() => new Error('delete failed'))
+    );
     actions$.next(deleteApplicant({ id: sample.id }));
 
     const action = await firstValueFrom(effects.deleteApplicant$);

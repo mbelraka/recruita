@@ -25,8 +25,6 @@ class MatchRequestPolicyValidatorCandidateTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     assertThrows(MatchValidationException.class, () -> validator.validate(request));
@@ -39,8 +37,6 @@ class MatchRequestPolicyValidatorCandidateTest {
             "Role",
             List.of(new MatchCandidateDto("a", List.of("java"), Double.NaN, "Dev")),
             true,
-            null,
-            null,
             null,
             null,
             null,

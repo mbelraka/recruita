@@ -124,7 +124,7 @@ public class SecurityProperties {
 
   public static class CorsProperties {
     private String allowedOrigins = "http://localhost:4200";
-    private String allowedMethods = "GET,HEAD,POST,OPTIONS";
+    private String allowedMethods = "GET,HEAD,POST,PUT,DELETE,OPTIONS";
     private String allowedHeaders = "Content-Type";
     @Positive private long maxAgeSeconds = 86_400L;
     private boolean allowCredentials = false;

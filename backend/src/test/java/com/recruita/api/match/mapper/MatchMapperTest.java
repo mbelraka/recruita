@@ -30,8 +30,6 @@ class MatchMapperTest {
             null,
             null,
             null,
-            null,
-            null,
             null);
 
     MatchRequest domain = requestMapper.toDomain(dto);

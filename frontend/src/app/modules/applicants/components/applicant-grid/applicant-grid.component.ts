@@ -10,14 +10,12 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
-import { SortDirection } from '../../enums/sort-direction.enum';
 import {
   selectFilterByCountry,
   selectFilterBySkill,
@@ -48,39 +46,19 @@ export class ApplicantGridComponent implements AfterViewInit {
   private readonly _cardsMeasure =
     viewChild<ElementRef<HTMLElement>>('cardsMeasure');
 
-  public readonly applicants = toSignal(
-    this._store.select(selectSortedApplicants),
-    { initialValue: [] as Applicant[] }
-  );
+  private readonly _store = inject(Store<FullState>);
 
-  public readonly globalFilter = toSignal(
-    this._store.select(selectGlobalFilter),
-    { initialValue: '' }
+  public readonly applicants = this._store.selectSignal(selectSortedApplicants);
+  public readonly globalFilter = this._store.selectSignal(selectGlobalFilter);
+  public readonly activeSkillFilter =
+    this._store.selectSignal(selectFilterBySkill);
+  public readonly filterByStatus =
+    this._store.selectSignal(selectFilterByStatus);
+  public readonly filterByCountry = this._store.selectSignal(
+    selectFilterByCountry
   );
-
-  public readonly activeSkillFilter = toSignal(
-    this._store.select(selectFilterBySkill),
-    { initialValue: null as string | null }
-  );
-
-  public readonly filterByStatus = toSignal(
-    this._store.select(selectFilterByStatus),
-    { initialValue: null as string | null }
-  );
-
-  public readonly filterByCountry = toSignal(
-    this._store.select(selectFilterByCountry),
-    { initialValue: null as string | null }
-  );
-
-  public readonly sortBy = toSignal(this._store.select(selectSortBy), {
-    initialValue: null as keyof Applicant | null,
-  });
-
-  public readonly sortDirection = toSignal(
-    this._store.select(selectSortDirection),
-    { initialValue: SortDirection.Asc }
-  );
+  public readonly sortBy = this._store.selectSignal(selectSortBy);
+  public readonly sortDirection = this._store.selectSignal(selectSortDirection);
 
   /** Matches `repeat(auto-fill, minmax(264px, 1fr))` + 16px gap in SCSS. */
   public readonly columnsPerRow = signal(1);
@@ -95,7 +73,7 @@ export class ApplicantGridComponent implements AfterViewInit {
   public readonly pageNumbers = this._pagination.pageNumbers;
   public readonly pagedApplicants = this._pagination.pagedItems;
 
-  public constructor(private readonly _store: Store<FullState>) {
+  public constructor() {
     effect(() => {
       this.globalFilter();
       this.activeSkillFilter();

@@ -28,7 +28,7 @@ import { ApplicationStatus } from '../../enums/application-status.enum';
   },
 })
 export class ApplicationStatusChipComponent {
-  @Input() public status: ApplicationStatus | string | null = null;
+  @Input() public status: ApplicationStatus | null = null;
 
   protected readonly applicationStatuses = ApplicationStatus;
 

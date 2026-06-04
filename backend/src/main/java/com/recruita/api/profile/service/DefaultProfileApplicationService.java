@@ -47,6 +47,9 @@ public class DefaultProfileApplicationService implements ProfileApplicationServi
   @Override
   @Transactional
   public ProfileDto update(String id, SaveProfileRequestDto request) {
+    if (!id.equals(request.id())) {
+      throw new ProfileConflictException(ProfileApiErrorMessage.ID_MISMATCH.message());
+    }
     ProfileEntity entity =
         repository
             .findById(id)

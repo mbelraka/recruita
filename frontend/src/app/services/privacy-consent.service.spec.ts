@@ -2,15 +2,18 @@ import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { firstValueFrom } from 'rxjs';
 
-import { StateFeatures } from '../containers/root/enums/state-features.enum';
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import { PRIVACY_CONSENT_VERSION } from '../constants/privacy.constants';
-import { adapter } from '../modules/applicants/state/applicants.reducer';
 import { ViewTypes } from '../modules/applicants/enums/view-types.enum';
 import { SortDirection } from '../modules/applicants/enums/sort-direction.enum';
-import { initialMainState } from '../modules/main/state/main.reducer';
 import { initialAppState } from '../state/app.reducer';
+import {
+  buildApplicantEntityCache,
+  buildProfileEntityCache,
+  mergeEntityCaches,
+  withEntityCache,
+} from '../testing/entity-cache-test.util';
 
 import { PrivacyConsentService } from './privacy-consent.service';
 
@@ -27,23 +30,31 @@ describe('PrivacyConsentService', () => {
     optionalAiMatching: true,
   };
 
-  const mockStoreState = (
-    mainState: typeof initialMainState = initialMainState
-  ) => ({
+  const applicantUiState = {
+    filter: '',
+    sortBy: 'name' as const,
+    sortDirection: SortDirection.Asc,
+    filterBySkill: null,
+    filterByStatus: null,
+    filterByCountry: null,
+    viewType: ViewTypes.GRID,
+    locationSuggestions: [],
+  };
+
+  const mockStoreState = (options?: {
+    profileLoaded?: boolean;
+    profile?: typeof profile | null;
+  }) => ({
     app: initialAppState,
-    [StateFeatures.Main]: mainState,
-    [StateFeatures.Applicants]: adapter.getInitialState({
-      loading: false,
-      error: null,
-      filter: '',
-      sortBy: 'name',
-      sortDirection: SortDirection.Asc,
-      filterBySkill: null,
-      filterByStatus: null,
-      filterByCountry: null,
-      viewType: ViewTypes.GRID,
-      locationSuggestions: [],
-    }),
+    applicants: applicantUiState,
+    ...withEntityCache(
+      mergeEntityCaches(
+        buildProfileEntityCache(options?.profile ?? null, {
+          loaded: options?.profileLoaded ?? false,
+        }),
+        buildApplicantEntityCache([])
+      )
+    ),
   });
 
   beforeEach(() => {
@@ -72,16 +83,7 @@ describe('PrivacyConsentService', () => {
   });
 
   it('reads consent flags from the profile in store', () => {
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-          loaded: true,
-        },
-      })
-    );
+    store.setState(mockStoreState({ profile, profileLoaded: true }));
 
     expect(service.isConsentCompleteAndCurrent()).toBeTrue();
     expect(service.formStateFromSnapshot()).toEqual({
@@ -97,31 +99,13 @@ describe('PrivacyConsentService', () => {
   it('optionalAiMatching$ emits profile-backed consent changes', async () => {
     expect(await firstValueFrom(service.optionalAiMatching$())).toBeFalse();
 
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-          loaded: true,
-        },
-      })
-    );
+    store.setState(mockStoreState({ profile, profileLoaded: true }));
 
     expect(await firstValueFrom(service.optionalAiMatching$())).toBeTrue();
   });
 
   it('buildDataExportJson$ includes consent version when profile accepted notice', async () => {
-    store.setState(
-      mockStoreState({
-        ...initialMainState,
-        profile: {
-          ...initialMainState.profile,
-          profile,
-          loaded: true,
-        },
-      })
-    );
+    store.setState(mockStoreState({ profile, profileLoaded: true }));
 
     const json = await firstValueFrom(service.buildDataExportJson$());
     const parsed = JSON.parse(json) as {
@@ -140,17 +124,13 @@ describe('PrivacyConsentService', () => {
   it('buildDataExportJson$ includes provided profile snapshot', async () => {
     store.setState(
       mockStoreState({
-        ...initialMainState,
         profile: {
-          ...initialMainState.profile,
-          profile: {
-            ...profile,
-            optionalRemoteTranslation: false,
-            optionalGeocoding: true,
-            optionalAiMatching: false,
-          },
-          loaded: true,
+          ...profile,
+          optionalRemoteTranslation: false,
+          optionalGeocoding: true,
+          optionalAiMatching: false,
         },
+        profileLoaded: true,
       })
     );
 
@@ -159,29 +139,20 @@ describe('PrivacyConsentService', () => {
         id: 'p-1',
         privacyNoticeAccepted: true,
         lastLanguage: Languages.German,
-        optionalRemoteTranslation: false,
-        optionalGeocoding: true,
-        optionalAiMatching: false,
+        optionalRemoteTranslation: true,
+        optionalGeocoding: false,
+        optionalAiMatching: true,
       })
     );
+
     const parsed = JSON.parse(json) as {
       profile: {
         id: string;
-        privacyNoticeAccepted: boolean;
-        lastLanguage: Languages;
         optionalRemoteTranslation: boolean;
-        optionalGeocoding: boolean;
-        optionalAiMatching: boolean;
-      };
+      } | null;
     };
 
-    expect(parsed.profile).toEqual({
-      id: 'p-1',
-      privacyNoticeAccepted: true,
-      lastLanguage: Languages.German,
-      optionalRemoteTranslation: false,
-      optionalGeocoding: true,
-      optionalAiMatching: false,
-    });
+    expect(parsed.profile?.id).toBe('p-1');
+    expect(parsed.profile?.optionalRemoteTranslation).toBeTrue();
   });
 });

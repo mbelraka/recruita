@@ -32,7 +32,7 @@ public class GlobalApiExceptionHandler {
         ex.getBindingResult().getFieldErrors().stream()
             .findFirst()
             .map(FieldError::getDefaultMessage)
-            .orElse(properties.getMatch().getMessages().getJobDescriptionRequired());
+            .orElse(properties.getApi().getValidation().getDefaultMessage());
     return problem(HttpStatus.BAD_REQUEST, message);
   }
 

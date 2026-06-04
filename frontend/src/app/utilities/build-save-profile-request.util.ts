@@ -48,17 +48,6 @@ export function buildPrivacyConsentSaveRequest(
   });
 }
 
-export function profileFromSaveRequest(request: SaveProfileRequest): Profile {
-  return {
-    id: request.id,
-    privacyNoticeAccepted: request.privacyNoticeAccepted,
-    lastLanguage: request.lastLanguage,
-    optionalRemoteTranslation: request.optionalRemoteTranslation,
-    optionalGeocoding: request.optionalGeocoding,
-    optionalAiMatching: request.optionalAiMatching,
-  };
-}
-
 export function profilePrivacyChoicesFrom(
   profile: Pick<
     Profile,

@@ -1,5 +1,4 @@
-import { ProfileState } from './profile-state.model';
-
+/** Reserved for future cross-route main feature state; profile rows live in NgRx Data. */
 export interface MainState {
-  profile: ProfileState;
+  readonly _reserved?: never;
 }

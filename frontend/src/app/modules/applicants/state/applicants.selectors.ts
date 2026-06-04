@@ -1,18 +1,20 @@
 import { createSelector } from '@ngrx/store';
 
+import {
+  selectAllFromEntityCollection,
+  selectEntityCollectionLoaded,
+  selectEntityCollectionLoading,
+} from '../../../core/entity-data/entity-cache.selectors';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
-import { ApplicantState } from '../models/applicant-state.model';
+import { ApplicantUiState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
-import { adapter } from './applicants.reducer';
 
 const APPLICATION_STATUS_ORDER = Object.values(ApplicationStatus);
-const EMPTY_APPLICANT_STATE: ApplicantState = adapter.getInitialState({
-  loading: false,
-  loaded: false,
-  error: null,
+const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
   filter: '',
   sortBy: 'name',
   sortDirection: SortDirection.Asc,
@@ -21,53 +23,27 @@ const EMPTY_APPLICANT_STATE: ApplicantState = adapter.getInitialState({
   filterByCountry: null,
   viewType: ViewTypes.GRID,
   locationSuggestions: [],
-});
+};
 
-/** Country segment from `location` (last comma-separated part, or whole string). */
-export function countryFromLocation(
-  location: string | undefined
-): string | null {
-  const raw = location?.trim();
-  if (!raw) {
-    return null;
-  }
-  const parts = raw
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-  if (parts.length === 0) {
-    return null;
-  }
-  return parts[parts.length - 1] ?? null;
-}
+const selectApplicantUiState = (state: {
+  [StateFeatures.Applicants]?: ApplicantUiState;
+}): ApplicantUiState | undefined => state[StateFeatures.Applicants];
 
-// Feature Selector
-const selectApplicantState = (state: {
-  [StateFeatures.Applicants]?: ApplicantState;
-}): ApplicantState | undefined => state[StateFeatures.Applicants];
-const selectApplicantStateSafe = createSelector(
-  selectApplicantState,
-  (state): ApplicantState => state ?? EMPTY_APPLICANT_STATE
+const selectApplicantUiStateSafe = createSelector(
+  selectApplicantUiState,
+  (state): ApplicantUiState => state ?? EMPTY_APPLICANT_UI_STATE
 );
 
-// Entity Adapter Selectors
-const { selectAll } = adapter.getSelectors();
-
-// Select All Applicants
-export const selectAllApplicants = createSelector(
-  selectApplicantStateSafe,
-  selectAll
+export const selectAllApplicants = selectAllFromEntityCollection<Applicant>(
+  RecruitaEntityNames.Applicant
 );
 
-// Select Loading State
-export const selectLoading = createSelector(
-  selectApplicantStateSafe,
-  (state): boolean => state.loading
+export const selectLoading = selectEntityCollectionLoading(
+  RecruitaEntityNames.Applicant
 );
 
-export const selectApplicantsLoaded = createSelector(
-  selectApplicantStateSafe,
-  (state): boolean => state.loaded
+export const selectApplicantsLoaded = selectEntityCollectionLoaded(
+  RecruitaEntityNames.Applicant
 );
 
 export const selectApplicantsReady = createSelector(
@@ -76,46 +52,43 @@ export const selectApplicantsReady = createSelector(
   (loaded, loading) => loaded && !loading
 );
 
-// Select View Type
 export const selectViewType = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): ViewTypes => state.viewType
 );
 
-// Select Global Filter
 export const selectGlobalFilter = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): string => state.filter
 );
 
 export const selectFilterBySkill = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): string | null => state.filterBySkill
 );
 
 export const selectFilterByStatus = createSelector(
-  selectApplicantStateSafe,
-  (state): string | null => state.filterByStatus
+  selectApplicantUiStateSafe,
+  (state): ApplicationStatus | null => state.filterByStatus
 );
 
 export const selectFilterByCountry = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): string | null => state.filterByCountry
 );
 
 export const selectUniqueApplicationStatuses = createSelector(
   selectAllApplicants,
-  (applicants): string[] => {
-    const set = new Set<string>();
+  (applicants): ApplicationStatus[] => {
+    const set = new Set<ApplicationStatus>();
     for (const a of applicants) {
-      const s = a.applicationStatus?.trim();
-      if (s) {
-        set.add(s);
+      if (a.applicationStatus) {
+        set.add(a.applicationStatus);
       }
     }
     return [...set].sort((a, b) => {
-      const ia = APPLICATION_STATUS_ORDER.indexOf(a as ApplicationStatus);
-      const ib = APPLICATION_STATUS_ORDER.indexOf(b as ApplicationStatus);
+      const ia = APPLICATION_STATUS_ORDER.indexOf(a);
+      const ib = APPLICATION_STATUS_ORDER.indexOf(b);
       const ra = ia === -1 ? 999 : ia;
       const rb = ib === -1 ? 999 : ib;
       if (ra !== rb) {
@@ -143,19 +116,37 @@ export const selectUniqueCountries = createSelector(
 );
 
 export const selectLocationSuggestions = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): string[] => state.locationSuggestions ?? []
 );
 
 export const selectSortBy = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): keyof Applicant | null => state.sortBy
 );
 
 export const selectSortDirection = createSelector(
-  selectApplicantStateSafe,
+  selectApplicantUiStateSafe,
   (state): SortDirection => state.sortDirection ?? SortDirection.Asc
 );
+
+/** Country segment from `location` (last comma-separated part, or whole string). */
+export function countryFromLocation(
+  location: string | undefined
+): string | null {
+  const raw = location?.trim();
+  if (!raw) {
+    return null;
+  }
+  const parts = raw
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length === 0) {
+    return null;
+  }
+  return parts[parts.length - 1] ?? null;
+}
 
 function compareApplicantValues(
   a: Applicant,
@@ -206,7 +197,6 @@ function compareApplicantValues(
   });
 }
 
-// Helper Functions
 const applyFilters = (
   applicants: Applicant[],
   globalFilter: string,
@@ -305,7 +295,6 @@ const selectFilteredApplicants = createSelector(
     )
 );
 
-// Sorted Applicants
 export const selectSortedApplicants = createSelector(
   selectFilteredApplicants,
   selectSortBy,

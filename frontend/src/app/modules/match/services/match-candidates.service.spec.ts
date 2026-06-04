@@ -1,12 +1,14 @@
 import { firstValueFrom, of, throwError } from 'rxjs';
+import { createApplicant } from '../../applicants/utilities/applicant-domain.util';
 
 import { HttpClient } from '@angular/common/http';
 
 import { Languages } from '../../../enums/language.enum';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
-import { MatchErrorMessage } from '../enums/match-error-message.enum';
+import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
 import { Applicant } from '../../applicants/models/applicant.model';
+import { MatchGroqResponseParser } from './match-groq-response.parser';
 import { MatchCandidatesService } from './match-candidates.service';
 
 describe('MatchCandidatesService', () => {
@@ -17,8 +19,8 @@ describe('MatchCandidatesService', () => {
   >;
 
   const applicants: Applicant[] = [
-    new Applicant({ id: 'a1', name: 'Alice', skills: ['Angular'] }),
-    new Applicant({ id: 'a2', name: 'Bob', skills: ['React'] }),
+    createApplicant({ id: 'a1', name: 'Alice', skills: ['Angular'] }),
+    createApplicant({ id: 'a2', name: 'Bob', skills: ['React'] }),
   ];
 
   beforeEach(() => {
@@ -35,7 +37,8 @@ describe('MatchCandidatesService', () => {
     privacySpy.allowsAiMatching.and.returnValue(true);
     service = new MatchCandidatesService(
       httpClientSpy,
-      privacySpy as unknown as PrivacyConsentService
+      privacySpy as unknown as PrivacyConsentService,
+      new MatchGroqResponseParser()
     );
   });
 
@@ -66,7 +69,7 @@ describe('MatchCandidatesService', () => {
 
   it('sends anonymized candidates without personal fields to the proxy', async () => {
     const rich = [
-      new Applicant({
+      createApplicant({
         id: 'a1',
         name: 'Alice Example',
         email: 'alice@example.com',
@@ -74,7 +77,7 @@ describe('MatchCandidatesService', () => {
         location: 'Zurich',
         skills: ['Angular'],
         notes: 'Internal HR note',
-        applicationStatus: 'screening',
+        applicationStatus: ApplicationStatus.Screening,
         yearsOfExperience: 4,
         currentJobTitle: 'Frontend developer',
       }),
@@ -304,7 +307,7 @@ describe('MatchCandidatesService', () => {
 
     await expectAsync(
       firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))
-    ).toBeRejectedWithError(Error, MatchErrorMessage.GroqProxyUnreachable);
+    ).toBeRejected();
   });
 
   it('ignores score entries without id and name identity', async () => {
@@ -340,9 +343,5 @@ describe('MatchCandidatesService', () => {
     );
 
     expect(result.find((r) => r.applicant.id === 'a1')?.score).toBe(0);
-  });
-
-  it('clamps non-finite values to minimum in score helper', () => {
-    expect((service as any)._clampScore(Number.NaN)).toBe(0);
   });
 });

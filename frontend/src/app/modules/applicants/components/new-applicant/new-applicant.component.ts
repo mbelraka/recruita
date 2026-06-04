@@ -8,10 +8,11 @@ import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 
 import { APP_CONFIG } from '../../../../config/app.config';
 import { Languages } from '../../../../enums/language.enum';
+import { FullState } from '../../../../models/full-state.model';
 import { selectAppLanguage } from '../../../../state/app.selectors';
 import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
+import { NEW_APPLICANT_DIALOG_UPDATE_FLAG } from '../../constants/new-applicant-dialog.constants';
 import { ApplicationStatus } from '../../enums/application-status.enum';
-import { Applicant } from '../../models/applicant.model';
 import { NewApplicantDialogData } from '../../models/new-applicant-dialog-data.model';
 import type { NewApplicantDialogCloseResult } from '../../models/new-applicant-dialog-close-result.model';
 import {
@@ -19,6 +20,7 @@ import {
   searchLocationSuggestions,
 } from '../../state/applicants.actions';
 import { selectLocationSuggestions } from '../../state/applicants.selectors';
+import { createApplicant } from '../../utilities/applicant-domain.util';
 import { applicantPhonePatternValidator } from '../../../../utilities/validators/applicant-phone-pattern.validator';
 import { applicantYearsOfExperienceValidator } from '../../../../utilities/validators/applicant-years-of-experience.validators';
 import { emailFieldValidator } from '../../../../utilities/validators/email-field.validator';
@@ -66,8 +68,7 @@ export class NewApplicantComponent {
     yearsOfExperience: new FormControl<number | null>(null, {
       validators: [Validators.required, applicantYearsOfExperienceValidator],
     }),
-    applicationStatus: new FormControl('', {
-      nonNullable: true,
+    applicationStatus: new FormControl<ApplicationStatus | null>(null, {
       validators: Validators.required,
     }),
     currentJobTitle: new FormControl('', {
@@ -89,7 +90,7 @@ export class NewApplicantComponent {
       NewApplicantComponent,
       NewApplicantDialogCloseResult | undefined
     >,
-    private readonly _store: Store,
+    private readonly _store: Store<FullState>,
     private readonly _privacy: PrivacyConsentService,
     @Optional()
     @Inject(MAT_DIALOG_DATA)
@@ -108,7 +109,7 @@ export class NewApplicantComponent {
         phone: initial.phone ?? '',
         location: initial.location ?? '',
         yearsOfExperience: initial.yearsOfExperience ?? null,
-        applicationStatus: initial.applicationStatus ?? '',
+        applicationStatus: initial.applicationStatus ?? null,
         currentJobTitle: initial.currentJobTitle ?? '',
         availableFrom: initial.availableFrom ?? null,
         notes: initial.notes ?? '',
@@ -156,14 +157,14 @@ export class NewApplicantComponent {
     } = this.fgNewApplicant.getRawValue();
     const trimmedNotes = notes.trim();
     const id = this._editingId ?? crypto.randomUUID();
-    const applicant = new Applicant({
+    const applicant = createApplicant({
       id,
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),
       location: location.trim(),
       yearsOfExperience: yearsOfExperience ?? undefined,
-      applicationStatus,
+      applicationStatus: applicationStatus ?? undefined,
       currentJobTitle: currentJobTitle.trim(),
       availableFrom: availableFrom ?? undefined,
       skills: [...this.skills],
@@ -171,7 +172,11 @@ export class NewApplicantComponent {
     });
     this._store.dispatch(clearLocationSuggestions());
     if (this.isEditMode) {
-      this._dialogRef.close({ applicant, isUpdate: true });
+      this._dialogRef.close({
+        applicant,
+        [NEW_APPLICANT_DIALOG_UPDATE_FLAG.KEY]:
+          NEW_APPLICANT_DIALOG_UPDATE_FLAG.VALUE,
+      });
     } else {
       this._dialogRef.close(applicant);
     }

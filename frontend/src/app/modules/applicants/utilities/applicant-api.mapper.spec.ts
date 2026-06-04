@@ -1,4 +1,4 @@
-import { Applicant } from '../models/applicant.model';
+import { createApplicant } from './applicant-domain.util';
 import {
   applicantFromApi,
   applicantToApiWrite,
@@ -28,7 +28,7 @@ describe('applicant-api.mapper', () => {
 
   it('maps applicant models into API write payloads', () => {
     const payload = applicantToApiWrite(
-      new Applicant({
+      createApplicant({
         id: 'a-2',
         name: 'Sam',
         skills: ['Java'],
@@ -72,7 +72,7 @@ describe('applicant-api.mapper', () => {
 
   it('omits invalid availability dates from write payloads', () => {
     const payload = applicantToApiWrite(
-      new Applicant({
+      createApplicant({
         id: 'a-3',
         availableFrom: new Date('invalid'),
         skills: [],

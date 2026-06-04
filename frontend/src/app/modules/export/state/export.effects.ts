@@ -2,15 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
-import {
-  catchError,
-  concat,
-  concatMap,
-  exhaustMap,
-  from,
-  Observable,
-  of,
-} from 'rxjs';
+import { catchError, concatMap, exhaustMap, from, Observable } from 'rxjs';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
@@ -20,8 +12,7 @@ import {
   concatWithNotification,
 } from '../../../utilities/notification.utils';
 import { getErrorMessage } from '../../../utilities/error.utils';
-import { ApplicantApiService } from '../../applicants/services/applicant-api.service';
-import { loadApplicantsSuccess } from '../../applicants/state/applicants.actions';
+import { ApplicantEntityCollectionService } from '../../applicants/data/applicant-entity-collection.service';
 import {
   exportApplicants,
   exportFailure,
@@ -39,19 +30,16 @@ export class ExportEffects {
     this._actions$.pipe(
       ofType(exportApplicants),
       exhaustMap(({ format }) =>
-        this._applicantApi.listFull().pipe(
-          concatMap((applicants) =>
-            concat(
-              of(loadApplicantsSuccess({ applicants })),
-              from(this._triggerExport(format)).pipe(
-                concatMap(() =>
-                  concatWithNotification(exportSuccess(), {
-                    type: AppNotificationType.Success,
-                    messageKey: NOTIFICATION_MESSAGE_KEYS.exportSuccess,
-                  })
-                ),
-                catchError((error: unknown) => this._exportFailure$(error))
-              )
+        this._applicants.loadFull().pipe(
+          concatMap(() =>
+            from(this._triggerExport(format)).pipe(
+              concatMap(() =>
+                concatWithNotification(exportSuccess(), {
+                  type: AppNotificationType.Success,
+                  messageKey: NOTIFICATION_MESSAGE_KEYS.exportSuccess,
+                })
+              ),
+              catchError((error: unknown) => this._exportFailure$(error))
             )
           ),
           catchError((error: unknown) => this._exportFailure$(error))
@@ -62,7 +50,7 @@ export class ExportEffects {
 
   public constructor(
     private readonly _actions$: Actions,
-    private readonly _applicantApi: ApplicantApiService,
+    private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _exportService: ExportService
   ) {}
 

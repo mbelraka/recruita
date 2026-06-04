@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '../../../config/app.config';
-import { Applicant } from '../../applicants/models/applicant.model';
+import { createApplicant } from '../../applicants/utilities/applicant-domain.util';
 import { MatchCandidateResult } from '../models/match-candidate-result.model';
 import {
   evaluateCandidates,
@@ -12,7 +12,7 @@ import { matchReducer } from './match.reducer';
 
 function makeResult(id: string): MatchCandidateResult {
   return {
-    applicant: new Applicant({ id, name: id }),
+    applicant: createApplicant({ id, name: id }),
     score: 80,
     reasoning: 'reason',
     matchingSkills: [],

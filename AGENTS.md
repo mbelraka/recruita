@@ -33,6 +33,11 @@ Optional DB/Redis: `npm run dev` starts Docker (Compose project **recruita**) an
 - `backend/**` staged → Spotless, Checkstyle, tests, JaCoCo
 - Both staged → both suites
 
+## Git commits
+
+- Do **not** add `Co-authored-by: Cursor`, `cursoragent@cursor.com`, or any other Cursor attribution to commit messages.
+- Husky `prepare-commit-msg` / `commit-msg` hooks strip Cursor co-author trailers if the IDE injects them.
+
 ## Do not commit
 
 - `backend/.env`, API keys, `backend/target/`, `node_modules/`, `frontend/dist/`

@@ -1,10 +1,10 @@
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import type { Profile } from '../modules/main/models/profile.model';
+import { profileFromSaveRequest } from '../modules/main/data/profile-api.mapper';
 import {
   buildPrivacyConsentSaveRequest,
   buildSaveProfileRequest,
-  profileFromSaveRequest,
   profilePrivacyChoicesFrom,
 } from './build-save-profile-request.util';
 

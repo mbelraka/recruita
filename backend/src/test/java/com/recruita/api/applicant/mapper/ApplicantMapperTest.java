@@ -8,10 +8,11 @@ import com.recruita.api.persistence.entity.ApplicantEntity;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 class ApplicantMapperTest {
 
-  private final ApplicantMapper mapper = new ApplicantMapper();
+  private final ApplicantMapper mapper = Mappers.getMapper(ApplicantMapper.class);
 
   @Test
   void mapsEntityToSummaryDtoWithoutNotes() {
@@ -77,5 +78,32 @@ class ApplicantMapperTest {
     assertEquals("Sam", entity.getName());
     assertEquals(List.of("angular"), entity.getSkills());
     assertNull(entity.getCreatedAt());
+  }
+
+  @Test
+  void applyRequestUpdatesExistingEntityIncludingSkills() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
+    entity.setName("Before");
+    entity.setSkills(List.of("legacy"));
+
+    var request =
+        new SaveApplicantRequestDto(
+            "a-1",
+            "After",
+            "after@example.com",
+            "+1",
+            "Berlin",
+            3.0,
+            "screening",
+            "Engineer",
+            LocalDate.parse("2026-08-01"),
+            List.of("spring"),
+            "updated");
+
+    mapper.applyRequest(entity, request);
+
+    assertEquals("After", entity.getName());
+    assertEquals(List.of("spring"), entity.getSkills());
   }
 }

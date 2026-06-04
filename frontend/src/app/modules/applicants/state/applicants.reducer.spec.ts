@@ -1,15 +1,16 @@
 import { ApplicationStatus } from '../enums/application-status.enum';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
-import { ApplicantState } from '../models/applicant-state.model';
+import { ApplicantUiState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
 import * as ApplicantsActions from './applicants.actions';
-import { adapter, applicantsReducer } from './applicants.reducer';
+import { applicantsReducer } from './applicants.reducer';
 
 describe('Applicants Reducer', () => {
-  let initialState: ApplicantState;
+  let initialState: ApplicantUiState;
 
-  const mockApplicant: Applicant = new Applicant({
+  const mockApplicant: Applicant = createApplicant({
     id: '1',
     name: 'John Doe',
     email: 'john@example.com',
@@ -21,10 +22,8 @@ describe('Applicants Reducer', () => {
   });
 
   beforeEach(() => {
-    initialState = adapter.getInitialState({
-      loading: false,
-      loaded: false,
-      error: null,
+    void mockApplicant;
+    initialState = {
       filter: '',
       sortBy: 'name',
       sortDirection: SortDirection.Asc,
@@ -33,7 +32,7 @@ describe('Applicants Reducer', () => {
       filterByCountry: null,
       viewType: ViewTypes.GRID,
       locationSuggestions: [],
-    });
+    };
   });
 
   describe('unknown action', () => {
@@ -45,170 +44,30 @@ describe('Applicants Reducer', () => {
     });
   });
 
-  describe('loadApplicants action', () => {
-    it('should set loading to true and error to null', () => {
-      const action = ApplicantsActions.loadApplicants();
+  describe('setGlobalFilter action', () => {
+    it('should update the global filter', () => {
+      const action = ApplicantsActions.setGlobalFilter({ filter: 'test' });
       const state = applicantsReducer(initialState, action);
 
-      expect(state.loading).toBeTrue();
-      expect(state.error).toBeNull();
-    });
-
-    it('should set applicants and loading to false on success', () => {
-      const action = ApplicantsActions.loadApplicantsSuccess({
-        applicants: [mockApplicant],
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.loaded).toBeTrue();
-      expect(state.error).toBeNull();
-      expect(state.entities['1']).toEqual(mockApplicant);
-    });
-
-    it('should set error on failure', () => {
-      const error = 'Failed to load';
-      const action = ApplicantsActions.loadApplicantsFailure({ error });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.loaded).toBeFalse();
-      expect(state.error).toBe(error);
+      expect(state.filter).toBe('test');
     });
   });
 
-  describe('addApplicant action', () => {
-    it('should set loading to true', () => {
-      const action = ApplicantsActions.addApplicant({
-        applicant: mockApplicant,
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeTrue();
-    });
-
-    it('should update applicants and set loading to false on success', () => {
-      const action = ApplicantsActions.addApplicantSuccess({
-        applicant: mockApplicant,
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.entities['1']).toEqual(mockApplicant);
-    });
-
-    it('should set error on failure', () => {
-      const error = 'Failed to add';
-      const action = ApplicantsActions.addApplicantFailure({ error });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.error).toBe(error);
-    });
-  });
-
-  describe('updateApplicant action', () => {
-    it('should set loading to true', () => {
-      const action = ApplicantsActions.updateApplicant({
-        applicant: mockApplicant,
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeTrue();
-    });
-
-    it('should update applicants and set loading to false on success', () => {
-      const action = ApplicantsActions.updateApplicantSuccess({
-        applicant: mockApplicant,
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.entities['1']).toEqual(mockApplicant);
-    });
-
-    it('should set error on failure', () => {
-      const error = 'Failed to update';
-      const action = ApplicantsActions.updateApplicantFailure({ error });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.error).toBe(error);
-    });
-  });
-
-  describe('deleteApplicant action', () => {
-    it('should set loading to true', () => {
-      const action = ApplicantsActions.deleteApplicant({ id: '1' });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeTrue();
-    });
-
-    it('should update applicants and set loading to false on success', () => {
-      const seeded = applicantsReducer(
-        initialState,
-        ApplicantsActions.addApplicantSuccess({ applicant: mockApplicant })
-      );
-      const action = ApplicantsActions.deleteApplicantSuccess({
-        id: '1',
-      });
-      const state = applicantsReducer(seeded, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.entities).toEqual({});
-    });
-
-    it('should set error on failure', () => {
-      const error = 'Failed to delete';
-      const action = ApplicantsActions.deleteApplicantFailure({ error });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.loading).toBeFalse();
-      expect(state.error).toBe(error);
-    });
-  });
-
-  describe('filter and sort actions', () => {
-    it('should set global filter', () => {
-      const action = ApplicantsActions.setGlobalFilter({ filter: 'John' });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.filter).toBe('John');
-    });
-
-    it('should set sort by', () => {
+  describe('setSortBy action', () => {
+    it('should update sortBy and sortDirection', () => {
       const action = ApplicantsActions.setSortBy({
-        sortBy: 'name',
+        sortBy: 'email',
         sortDirection: SortDirection.Desc,
       });
       const state = applicantsReducer(initialState, action);
 
-      expect(state.sortBy).toBe('name');
+      expect(state.sortBy).toBe('email');
       expect(state.sortDirection).toBe(SortDirection.Desc);
     });
+  });
 
-    it('should set sortDirection to asc if sortBy is null', () => {
-      const action = ApplicantsActions.setSortBy({
-        sortBy: null,
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.sortBy).toBeNull();
-      expect(state.sortDirection).toBe(SortDirection.Asc);
-    });
-
-    it('should use default sort direction asc if not provided', () => {
-      const action = ApplicantsActions.setSortBy({
-        sortBy: 'location',
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.sortBy).toBe('location');
-      expect(state.sortDirection).toBe(SortDirection.Asc);
-    });
-
-    it('should set view type', () => {
+  describe('setViewType action', () => {
+    it('should update viewType', () => {
       const action = ApplicantsActions.setViewType({
         viewType: ViewTypes.LIST,
       });
@@ -216,72 +75,29 @@ describe('Applicants Reducer', () => {
 
       expect(state.viewType).toBe(ViewTypes.LIST);
     });
+  });
 
-    it('should set filter by skill', () => {
-      const action = ApplicantsActions.setFilterBySkill({ skill: 'Angular' });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.filterBySkill).toBe('Angular');
-    });
-
-    it('should set filter by status', () => {
-      const action = ApplicantsActions.setFilterByStatus({
-        status: ApplicationStatus.Received,
+  describe('location suggestions', () => {
+    it('stores suggestions on success', () => {
+      const action = ApplicantsActions.searchLocationSuggestionsSuccess({
+        suggestions: ['Berlin, Germany'],
       });
       const state = applicantsReducer(initialState, action);
 
-      expect(state.filterByStatus).toBe(ApplicationStatus.Received);
+      expect(state.locationSuggestions).toEqual(['Berlin, Germany']);
     });
 
-    it('should set filter by country', () => {
-      const action = ApplicantsActions.setFilterByCountry({ country: 'USA' });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.filterByCountry).toBe('USA');
-    });
-  });
-
-  describe('loadApplicantDetailSuccess action', () => {
-    it('upserts the full applicant record', () => {
-      const seeded = applicantsReducer(
+    it('clears suggestions on failure', () => {
+      const withSuggestions = applicantsReducer(
         initialState,
-        ApplicantsActions.loadApplicantsSuccess({
-          applicants: [mockApplicant],
+        ApplicantsActions.searchLocationSuggestionsSuccess({
+          suggestions: ['Berlin, Germany'],
         })
       );
-      const withNotes = new Applicant({
-        ...mockApplicant,
-        notes: 'Updated notes',
-      });
-      const action = ApplicantsActions.loadApplicantDetailSuccess({
-        applicant: withNotes,
-      });
-      const state = applicantsReducer(seeded, action);
-
-      expect(state.entities['1']?.notes).toBe('Updated notes');
-    });
-  });
-
-  describe('location suggestions actions', () => {
-    it('should update location suggestions on success', () => {
-      const action = ApplicantsActions.searchLocationSuggestionsSuccess({
-        suggestions: ['NY', 'NJ'],
-      });
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.locationSuggestions).toEqual(['NY', 'NJ']);
-    });
-
-    it('should clear suggestions on failure', () => {
-      const action = ApplicantsActions.searchLocationSuggestionsFailure();
-      const state = applicantsReducer(initialState, action);
-
-      expect(state.locationSuggestions).toEqual([]);
-    });
-
-    it('should clear suggestions on clear location suggestions', () => {
-      const action = ApplicantsActions.clearLocationSuggestions();
-      const state = applicantsReducer(initialState, action);
+      const state = applicantsReducer(
+        withSuggestions,
+        ApplicantsActions.searchLocationSuggestionsFailure()
+      );
 
       expect(state.locationSuggestions).toEqual([]);
     });

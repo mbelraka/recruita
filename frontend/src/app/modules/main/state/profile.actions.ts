@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import type { Profile } from '../models/profile.model';
+import type { PrivacyConsentDialogCloseResult } from '../../../models/privacy-consent-dialog-close-result.model';
 import { ProfileActionTypes } from '../enums/profile-action-types.enum';
 
 export const loadProfile = createAction(ProfileActionTypes.LoadProfile);
@@ -17,7 +18,7 @@ export const loadProfileFailure = createAction(
 
 export const persistPrivacyConsentOutcome = createAction(
   ProfileActionTypes.PersistPrivacyConsentOutcome,
-  props<{ result: unknown }>()
+  props<{ result: PrivacyConsentDialogCloseResult }>()
 );
 
 export const persistPrivacyConsentOutcomeSuccess = createAction(

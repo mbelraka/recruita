@@ -3,6 +3,7 @@ package com.recruita.api.profile.message;
 public enum ProfileApiErrorMessage {
   ID_REQUIRED("Profile id is required."),
   LAST_LANGUAGE_REQUIRED("Last language is required."),
+  ID_MISMATCH("Profile id in the request body must match the path id."),
   NOT_FOUND("Profile not found."),
   ALREADY_EXISTS("A profile with this id already exists.");
 

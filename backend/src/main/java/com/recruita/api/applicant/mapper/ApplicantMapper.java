@@ -4,68 +4,37 @@ import com.recruita.api.api.dto.applicant.ApplicantDto;
 import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.persistence.entity.ApplicantEntity;
+import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class ApplicantMapper {
+@Mapper(componentModel = "spring")
+public interface ApplicantMapper {
 
-  public ApplicantDto toDto(ApplicantEntity entity) {
-    return new ApplicantDto(
-        entity.getId(),
-        entity.getName(),
-        entity.getEmail(),
-        entity.getPhone(),
-        entity.getLocation(),
-        entity.getYearsOfExperience(),
-        entity.getApplicationStatus(),
-        entity.getCurrentJobTitle(),
-        entity.getAvailableFrom(),
-        entity.getSkills(),
-        entity.getNotes(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
-  }
+  ApplicantDto toDto(ApplicantEntity entity);
 
-  public ApplicantSummaryDto toSummaryDto(ApplicantEntity entity) {
-    return new ApplicantSummaryDto(
-        entity.getId(),
-        entity.getName(),
-        entity.getEmail(),
-        entity.getPhone(),
-        entity.getLocation(),
-        entity.getYearsOfExperience(),
-        entity.getApplicationStatus(),
-        entity.getCurrentJobTitle(),
-        entity.getAvailableFrom(),
-        entity.getSkills());
-  }
+  ApplicantSummaryDto toSummaryDto(ApplicantEntity entity);
 
-  public List<ApplicantSummaryDto> toSummaryDtoList(List<ApplicantEntity> entities) {
-    return entities.stream().map(this::toSummaryDto).toList();
-  }
+  List<ApplicantSummaryDto> toSummaryDtoList(List<ApplicantEntity> entities);
 
-  public List<ApplicantDto> toDtoList(List<ApplicantEntity> entities) {
-    return entities.stream().map(this::toDto).toList();
-  }
+  List<ApplicantDto> toDtoList(List<ApplicantEntity> entities);
 
-  public ApplicantEntity toNewEntity(SaveApplicantRequestDto request) {
-    ApplicantEntity entity = new ApplicantEntity();
-    applyRequest(entity, request);
-    return entity;
-  }
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  ApplicantEntity toNewEntity(SaveApplicantRequestDto request);
 
-  public void applyRequest(ApplicantEntity entity, SaveApplicantRequestDto request) {
-    entity.setId(request.id());
-    entity.setName(request.name());
-    entity.setEmail(request.email());
-    entity.setPhone(request.phone());
-    entity.setLocation(request.location());
-    entity.setYearsOfExperience(request.yearsOfExperience());
-    entity.setApplicationStatus(request.applicationStatus());
-    entity.setCurrentJobTitle(request.currentJobTitle());
-    entity.setAvailableFrom(request.availableFrom());
-    entity.setSkills(request.skills());
-    entity.setNotes(request.notes());
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "skills", ignore = true)
+  void applyRequest(@MappingTarget ApplicantEntity entity, SaveApplicantRequestDto request);
+
+  @AfterMapping
+  default void applyMutableSkills(
+      SaveApplicantRequestDto request, @MappingTarget ApplicantEntity entity) {
+    List<String> skills = request.skills();
+    entity.setSkills(skills == null ? new ArrayList<>() : new ArrayList<>(skills));
   }
 }
