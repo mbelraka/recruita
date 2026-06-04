@@ -12,6 +12,7 @@ import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { ApplicantUiState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
+import { applicantGlobalSearchHaystack } from '../utilities/applicant-global-search.util';
 
 const APPLICATION_STATUS_ORDER = Object.values(ApplicationStatus);
 const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
@@ -225,36 +226,9 @@ const applyFilters = (
   }
   const q = globalFilter.trim().toLowerCase();
   if (q.length > 0) {
-    filtered = filtered.filter((applicant: Applicant): boolean => {
-      const avail = applicant.availableFrom;
-      let availStr = '';
-      if (avail !== undefined && avail !== null) {
-        const d =
-          avail instanceof Date ? avail : new Date(avail as string | number);
-        if (!Number.isNaN(d.getTime())) {
-          availStr = `${d.toISOString().slice(0, 10)} ${d.toLocaleDateString()}`;
-        }
-      }
-      const haystack = [
-        applicant.name,
-        applicant.email,
-        applicant.phone,
-        applicant.location,
-        applicant.currentJobTitle,
-        applicant.applicationStatus,
-        applicant.yearsOfExperience !== undefined &&
-        applicant.yearsOfExperience !== null
-          ? String(applicant.yearsOfExperience)
-          : '',
-        applicant.notes,
-        (applicant.skills ?? []).join(' '),
-        availStr,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(q);
-    });
+    filtered = filtered.filter((applicant: Applicant): boolean =>
+      applicantGlobalSearchHaystack(applicant).includes(q)
+    );
   }
   return filtered;
 };

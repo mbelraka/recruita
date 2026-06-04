@@ -121,7 +121,8 @@
   },
   "applicants": {
     "searchLabel": "Bewerber suchen",
-    "searchPlaceholder": "Bewerber suchen",
+    "searchPlaceholder": "Name, E-Mail, Skills, Rolle…",
+    "searchScopeHint": "Notizen sind durchsuchbar, nachdem Sie einen Bewerber geöffnet haben.",
     "clearSearch": "Suche löschen",
     "filterByStatus": "Status",
     "filterByCountry": "Land",

@@ -61,10 +61,7 @@ export class MainEffects {
       ofType(loadProfile),
       switchMap(() =>
         this._profiles.getByKey(APP_CONFIG.PROFILE.DEFAULT_ID).pipe(
-          tap(() => {
-            this._profiles.setLoaded(true);
-            this._profiles.setLoading(false);
-          }),
+          tap((profile) => this._profiles.syncProfileInCache(profile)),
           concatMap((profile) =>
             concat(
               of(loadProfileSuccess({ profile })),
@@ -84,8 +81,29 @@ export class MainEffects {
   openPrivacyGateAfterProfileLoad$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(loadProfileSuccess, loadProfileFailure),
+        ofType(loadProfileSuccess),
+        tap(({ profile }) => {
+          this._profiles.syncProfileInCache(profile);
+          this._privacyDialog.openConsentDialogIfRequired();
+        })
+      ),
+    { dispatch: false }
+  );
+
+  openPrivacyGateAfterProfileLoadFailure$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(loadProfileFailure),
         tap(() => this._privacyDialog.openConsentDialogIfRequired())
+      ),
+    { dispatch: false }
+  );
+
+  syncProfileCacheAfterPersist$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(persistPrivacyConsentOutcomeSuccess, profileUpdated),
+        tap(({ profile }) => this._profiles.syncProfileInCache(profile))
       ),
     { dispatch: false }
   );

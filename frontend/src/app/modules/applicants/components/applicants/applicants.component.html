@@ -35,9 +35,14 @@
               id="applicants-search-input"
               #searchInput
               matInput
+              [placeholder]="'applicants.searchPlaceholder' | translate"
+              [attr.aria-describedby]="'applicants-search-scope-hint'"
               [value]="globalFilter ?? ''"
               (input)="applyFilter($event)"
             />
+            <mat-hint id="applicants-search-scope-hint">{{
+              'applicants.searchScopeHint' | translate
+            }}</mat-hint>
             @if (searchHasText) {
               <button
                 mat-icon-button

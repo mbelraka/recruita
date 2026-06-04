@@ -18,7 +18,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
-import { EntityDataService, HttpUrlGenerator } from '@ngrx/data';
+import { EntityDataService } from '@ngrx/data';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -35,7 +35,6 @@ import { AppEffects } from './state/app.effects';
 import { NotificationSnackBarComponent } from './components/notification-snack-bar/notification-snack-bar.component';
 import { localeIdFactory } from './utilities/factories/locale-id.factory';
 import { matDateLocaleFactory } from './utilities/factories/mat-date-locale.factory';
-import { RecruitaHttpUrlGenerator } from './core/entity-data/recruita-http-url-generator.service';
 import { registerRecruitaEntityDataServices } from './core/entity-data/register-recruita-entity-data-services.initializer';
 import { ApplicantDataService } from './modules/applicants/data/applicant-data.service';
 import { ProfileDataService } from './modules/main/data/profile-data.service';
@@ -118,7 +117,6 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     provideAppInitializer(() => {
       registerMaterialSymbolsOutlinedFont(inject(MatIconRegistry))();
     }),
-    { provide: HttpUrlGenerator, useClass: RecruitaHttpUrlGenerator },
   ],
   bootstrap: [AppComponent],
 })

@@ -9,10 +9,6 @@ import { Languages } from '../../../enums/language.enum';
 
 // Load Applicants
 export const loadApplicants = createAction(ApplicantActionTypes.LoadApplicants);
-export const loadApplicantsSuccess = createAction(
-  ApplicantActionTypes.LoadApplicantsSuccess,
-  props<{ applicants: Applicant[] }>()
-);
 export const loadApplicantsFailure = createAction(
   ApplicantActionTypes.LoadApplicantsFailure,
   props<{ error: string }>()
@@ -111,9 +107,4 @@ export const searchLocationSuggestionsFailure = createAction(
 );
 export const clearLocationSuggestions = createAction(
   ApplicantActionTypes.ClearLocationSuggestions
-);
-
-export const loadApplicantDetailSuccess = createAction(
-  ApplicantActionTypes.LoadApplicantDetailSuccess,
-  props<{ applicant: Applicant }>()
 );

@@ -249,6 +249,36 @@ describe('Applicants Selectors', () => {
       expect(result[0].name).toBe('John Doe');
     });
 
+    it('should not match notes on roster rows until detail is cached', () => {
+      const rosterOnly = mockApplicants.map(
+        ({ notes: _notes, ...applicant }) => ({
+          ...applicant,
+        })
+      );
+      const state = {
+        app: initialAppState,
+        applicants: { ...uiState, filter: 'Good candidate' },
+        ...withEntityCache(buildApplicantEntityCache(rosterOnly)),
+      };
+      expect(fromSelectors.selectSortedApplicants(state).length).toBe(0);
+    });
+
+    it('should match notes when present on cached applicants', () => {
+      const withNotes = mockApplicants.map((applicant) =>
+        applicant.id === '1'
+          ? { ...applicant, notes: 'Good candidate' }
+          : { ...applicant, notes: undefined }
+      );
+      const state = {
+        app: initialAppState,
+        applicants: { ...uiState, filter: 'Good candidate' },
+        ...withEntityCache(buildApplicantEntityCache(withNotes)),
+      };
+      const result = fromSelectors.selectSortedApplicants(state);
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('1');
+    });
+
     it('should filter by skill filter', () => {
       const state = {
         app: initialAppState,

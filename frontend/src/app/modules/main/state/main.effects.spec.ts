@@ -71,13 +71,7 @@ describe('MainEffects', () => {
     actions$ = new ReplaySubject(1);
     profiles = jasmine.createSpyObj<ProfileEntityCollectionService>(
       'ProfileEntityCollectionService',
-      [
-        'getByKey',
-        'save',
-        'upsertOptimisticFromRequest',
-        'setLoaded',
-        'setLoading',
-      ]
+      ['getByKey', 'save', 'upsertOptimisticFromRequest', 'syncProfileInCache']
     );
 
     TestBed.configureTestingModule({
@@ -114,8 +108,7 @@ describe('MainEffects', () => {
 
     actions$.next(loadProfile());
 
-    expect(profiles.setLoaded).toHaveBeenCalledWith(true);
-    expect(profiles.setLoading).toHaveBeenCalledWith(false);
+    expect(profiles.syncProfileInCache).toHaveBeenCalledWith(profile);
     expect(emitted).toEqual([
       loadProfileSuccess({ profile }),
       setLanguage({ language: Languages.English }),
@@ -152,18 +145,26 @@ describe('MainEffects', () => {
     subscription.unsubscribe();
   });
 
-  it('opens the privacy gate after profile load', () => {
+  it('syncs profile into the entity cache before opening the privacy gate', () => {
+    const accepted = {
+      ...profile,
+      privacyNoticeAccepted: true,
+      optionalAiMatching: true,
+    };
     const subscription = effects.openPrivacyGateAfterProfileLoad$.subscribe();
 
-    actions$.next(
-      loadProfileSuccess({
-        profile: {
-          ...profile,
-          privacyNoticeAccepted: true,
-          optionalAiMatching: true,
-        },
-      })
-    );
+    actions$.next(loadProfileSuccess({ profile: accepted }));
+
+    expect(profiles.syncProfileInCache).toHaveBeenCalledWith(accepted);
+    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('opens the privacy gate when profile load fails', () => {
+    const subscription =
+      effects.openPrivacyGateAfterProfileLoadFailure$.subscribe();
+
+    actions$.next(loadProfileFailure({ error: 'offline' }));
 
     expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
     subscription.unsubscribe();

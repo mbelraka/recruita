@@ -121,7 +121,8 @@
   },
   "applicants": {
     "searchLabel": "Buscar candidatos",
-    "searchPlaceholder": "Buscar candidatos",
+    "searchPlaceholder": "Nombre, correo, habilidades, puesto…",
+    "searchScopeHint": "Las notas se pueden buscar después de abrir un candidato.",
     "clearSearch": "Limpiar busqueda",
     "filterByStatus": "Estado",
     "filterByCountry": "Pais",

@@ -121,7 +121,8 @@
   },
   "applicants": {
     "searchLabel": "Tschertgar candidats",
-    "searchPlaceholder": "Tschertgar candidats",
+    "searchPlaceholder": "Num, e-mail, qualificaziuns, rolla…",
+    "searchScopeHint": "Notas pon vegnir tschertgadas suenter avrir in candidat.",
     "clearSearch": "Stizzar tschertga",
     "filterByStatus": "Status",
     "filterByCountry": "Pajais",

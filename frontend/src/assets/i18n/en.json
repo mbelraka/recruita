@@ -121,7 +121,8 @@
   },
   "applicants": {
     "searchLabel": "Search applicants",
-    "searchPlaceholder": "Search applicants",
+    "searchPlaceholder": "Name, email, skills, role…",
+    "searchScopeHint": "Notes are searchable after you open an applicant.",
     "clearSearch": "Clear search",
     "filterByStatus": "Status",
     "filterByCountry": "Country",

@@ -39,4 +39,11 @@ export class ProfileEntityCollectionService extends EntityCollectionServiceBase<
   public upsertOptimisticFromRequest(request: SaveProfileRequest): void {
     this.upsertOneInCache(profileFromSaveRequest(request));
   }
+
+  /** Keeps NgRx Data entity cache aligned with API/profile actions (selectors read the cache). */
+  public syncProfileInCache(profile: Profile): void {
+    this.upsertOneInCache(profile);
+    this.setLoaded(true);
+    this.setLoading(false);
+  }
 }

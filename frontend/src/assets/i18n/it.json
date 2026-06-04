@@ -121,7 +121,8 @@
   },
   "applicants": {
     "searchLabel": "Cerca candidati",
-    "searchPlaceholder": "Cerca candidati",
+    "searchPlaceholder": "Nome, email, competenze, ruolo…",
+    "searchScopeHint": "Le note sono ricercabili dopo aver aperto un candidato.",
     "clearSearch": "Cancella ricerca",
     "filterByStatus": "Stato",
     "filterByCountry": "Paese",

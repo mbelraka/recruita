@@ -1,6 +1,5 @@
 export enum ApplicantActionTypes {
   LoadApplicants = '[Applicants] Load Applicants',
-  LoadApplicantsSuccess = '[Applicants] Load Applicants Success',
   LoadApplicantsFailure = '[Applicants] Load Applicants Failure',
   ApplicantsRosterLoaded = '[Applicants] Roster Loaded',
   AddApplicant = '[Applicants] Add Applicant',
@@ -22,5 +21,4 @@ export enum ApplicantActionTypes {
   SearchLocationSuggestionsSuccess = '[Applicants] Search Location Suggestions Success',
   SearchLocationSuggestionsFailure = '[Applicants] Search Location Suggestions Failure',
   ClearLocationSuggestions = '[Applicants] Clear Location Suggestions',
-  LoadApplicantDetailSuccess = '[Applicants] Load Applicant Detail Success',
 }
