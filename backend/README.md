@@ -32,6 +32,8 @@ npm run dev
 
 - API: http://localhost:3001  
 - Frontend proxies `/api` from :4200
+- **OpenAPI:** http://localhost:3001/v3/api-docs (JSON spec)  
+- **Swagger UI:** http://localhost:3001/swagger-ui.html (interactive docs; disabled in production profile)
 
 Secrets: `backend/.env` (from `.env.example`).
 
@@ -85,6 +87,7 @@ The Angular app uses profile id **`admin`** (`APP_CONFIG.PROFILE.DEFAULT_ID`) un
 | `npm run test:backend` | Tests only |
 | `npm run verify:backend` | Full verify (CI gate) |
 | `npm run validate:ci:backend` | `quality:backend` + `verify:backend` |
+| `npm run validate:openapi:backend` | Smoke-test live `/v3/api-docs` against a running dev server |
 
 From this directory: `./mvnw verify`
 

@@ -37,7 +37,7 @@ public class SecurityConfiguration {
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    String[] publicPaths = properties.getApi().getRoutes().publicPaths();
+    String[] publicPaths = properties.getApi().publicPaths();
     SecurityProperties.HeaderProperties headerProps = properties.getSecurity().getHeaders();
     SecurityProperties.HstsProperties hsts = properties.getSecurity().getHsts();
     SecurityProperties.CorsProperties cors = properties.getSecurity().getCors();

@@ -7,6 +7,14 @@ server:
     max-http-form-post-size: 524288
     server-header: ''
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
 spring:
   application:
     name: recruita-api
@@ -32,6 +40,22 @@ recruita:
       - 'true'
     suppress-error-detail: ${RECRUITA_SUPPRESS_ERROR_DETAIL:}
   api:
+    openapi:
+      info:
+        title: Recruita API
+        description: Applicant management, session profiles, health checks, and consent-gated AI candidate matching.
+        version: 1.0.0
+      contact:
+        name: Recruita Team
+        url: https://github.com/mbelraka/recruita
+      bearer-auth:
+        scheme-name: bearerAuth
+        description: Optional bearer token for future IdP integration. Public routes do not require authentication today.
+      permitted-paths:
+        - /v3/api-docs
+        - /v3/api-docs/**
+        - /swagger-ui.html
+        - /swagger-ui/**
     problem-detail:
       error-property-key: error
     validation:

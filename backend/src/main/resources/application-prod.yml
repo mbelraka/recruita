@@ -5,6 +5,12 @@ spring:
       - optional:file:.env
       - optional:classpath:application-profile-api.yml
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 recruita:
   runtime:
     production-mode: production

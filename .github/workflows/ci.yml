@@ -77,3 +77,7 @@ jobs:
             backend/.mvn/wrapper/maven-wrapper.properties
       - name: Backend CI
         run: npm run validate:ci:backend
+      - name: Validate OpenAPI spec
+        env:
+          GROQ_API_KEY: ci-openapi-validation-key
+        run: npm run validate:openapi:backend

@@ -45,6 +45,7 @@
     "letify": "npm run letify -w @recruita/frontend",
     "test:backend": "sh scripts/run-mvn.sh test -q",
     "verify:backend": "sh scripts/run-mvn.sh verify -q",
+    "validate:openapi:backend": "sh scripts/validate-openapi.sh",
     "precommit:frontend": "npm run validate:ci:frontend",
     "precommit:backend": "npm run validate:ci:backend",
     "validate:ci:frontend": "npm run quality -w @recruita/frontend && npm run test:ci -w @recruita/frontend && npm run doctor:full -w @recruita/frontend && npm run security:audit -w @recruita/frontend && npm run letify -w @recruita/frontend && npm run build:prod -w @recruita/frontend",

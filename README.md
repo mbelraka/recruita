@@ -337,6 +337,19 @@ Recruita uses **NgRx** with a split between **entity cache** (server-backed doma
 
 Without `persistence`, applicant/profile routes return **404**; match and health still work.
 
+### OpenAPI / Swagger
+
+Interactive API documentation is generated with **springdoc-openapi** 2.8.x (OpenAPI 3; requires 2.7+ on Spring Boot 3.4).
+
+| URL (dev) | Purpose |
+|-----------|---------|
+| http://localhost:3001/swagger-ui.html | Swagger UI — browse and try endpoints |
+| http://localhost:3001/v3/api-docs | Machine-readable OpenAPI JSON |
+
+Configuration: `recruita.api.openapi` in `application.yml` (metadata + security permit paths), `OpenApiDocumentFactory` (builds the spec), and thin `OpenApiConfig`. Controllers use `@Tag` / `@Operation`; match DTOs include `@Schema` for anonymized payloads. `springdoc.*` paths must stay aligned with `recruita.api.openapi.permitted-paths`.
+
+**Production:** `application-prod.yml` disables both Swagger UI and `/v3/api-docs`. **CI** runs `npm run validate:openapi:backend` to curl the spec against a live dev server after `validate:ci:backend`.
+
 ---
 
 ## Tech stack
@@ -464,6 +477,7 @@ Serve the static bundle behind HTTPS with the Spring API configured per [SECURIT
 | `npm run lockfile:check` | Lockfile matches `package.json` |
 | `npm run security:audit` | Frontend ngx-security-audit |
 | `npm run e2e` | Playwright (`npm run e2e:install` first) |
+| `npm run validate:openapi:backend` | Verify `/v3/api-docs` on a running dev API |
 
 Pre-commit: **lint-staged** → **lockfile:check** (when lockfile staged) → scoped **precommit:frontend** / **precommit:backend**. Do not use `git commit --no-verify`.
 

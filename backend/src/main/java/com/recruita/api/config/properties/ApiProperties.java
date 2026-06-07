@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 public class ApiProperties {
 
   @Valid @NotNull private RouteProperties routes = new RouteProperties();
+  @Valid @NotNull private OpenApiProperties openapi = new OpenApiProperties();
   @Valid @NotNull private ProblemDetailProperties problemDetail = new ProblemDetailProperties();
   @Valid @NotNull private ValidationProperties validation = new ValidationProperties();
 
@@ -16,6 +17,19 @@ public class ApiProperties {
 
   public void setRoutes(RouteProperties routes) {
     this.routes = routes;
+  }
+
+  public OpenApiProperties getOpenapi() {
+    return openapi;
+  }
+
+  public void setOpenapi(OpenApiProperties openapi) {
+    this.openapi = openapi;
+  }
+
+  /** API and OpenAPI documentation paths permitted without authentication. */
+  public String[] publicPaths() {
+    return concat(routes.permitAllPaths(), openapi.permittedPathsArray());
   }
 
   public ProblemDetailProperties getProblemDetail() {
@@ -117,7 +131,7 @@ public class ApiProperties {
       return profilesPath + "/{id}";
     }
 
-    public String[] publicPaths() {
+    String[] permitAllPaths() {
       return new String[] {
         healthPath,
         matchPath,
@@ -128,5 +142,12 @@ public class ApiProperties {
         profilesPath + "/**"
       };
     }
+  }
+
+  private static String[] concat(String[] first, String[] second) {
+    String[] merged = new String[first.length + second.length];
+    System.arraycopy(first, 0, merged, 0, first.length);
+    System.arraycopy(second, 0, merged, first.length, second.length);
+    return merged;
   }
 }
