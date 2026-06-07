@@ -1,7 +1,7 @@
 package com.recruita.api.api.advice;
 
+import static com.recruita.api.support.MockMvcApiRequests.postJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,7 +51,7 @@ class GlobalApiExceptionHandlerTest {
   @Test
   void invalidJsonReturnsConfiguredMessage() throws Exception {
     mockMvc
-        .perform(post("/api/match").contentType(MediaType.APPLICATION_JSON).content("{"))
+        .perform(postJson("/api/match", "{"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.error").value("Request body must be valid JSON."));
   }
@@ -80,7 +79,7 @@ class GlobalApiExceptionHandlerTest {
         """;
 
     mockMvc
-        .perform(post("/api/match").contentType(MediaType.APPLICATION_JSON).content(body))
+        .perform(postJson("/api/match", body))
         .andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.error").value("boom"));
   }

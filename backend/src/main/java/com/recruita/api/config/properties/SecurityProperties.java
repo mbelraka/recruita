@@ -10,6 +10,7 @@ import java.util.List;
 public class SecurityProperties {
 
   @Valid @NotNull private CorsProperties cors = new CorsProperties();
+  @Valid @NotNull private CsrfProperties csrf = new CsrfProperties();
   @Valid @NotNull private HstsProperties hsts = new HstsProperties();
   @Valid @NotNull private RateLimitProperties rateLimit = new RateLimitProperties();
   @Valid @NotNull private HeaderProperties headers = new HeaderProperties();
@@ -21,6 +22,14 @@ public class SecurityProperties {
 
   public void setCors(CorsProperties cors) {
     this.cors = cors;
+  }
+
+  public CsrfProperties getCsrf() {
+    return csrf;
+  }
+
+  public void setCsrf(CsrfProperties csrf) {
+    this.csrf = csrf;
   }
 
   public HstsProperties getHsts() {
@@ -119,6 +128,55 @@ public class SecurityProperties {
 
     public void setTrustProxyTruthyValues(java.util.List<String> trustProxyTruthyValues) {
       this.trustProxyTruthyValues = trustProxyTruthyValues;
+    }
+  }
+
+  /** Must stay aligned with frontend {@code APP_CONFIG.HTTP} XSRF names. */
+  public static class CsrfProperties {
+    private boolean enabled = true;
+    @NotBlank private String cookieName = "XSRF-TOKEN";
+    @NotBlank private String headerName = "X-XSRF-TOKEN";
+    @NotBlank private String parameterName = "_csrf";
+    private boolean cookieHttpOnly = false;
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getCookieName() {
+      return cookieName;
+    }
+
+    public void setCookieName(String cookieName) {
+      this.cookieName = cookieName;
+    }
+
+    public String getHeaderName() {
+      return headerName;
+    }
+
+    public void setHeaderName(String headerName) {
+      this.headerName = headerName;
+    }
+
+    public String getParameterName() {
+      return parameterName;
+    }
+
+    public void setParameterName(String parameterName) {
+      this.parameterName = parameterName;
+    }
+
+    public boolean isCookieHttpOnly() {
+      return cookieHttpOnly;
+    }
+
+    public void setCookieHttpOnly(boolean cookieHttpOnly) {
+      this.cookieHttpOnly = cookieHttpOnly;
     }
   }
 

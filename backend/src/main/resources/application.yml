@@ -82,6 +82,12 @@ recruita:
       match-evaluate-rejected-template: 'match.evaluate rejected deterministic={} candidates={} durationMs={}'
       match-evaluate-failed-template: 'match.evaluate failed deterministic={} candidates={} durationMs={}'
   security:
+    csrf:
+      enabled: true
+      cookie-name: XSRF-TOKEN
+      header-name: X-XSRF-TOKEN
+      parameter-name: _csrf
+      cookie-http-only: false
     cors:
       allowed-origins: ${CORS_ORIGIN:http://localhost:4200,http://127.0.0.1:4200}
       allowed-methods: GET,HEAD,POST,PUT,DELETE,OPTIONS

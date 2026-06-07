@@ -3,10 +3,8 @@ import {
   HttpClient,
   provideHttpClient,
   withInterceptorsFromDi,
-  withXsrfConfiguration,
 } from '@angular/common/http';
 import {
-  APP_INITIALIZER,
   inject,
   LOCALE_ID,
   NgModule,
@@ -39,6 +37,7 @@ import { registerRecruitaEntityDataServices } from './core/entity-data/register-
 import { ApplicantDataService } from './modules/applicants/data/applicant-data.service';
 import { ProfileDataService } from './modules/main/data/profile-data.service';
 import { AuthInterceptor } from './core/http/auth.interceptor';
+import { CsrfInterceptor } from './core/http/csrf.interceptor';
 import { HttpApiInterceptor } from './core/http/http-api.interceptor';
 import { environment } from '../environments/environment';
 import { registerMaterialSymbolsOutlinedFont } from './utilities/initializers/material-symbols-outlined-font.initializer';
@@ -83,13 +82,12 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     }),
   ],
   providers: [
-    provideHttpClient(
-      withXsrfConfiguration({
-        cookieName: APP_CONFIG.HTTP.XSRF_COOKIE_NAME,
-        headerName: APP_CONFIG.HTTP.XSRF_HEADER_NAME,
-      }),
-      withInterceptorsFromDi()
-    ),
+    provideHttpClient(withInterceptorsFromDi()),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CsrfInterceptor,
+      multi: true,
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpApiInterceptor,
@@ -108,12 +106,13 @@ function translateHttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
       provide: MAT_DATE_LOCALE,
       useFactory: matDateLocaleFactory,
     },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: registerRecruitaEntityDataServices,
-      deps: [EntityDataService, ApplicantDataService, ProfileDataService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      registerRecruitaEntityDataServices(
+        inject(EntityDataService),
+        inject(ApplicantDataService),
+        inject(ProfileDataService)
+      )();
+    }),
     provideAppInitializer(() => {
       registerMaterialSymbolsOutlinedFont(inject(MatIconRegistry))();
     }),

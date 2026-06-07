@@ -13,10 +13,11 @@ export const APP_CONFIG = {
     SITE_TITLE_FALLBACK: 'Recruita - Talent without Boundaries',
   } as const,
 
-  /** `provideHttpClient` + `withXsrfConfiguration` (Angular CSRF defaults match common backends). */
+  /** `CsrfInterceptor` + Spring `CookieCsrfTokenRepository` (names must stay aligned with `recruita.security.csrf`). */
   HTTP: {
     XSRF_COOKIE_NAME: 'XSRF-TOKEN',
     XSRF_HEADER_NAME: 'X-XSRF-TOKEN',
+    CSRF_SAFE_METHODS: ['GET', 'HEAD', 'OPTIONS'] as const,
     /** Must match backend `recruita.api.problem-detail.error-property-key`. */
     PROBLEM_DETAIL_ERROR_PROPERTY: ApiProblemDetailPropertyKey.Error,
   } as const,

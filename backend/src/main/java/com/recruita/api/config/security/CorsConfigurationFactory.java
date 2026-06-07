@@ -2,6 +2,7 @@ package com.recruita.api.config.security;
 
 import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.config.properties.SecurityProperties;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +14,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class CorsConfigurationFactory {
 
   private final SecurityProperties.CorsProperties cors;
+  private final SecurityProperties.CsrfProperties csrf;
 
   public CorsConfigurationFactory(RecruitaProperties properties) {
     this.cors = properties.getSecurity().getCors();
+    this.csrf = properties.getSecurity().getCsrf();
   }
 
   @Bean
@@ -27,12 +30,23 @@ public class CorsConfigurationFactory {
       configuration.setAllowedOrigins(cors.allowedOriginsList());
     }
     configuration.setAllowedMethods(cors.allowedMethodsList());
-    configuration.setAllowedHeaders(cors.allowedHeadersList());
+    configuration.setAllowedHeaders(resolveAllowedHeaders());
     configuration.setMaxAge(cors.getMaxAgeSeconds());
     configuration.setAllowCredentials(cors.isAllowCredentials());
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration(cors.getRegistrationPath(), configuration);
     return source;
+  }
+
+  private List<String> resolveAllowedHeaders() {
+    List<String> headers = new ArrayList<>(cors.allowedHeadersList());
+    String csrfHeader = csrf.getHeaderName();
+    boolean alreadyPresent =
+        headers.stream().anyMatch(header -> header.equalsIgnoreCase(csrfHeader));
+    if (!alreadyPresent) {
+      headers.add(csrfHeader);
+    }
+    return headers;
   }
 }

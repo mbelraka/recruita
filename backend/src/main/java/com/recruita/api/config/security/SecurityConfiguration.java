@@ -25,27 +25,31 @@ public class SecurityConfiguration {
   private final RecruitaProperties properties;
   private final CorsConfigurationSource corsConfigurationSource;
   private final MatchRateLimitFilter matchRateLimitFilter;
+  private final CsrfSecurityConfigurer csrfSecurityConfigurer;
 
   public SecurityConfiguration(
       RecruitaProperties properties,
       CorsConfigurationSource corsConfigurationSource,
-      MatchRateLimitFilter matchRateLimitFilter) {
+      MatchRateLimitFilter matchRateLimitFilter,
+      CsrfSecurityConfigurer csrfSecurityConfigurer) {
     this.properties = properties;
     this.corsConfigurationSource = corsConfigurationSource;
     this.matchRateLimitFilter = matchRateLimitFilter;
+    this.csrfSecurityConfigurer = csrfSecurityConfigurer;
   }
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     String[] publicPaths = properties.getApi().publicPaths();
+    SecurityProperties.CsrfProperties csrfProps = properties.getSecurity().getCsrf();
     SecurityProperties.HeaderProperties headerProps = properties.getSecurity().getHeaders();
     SecurityProperties.HstsProperties hsts = properties.getSecurity().getHsts();
     SecurityProperties.CorsProperties cors = properties.getSecurity().getCors();
     ReferrerPolicyHeaderWriter.ReferrerPolicy referrerPolicy =
         parseReferrerPolicy(headerProps.getReferrerPolicy());
 
-    http.csrf(AbstractHttpConfigurer::disable)
-        .httpBasic(AbstractHttpConfigurer::disable)
+    csrfSecurityConfigurer.apply(http, csrfProps);
+    http.httpBasic(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

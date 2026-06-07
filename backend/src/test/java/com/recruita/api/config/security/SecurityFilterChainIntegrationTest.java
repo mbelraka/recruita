@@ -1,11 +1,14 @@
 package com.recruita.api.config.security;
 
+import static com.recruita.api.support.MockMvcApiRequests.postJson;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.recruita.api.config.properties.RecruitaProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class SecurityFilterChainIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
+  @Autowired private RecruitaProperties recruitaProperties;
 
   @Test
   void deniesUnlistedRoutes() throws Exception {
@@ -70,9 +74,35 @@ class SecurityFilterChainIntegrationTest {
         """;
 
     mockMvc
-        .perform(post("/api/match").contentType(MediaType.APPLICATION_JSON).content(body))
+        .perform(postJson("/api/match", body))
         .andExpect(status().isOk())
         .andExpect(header().string("X-Content-Type-Options", "nosniff"))
         .andExpect(header().exists("Content-Security-Policy"));
+  }
+
+  @Test
+  void rejectsMutatingRequestsWithoutCsrfToken() throws Exception {
+    String body =
+        """
+        {
+          "jobDescription": "Engineer",
+          "deterministic": true,
+          "candidates": [{"id": "a", "skills": ["java"]}]
+        }
+        """;
+
+    mockMvc
+        .perform(post("/api/match").contentType(MediaType.APPLICATION_JSON).content(body))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void issuesCsrfCookieOnSafeRequests() throws Exception {
+    String cookieName = recruitaProperties.getSecurity().getCsrf().getCookieName();
+
+    mockMvc
+        .perform(get("/api/health"))
+        .andExpect(status().isOk())
+        .andExpect(cookie().exists(cookieName));
   }
 }

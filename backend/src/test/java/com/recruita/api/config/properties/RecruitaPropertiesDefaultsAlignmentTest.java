@@ -2,6 +2,7 @@ package com.recruita.api.config.properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -30,6 +31,22 @@ class RecruitaPropertiesDefaultsAlignmentTest {
               assertEquals("Content-Type", cors.getAllowedHeaders());
               assertEquals(86_400L, cors.getMaxAgeSeconds());
               assertFalse(cors.isAllowCredentials());
+            });
+  }
+
+  @Test
+  void securityCsrfDefaultsMatchApplicationYaml() {
+    contextRunner
+        .withPropertyValues(REQUIRED_TEST_PROPERTIES)
+        .run(
+            context -> {
+              SecurityProperties.CsrfProperties csrf =
+                  context.getBean(RecruitaProperties.class).getSecurity().getCsrf();
+              assertTrue(csrf.isEnabled());
+              assertEquals("XSRF-TOKEN", csrf.getCookieName());
+              assertEquals("X-XSRF-TOKEN", csrf.getHeaderName());
+              assertEquals("_csrf", csrf.getParameterName());
+              assertFalse(csrf.isCookieHttpOnly());
             });
   }
 

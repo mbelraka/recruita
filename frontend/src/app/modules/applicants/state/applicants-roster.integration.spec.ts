@@ -1,4 +1,4 @@
-import { APP_INITIALIZER } from '@angular/core';
+import { inject, provideAppInitializer } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   provideHttpClient,
@@ -49,12 +49,13 @@ describe('Applicants roster (NgRx Data integration)', () => {
           useValue: { entityHttpResourceUrls: recruitaEntityHttpResourceUrls },
         },
         { provide: HttpUrlGenerator, useClass: RecruitaHttpUrlGenerator },
-        {
-          provide: APP_INITIALIZER,
-          useFactory: registerRecruitaEntityDataServices,
-          deps: [EntityDataService, ApplicantDataService, ProfileDataService],
-          multi: true,
-        },
+        provideAppInitializer(() => {
+          registerRecruitaEntityDataServices(
+            inject(EntityDataService),
+            inject(ApplicantDataService),
+            inject(ProfileDataService)
+          )();
+        }),
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
       ],
