@@ -1,0 +1,64 @@
+<div class="smart-input" [class.smart-input--processing]="isProcessing()">
+  <div class="smart-input__wrapper">
+    <textarea
+      class="smart-input__field"
+      [ngModel]="command()"
+      (ngModelChange)="onCommandChange($event)"
+      (keydown.enter)="onEnter($event)"
+      [placeholder]="'smartAction.placeholder' | translate"
+      [disabled]="isProcessing()"
+      rows="2"
+      [attr.maxlength]="maxCommandLength"
+    ></textarea>
+
+    <button
+      type="button"
+      class="smart-input__submit"
+      (click)="execute()"
+      [disabled]="!canExecute()"
+      [attr.aria-label]="'smartAction.execute' | translate"
+    >
+      {{ isProcessing() ? '…' : '→' }}
+    </button>
+  </div>
+
+  @if (result(); as actionResult) {
+    <div
+      class="smart-input__result"
+      [class.smart-input__result--success]="actionResult.success"
+      [class.smart-input__result--error]="!actionResult.success"
+    >
+      <div class="smart-input__result-message">
+        <span class="smart-input__result-icon">{{
+          actionResult.success ? '✓' : '✗'
+        }}</span>
+        <span>{{ actionResult.message }}</span>
+        @if (actionResult.undo) {
+          <button type="button" class="smart-input__undo" (click)="undo()">
+            {{ 'smartAction.undo' | translate }}
+          </button>
+        }
+      </div>
+
+      @if (actionResult.data && $any(actionResult.data).applicants) {
+        <div class="smart-input__preview">
+          <strong
+            >{{ 'smartAction.foundApplicants' | translate }}:
+            {{ $any(actionResult.data).totalCount }}</strong
+          >
+          <ul>
+            @for (
+              applicant of $any(actionResult.data).applicants;
+              track applicant.id
+            ) {
+              <li>
+                {{ applicant.name }} —
+                {{ applicant.currentJobTitle || applicant.email }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+</div>

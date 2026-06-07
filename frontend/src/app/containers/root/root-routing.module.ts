@@ -33,6 +33,13 @@ const routes: Routes = [
           ),
       },
       {
+        path: 'smart-action',
+        loadChildren: () =>
+          import('../../modules/smart-action/smart-action.module').then(
+            (m) => m.SmartActionModule
+          ),
+      },
+      {
         path: 'privacy',
         loadComponent: () =>
           import('./privacy/privacy-page.component').then(

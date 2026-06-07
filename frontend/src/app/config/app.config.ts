@@ -6,7 +6,17 @@ import { Applicant } from '../modules/applicants/models/applicant.model';
 import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
 
+/** Canonical in-app route paths (shared by nav links and smart-action execution). */
+export const APP_ROUTES = {
+  MAIN: '/main',
+  APPLICANTS: '/applicants',
+  MATCH: '/match',
+  EXPORT: '/export',
+  SMART_ACTION: '/smart-action',
+} as const;
+
 export const APP_CONFIG = {
+  ROUTES: APP_ROUTES,
   /** Browser tab title (`index.html` fallback until i18n loads). */
   APP: {
     SITE_TITLE_I18N_KEY: 'app.siteTitle',
@@ -166,20 +176,25 @@ export const APP_CONFIG = {
 
   // Navigation links for the app
   NAV_LINKS: [
-    { translationKey: 'nav.main', link: '/main', showHeader: false },
+    { translationKey: 'nav.main', link: APP_ROUTES.MAIN, showHeader: false },
     {
       translationKey: 'nav.applicants',
-      link: '/applicants',
+      link: APP_ROUTES.APPLICANTS,
       showHeader: true,
     },
     {
       translationKey: 'nav.matchCandidates',
-      link: '/match',
+      link: APP_ROUTES.MATCH,
       showHeader: true,
     },
     {
       translationKey: 'nav.export',
-      link: '/export',
+      link: APP_ROUTES.EXPORT,
+      showHeader: true,
+    },
+    {
+      translationKey: 'nav.smartAction',
+      link: APP_ROUTES.SMART_ACTION,
       showHeader: true,
     },
   ] as const satisfies readonly NavLink[],
@@ -300,6 +315,35 @@ export const APP_CONFIG = {
       readonly sortKey: keyof Applicant;
       readonly labelKey: string;
     }>,
+  } as const,
+
+  SMART_ACTION: {
+    API: {
+      PARSE_PATH: '/api/action/parse',
+      REQUEST_TIMEOUT_MS: 10000,
+    },
+    INPUT: {
+      MAX_COMMAND_LENGTH: 500,
+      MAX_RETRIES: 2,
+    },
+    VALIDATION: {
+      MAX_SKILLS: 20,
+      MIN_EXPERIENCE: 0,
+      MAX_EXPERIENCE: 50,
+      MAX_SEARCH_TERM_LENGTH: 100,
+      MATCH_LIMIT_DEFAULT: 10,
+      MATCH_LIMIT_MAX: 100,
+      MAX_LOG_ENTRIES: 100,
+    },
+    LOGGING: {
+      RECENT_LOGS_DEFAULT_LIMIT: 10,
+      SESSION_ID_STORAGE_KEY: 'recruita_session_id',
+    },
+    REPORT: {
+      UNKNOWN_STATUS_KEY: 'unknown',
+      TYPE_LABEL_REPLACE_FROM: '_',
+      TYPE_LABEL_REPLACE_TO: ' ',
+    },
   } as const,
 
   MATCH: {

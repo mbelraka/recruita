@@ -27,6 +27,10 @@
       <Package name="com.recruita.api.api.controller"/>
       <Package name="com.recruita.api.api.advice"/>
       <Package name="com.recruita.api.observability.aop"/>
+      <Package name="com.recruita.api.action.service"/>
+      <Package name="com.recruita.api.action.prompt"/>
+      <Package name="com.recruita.api.action.validation"/>
+      <Package name="com.recruita.api.action.parse"/>
     </Or>
   </Match>
 </FindBugsFilter>

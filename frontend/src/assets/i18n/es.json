@@ -7,7 +7,16 @@
     "applicants": "Candidatos",
     "matchCandidates": "Coincidencia de candidatos",
     "export": "Exportar",
+    "smartAction": "Smart Action",
     "openMenu": "Abrir menú de navegación"
+  },
+  "smartAction": {
+    "title": "Smart Action",
+    "subtitle": "Describe tu objetivo en lenguaje natural: filtrar, actualizar estado, exportar, emparejar candidatos y más.",
+    "placeholder": "Escribe un comando… p. ej. «Buscar desarrolladores React con 5+ años en Berlín»",
+    "execute": "Ejecutar",
+    "undo": "Deshacer",
+    "foundApplicants": "Candidatos encontrados"
   },
   "language": {
     "label": "Idioma",

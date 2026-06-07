@@ -15,6 +15,7 @@ public class ApiRoutePaths {
   private final String applicantsPathWithId;
   private final String profilesPath;
   private final String profilesPathWithId;
+  private final String actionParsePath;
 
   public ApiRoutePaths(RecruitaProperties properties) {
     var routes = properties.getApi().getRoutes();
@@ -26,6 +27,7 @@ public class ApiRoutePaths {
     this.applicantsPathWithId = routes.getApplicantsPathWithId();
     this.profilesPath = routes.getProfilesPath();
     this.profilesPathWithId = routes.getProfilesPathWithId();
+    this.actionParsePath = routes.getActionParsePath();
   }
 
   public String getHealthPath() {
@@ -58,5 +60,9 @@ public class ApiRoutePaths {
 
   public String getProfilesPathWithId() {
     return profilesPathWithId;
+  }
+
+  public String getActionParsePath() {
+    return actionParsePath;
   }
 }

@@ -7,7 +7,16 @@
     "applicants": "Candidats",
     "matchCandidates": "Cumparegliaziun da candidats",
     "export": "Exportar",
+    "smartAction": "Smart Action",
     "openMenu": "Avrir il menu da navigaziun"
+  },
+  "smartAction": {
+    "title": "Smart Action",
+    "subtitle": "Descriva voss target en linguatg natural — filtrar, actualisar status, exportar, match candidates e dapli.",
+    "placeholder": "Endatescha in command… per ex. «Chattar developers React cun 5+ onns a Berlin»",
+    "execute": "Executar",
+    "undo": "Revocar",
+    "foundApplicants": "Candidates chattads"
   },
   "language": {
     "label": "Ling.",

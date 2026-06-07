@@ -13,6 +13,7 @@ public class RecruitaProperties {
   @Valid @NotNull private ApiProperties api = new ApiProperties();
   @Valid @NotNull private SecurityProperties security = new SecurityProperties();
   @Valid @NotNull private MatchProperties match = new MatchProperties();
+  @Valid @NotNull private ActionProperties action = new ActionProperties();
   @Valid @NotNull private OperationalProperties operational = new OperationalProperties();
   @Valid @NotNull private PersistenceProperties persistence = new PersistenceProperties();
   @Valid @NotNull private ProfileProperties profileApi = new ProfileProperties();
@@ -48,6 +49,14 @@ public class RecruitaProperties {
 
   public void setMatch(MatchProperties match) {
     this.match = match;
+  }
+
+  public ActionProperties getAction() {
+    return action;
+  }
+
+  public void setAction(ActionProperties action) {
+    this.action = action;
   }
 
   public OperationalProperties getOperational() {

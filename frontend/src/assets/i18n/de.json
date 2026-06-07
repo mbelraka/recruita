@@ -7,7 +7,16 @@
     "applicants": "Bewerber",
     "matchCandidates": "Kandidaten-Matching",
     "export": "Export",
+    "smartAction": "Smart Action",
     "openMenu": "Navigationsmenü öffnen"
+  },
+  "smartAction": {
+    "title": "Smart Action",
+    "subtitle": "Beschreiben Sie Ihr Ziel in natürlicher Sprache — filtern, Status ändern, exportieren, Kandidaten matchen und mehr.",
+    "placeholder": "Befehl eingeben… z. B. „React-Entwickler mit 5+ Jahren in Berlin finden“",
+    "execute": "Ausführen",
+    "undo": "Rückgängig",
+    "foundApplicants": "Gefundene Bewerber"
   },
   "language": {
     "label": "Spr.",

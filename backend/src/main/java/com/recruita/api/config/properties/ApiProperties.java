@@ -78,6 +78,7 @@ public class ApiProperties {
     private String matchLegacyPath = "/api/match-job";
     private String applicantsPath = "/api/applicants";
     private String profilesPath = "/api/profiles";
+    private String actionParsePath = "/api/action/parse";
 
     public String getHealthPath() {
       return healthPath;
@@ -119,6 +120,14 @@ public class ApiProperties {
       this.profilesPath = profilesPath;
     }
 
+    public String getActionParsePath() {
+      return actionParsePath;
+    }
+
+    public void setActionParsePath(String actionParsePath) {
+      this.actionParsePath = actionParsePath;
+    }
+
     public String getApplicantsPathWithId() {
       return applicantsPath + "/{id}";
     }
@@ -139,7 +148,8 @@ public class ApiProperties {
         applicantsPath,
         applicantsPath + "/**",
         profilesPath,
-        profilesPath + "/**"
+        profilesPath + "/**",
+        actionParsePath
       };
     }
   }

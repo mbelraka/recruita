@@ -7,7 +7,16 @@
     "applicants": "Applicants",
     "matchCandidates": "Match Candidates",
     "export": "Export",
+    "smartAction": "Smart Action",
     "openMenu": "Open navigation menu"
+  },
+  "smartAction": {
+    "title": "Smart Action",
+    "subtitle": "Describe what you want in plain language — filter applicants, update status, export data, match candidates, and more.",
+    "placeholder": "Type your command… e.g. \"Find React developers with 5+ years in Berlin\"",
+    "execute": "Run command",
+    "undo": "Undo",
+    "foundApplicants": "Found applicants"
   },
   "language": {
     "label": "Lang",
