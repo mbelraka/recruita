@@ -10,13 +10,16 @@ import {
   Observable,
   of,
   switchMap,
+  take,
   tap,
 } from 'rxjs';
 
 import { SMART_ACTION_MESSAGES } from '../constants/smart-action-messages.constants';
 import { FullState } from '../../../models/full-state.model';
+import { selectAppLanguage } from '../../../state/app.selectors';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import { ParsedAction } from '../models/parsed-action.type';
+import { SmartActionExecutionDeps } from '../models/smart-action-execution-deps.interface';
 import { mapParseActionResponse } from '../utilities/map-parse-action-response.util';
 import { executeParsedAction } from '../utilities/execution/execute-parsed-action.util';
 import { ActionLoggerService } from '../services/action-logger.service';
@@ -38,24 +41,29 @@ export class SmartActionEffects {
     this._actions$.pipe(
       ofType(submitSmartActionCommand),
       exhaustMap(({ command }) =>
-        this._parseApi.parseCommand(command).pipe(
-          map((response) => {
-            const action = mapParseActionResponse(response);
-            if (!action) {
-              return parseSmartActionFailure({
-                errors:
-                  response.errors.length > 0
-                    ? response.errors
-                    : [SMART_ACTION_MESSAGES.INVALID_PARSER_ACTION],
-              });
-            }
-            return parseSmartActionSuccess({ action });
-          }),
-          catchError((error: unknown) =>
-            of(
-              parseSmartActionFailure({
-                errors: [getErrorMessage(error)],
-              })
+        this._store.select(selectAppLanguage).pipe(
+          take(1),
+          switchMap((language) =>
+            this._parseApi.parseCommand(command, language).pipe(
+              map((response) => {
+                const action = mapParseActionResponse(response);
+                if (!action) {
+                  return parseSmartActionFailure({
+                    errors:
+                      response.errors.length > 0
+                        ? response.errors
+                        : [SMART_ACTION_MESSAGES.INVALID_PARSER_ACTION],
+                  });
+                }
+                return parseSmartActionSuccess({ action });
+              }),
+              catchError((error: unknown) =>
+                of(
+                  parseSmartActionFailure({
+                    errors: [getErrorMessage(error)],
+                  })
+                )
+              )
             )
           )
         )
@@ -96,6 +104,13 @@ export class SmartActionEffects {
     private readonly _logger: ActionLoggerService
   ) {}
 
+  private _executionDeps(): SmartActionExecutionDeps {
+    return {
+      store: this._store,
+      router: this._router,
+    };
+  }
+
   private _runExecution$(
     trigger:
       | ReturnType<typeof executeSmartAction>
@@ -117,10 +132,7 @@ export class SmartActionEffects {
             type: result.undo.type,
             params: result.undo.params,
           } as ParsedAction;
-          return executeParsedAction(undoAction, {
-            store: this._store,
-            router: this._router,
-          }).pipe(
+          return executeParsedAction(undoAction, this._executionDeps()).pipe(
             map((executionResult) =>
               executeSmartActionSuccess({
                 action: undoAction,
@@ -136,10 +148,7 @@ export class SmartActionEffects {
       );
     }
 
-    return executeParsedAction(trigger.action, {
-      store: this._store,
-      router: this._router,
-    }).pipe(
+    return executeParsedAction(trigger.action, this._executionDeps()).pipe(
       map((result) =>
         executeSmartActionSuccess({
           action: trigger.action,

@@ -42,7 +42,7 @@ public class ActionParseApplicationService {
     var matchGroq = properties.getMatch().getGroq();
     String model = groq.getModel();
     String systemPrompt = promptFactory.systemPrompt();
-    String userPrompt = promptFactory.userPrompt(request.command());
+    String userPrompt = promptFactory.userPrompt(request.command(), request.language());
 
     try {
       String content =

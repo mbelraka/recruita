@@ -39,6 +39,8 @@ describe('PrivacyConsentService', () => {
     filterByCountry: null,
     viewType: ViewTypes.GRID,
     locationSuggestions: [],
+    newApplicantFabExpanded: false,
+    suppressNewApplicantFabPointerExpandUntil: 0,
   };
 
   const mockStoreState = (options?: {

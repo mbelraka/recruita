@@ -71,6 +71,8 @@ describe('match selectors', () => {
       filterByCountry: null,
       viewType: ViewTypes.GRID,
       locationSuggestions: [],
+      newApplicantFabExpanded: false,
+      suppressNewApplicantFabPointerExpandUntil: 0,
     },
     ...withEntityCache(
       buildApplicantEntityCache([resultA.applicant, resultB.applicant])

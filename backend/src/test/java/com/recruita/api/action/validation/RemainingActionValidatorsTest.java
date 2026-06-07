@@ -63,7 +63,7 @@ class RemainingActionValidatorsTest {
         generateReportParamsValidator.validate(
             objectMapper.readTree(
                 """
-                {"reportType":"skills_distribution","filters":{"skills":["TS"]}}
+                {"reportType":"skills_distribution","filters":{"skills":["TypeScript"]}}
                 """));
     assertThat(result.isValid()).isTrue();
   }

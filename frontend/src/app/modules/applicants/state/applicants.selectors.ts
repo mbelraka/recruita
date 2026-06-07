@@ -12,7 +12,8 @@ import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import { ApplicantUiState } from '../models/applicant-state.model';
 import { Applicant } from '../models/applicant.model';
-import { applicantGlobalSearchHaystack } from '../utilities/applicant-global-search.util';
+import { filterApplicantList } from '../utilities/applicant-filters.util';
+import { countryFromLocation } from '../utilities/applicant-location.util';
 
 const APPLICATION_STATUS_ORDER = Object.values(ApplicationStatus);
 const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
@@ -24,6 +25,8 @@ const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
   filterByCountry: null,
   viewType: ViewTypes.GRID,
   locationSuggestions: [],
+  newApplicantFabExpanded: false,
+  suppressNewApplicantFabPointerExpandUntil: 0,
 };
 
 const selectApplicantUiState = (state: {
@@ -131,23 +134,17 @@ export const selectSortDirection = createSelector(
   (state): SortDirection => state.sortDirection ?? SortDirection.Asc
 );
 
-/** Country segment from `location` (last comma-separated part, or whole string). */
-export function countryFromLocation(
-  location: string | undefined
-): string | null {
-  const raw = location?.trim();
-  if (!raw) {
-    return null;
-  }
-  const parts = raw
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-  if (parts.length === 0) {
-    return null;
-  }
-  return parts[parts.length - 1] ?? null;
-}
+export const selectNewApplicantFabExpanded = createSelector(
+  selectApplicantUiStateSafe,
+  (state): boolean => state.newApplicantFabExpanded
+);
+
+export const selectSuppressNewApplicantFabPointerExpandUntil = createSelector(
+  selectApplicantUiStateSafe,
+  (state): number => state.suppressNewApplicantFabPointerExpandUntil
+);
+
+export { countryFromLocation } from '../utilities/applicant-location.util';
 
 function compareApplicantValues(
   a: Applicant,
@@ -198,41 +195,6 @@ function compareApplicantValues(
   });
 }
 
-const applyFilters = (
-  applicants: Applicant[],
-  globalFilter: string,
-  skillFilter: string | null,
-  statusFilter: string | null,
-  countryFilter: string | null
-): Applicant[] => {
-  let filtered = applicants;
-  if (skillFilter) {
-    filtered = filtered.filter(
-      (applicant: Applicant): boolean =>
-        applicant.skills?.includes(skillFilter) ?? false
-    );
-  }
-  if (statusFilter) {
-    filtered = filtered.filter(
-      (applicant: Applicant): boolean =>
-        applicant.applicationStatus === statusFilter
-    );
-  }
-  if (countryFilter) {
-    filtered = filtered.filter(
-      (applicant: Applicant): boolean =>
-        countryFromLocation(applicant.location) === countryFilter
-    );
-  }
-  const q = globalFilter.trim().toLowerCase();
-  if (q.length > 0) {
-    filtered = filtered.filter((applicant: Applicant): boolean =>
-      applicantGlobalSearchHaystack(applicant).includes(q)
-    );
-  }
-  return filtered;
-};
-
 const applySorting = (
   applicants: Applicant[],
   sortBy: keyof Applicant | null,
@@ -260,13 +222,12 @@ const selectFilteredApplicants = createSelector(
     statusFilter,
     countryFilter
   ): Applicant[] =>
-    applyFilters(
-      applicants,
+    filterApplicantList(applicants, {
       globalFilter,
-      skillFilter,
-      statusFilter,
-      countryFilter
-    )
+      skill: skillFilter,
+      status: statusFilter,
+      country: countryFilter,
+    })
 );
 
 export const selectSortedApplicants = createSelector(

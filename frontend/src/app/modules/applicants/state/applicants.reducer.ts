@@ -4,12 +4,11 @@ import { ApplicantUiState } from '../models/applicant-state.model';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
 import {
-  setFilterBySkill,
-  setFilterByStatus,
-  setFilterByCountry,
-  setGlobalFilter,
+  applicantFormDialogClosed,
+  setNewApplicantFabExpanded,
   setSortBy,
   setViewType,
+  syncApplicantFiltersFromUrl,
   searchLocationSuggestionsSuccess,
   searchLocationSuggestionsFailure,
   clearLocationSuggestions,
@@ -24,14 +23,19 @@ const initialApplicantUiState: ApplicantUiState = {
   filterByCountry: null,
   viewType: ViewTypes.GRID,
   locationSuggestions: [],
+  newApplicantFabExpanded: false,
+  suppressNewApplicantFabPointerExpandUntil: 0,
 };
 
 export const applicantsReducer = createReducer(
   initialApplicantUiState,
 
-  on(setGlobalFilter, (state, { filter }) => ({
+  on(syncApplicantFiltersFromUrl, (state, { filters }) => ({
     ...state,
-    filter,
+    filter: filters.globalFilter,
+    filterBySkill: filters.skill,
+    filterByStatus: filters.status,
+    filterByCountry: filters.country,
   })),
 
   on(setSortBy, (state, { sortBy, sortDirection = SortDirection.Asc }) => ({
@@ -45,21 +49,6 @@ export const applicantsReducer = createReducer(
     viewType,
   })),
 
-  on(setFilterBySkill, (state, { skill }) => ({
-    ...state,
-    filterBySkill: skill,
-  })),
-
-  on(setFilterByStatus, (state, { status }) => ({
-    ...state,
-    filterByStatus: status,
-  })),
-
-  on(setFilterByCountry, (state, { country }) => ({
-    ...state,
-    filterByCountry: country,
-  })),
-
   on(searchLocationSuggestionsSuccess, (state, { suggestions }) => ({
     ...state,
     locationSuggestions: suggestions,
@@ -71,5 +60,16 @@ export const applicantsReducer = createReducer(
   on(clearLocationSuggestions, (state) => ({
     ...state,
     locationSuggestions: [] as string[],
+  })),
+
+  on(applicantFormDialogClosed, (state, { suppressPointerExpandUntil }) => ({
+    ...state,
+    newApplicantFabExpanded: false,
+    suppressNewApplicantFabPointerExpandUntil: suppressPointerExpandUntil,
+  })),
+
+  on(setNewApplicantFabExpanded, (state, { expanded }) => ({
+    ...state,
+    newApplicantFabExpanded: expanded,
   }))
 );

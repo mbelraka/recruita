@@ -43,4 +43,32 @@ describe('AppConfig', () => {
   it('should get correct date format for Spanish', () => {
     expect(APP_CONFIG.getDateFormat(Languages.Spanish)).toBe('dd/MM/yyyy');
   });
+
+  it('should return full applicant list columns on large viewports', () => {
+    expect(APP_CONFIG.getApplicantListDisplayedColumns('lg')).toEqual([
+      'name',
+      'currentJobTitle',
+      'yearsOfExperience',
+      'applicationStatus',
+      'email',
+      'phone',
+      'availability',
+      'location',
+      'skills',
+    ]);
+  });
+
+  it('should return reduced applicant list columns on narrow viewports', () => {
+    expect(APP_CONFIG.getApplicantListDisplayedColumns('xs')).toEqual([
+      'name',
+      'applicationStatus',
+      'currentJobTitle',
+    ]);
+    expect(APP_CONFIG.getApplicantListDisplayedColumns('md')).toContain(
+      'location'
+    );
+    expect(APP_CONFIG.getApplicantListDisplayedColumns('md')).not.toContain(
+      'skills'
+    );
+  });
 });

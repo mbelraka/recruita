@@ -32,6 +32,7 @@ public final class ActionParamKey {
   public static final String MAX_EXPERIENCE = "maxExperience";
   public static final String STATUS = "status";
   public static final String SEARCH_TERM = "searchTerm";
+  public static final String COUNTRY = "country";
   public static final String LOCATION = "location";
 
   private ActionParamKey() {}

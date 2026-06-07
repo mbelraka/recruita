@@ -1,10 +1,10 @@
-import { DestroyRef } from '@angular/core';
-import { createApplicant } from '../utilities/applicant-domain.util';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { of, Subject } from 'rxjs';
 
+import { APP_CONFIG } from '../../../config/app.config';
+import { createApplicant } from '../utilities/applicant-domain.util';
 import * as ApplicantsActions from '../state/applicants.actions';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantEditDialogService } from './applicant-edit-dialog.service';
@@ -15,7 +15,6 @@ describe('ApplicantEditDialogService', () => {
   let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockCollection: jasmine.SpyObj<ApplicantEntityCollectionService>;
   let afterClosed$: Subject<unknown>;
-  let destroyRef: DestroyRef;
 
   beforeEach(() => {
     afterClosed$ = new Subject<unknown>();
@@ -39,22 +38,29 @@ describe('ApplicantEditDialogService', () => {
     });
 
     service = TestBed.inject(ApplicantEditDialogService);
-    destroyRef = TestBed.inject(DestroyRef);
   });
 
   it('opens create dialog without calling the detail API', () => {
-    const onClosed = jasmine.createSpy('onClosed');
-    service.openCreateOrEdit(destroyRef, undefined, onClosed);
+    service.openCreateOrEdit(undefined);
 
     expect(mockCollection.getByKey).not.toHaveBeenCalled();
     expect(mockDialog.open).toHaveBeenCalled();
   });
 
-  it('dispatches addApplicant when create dialog closes with a new applicant', () => {
-    service.openCreateOrEdit(destroyRef, undefined, () => undefined);
+  it('dispatches applicantFormDialogClosed and addApplicant when create dialog closes', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+    service.openCreateOrEdit(undefined);
     const created = createApplicant({ id: 'new', name: 'Sam', skills: ['Go'] });
     afterClosed$.next(created);
 
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      ApplicantsActions.applicantFormDialogClosed({
+        suppressPointerExpandUntil:
+          1000 +
+          APP_CONFIG.APPLICANTS
+            .NEW_APPLICANT_FAB_SUPPRESS_POINTER_EXPAND_AFTER_DIALOG_MS,
+      })
+    );
     expect(mockStore.dispatch).toHaveBeenCalledWith(
       ApplicantsActions.addApplicant({ applicant: created })
     );
@@ -74,7 +80,7 @@ describe('ApplicantEditDialogService', () => {
     });
     mockCollection.getByKey.and.returnValue(of(detailed));
 
-    service.openCreateOrEdit(destroyRef, listApplicant, () => undefined);
+    service.openCreateOrEdit(listApplicant);
 
     expect(mockCollection.getByKey).toHaveBeenCalledWith('1');
     expect(mockStore.dispatch).not.toHaveBeenCalled();
@@ -82,7 +88,7 @@ describe('ApplicantEditDialogService', () => {
   });
 
   it('dispatches updateApplicant when edit dialog closes with an update result', () => {
-    service.openCreateOrEdit(destroyRef, undefined, () => undefined);
+    service.openCreateOrEdit(undefined);
     const updated = createApplicant({
       id: '1',
       name: 'John Updated',

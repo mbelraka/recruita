@@ -1,9 +1,7 @@
-import { DestroyRef, Injectable } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
 import { Store } from '@ngrx/store';
-import { filter, tap } from 'rxjs';
+import { filter, take, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { FullState } from '../../../models/full-state.model';
@@ -13,7 +11,11 @@ import { NewApplicantDialogCloseResult } from '../models/new-applicant-dialog-cl
 import { NewApplicantDialogData } from '../models/new-applicant-dialog-data.model';
 import { Applicant } from '../models/applicant.model';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
-import { addApplicant, updateApplicant } from '../state/applicants.actions';
+import {
+  addApplicant,
+  applicantFormDialogClosed,
+  updateApplicant,
+} from '../state/applicants.actions';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicantEditDialogService {
@@ -24,31 +26,22 @@ export class ApplicantEditDialogService {
   ) {}
 
   /** Opens create dialog, or loads detail then opens edit dialog. */
-  public openCreateOrEdit(
-    destroyRef: DestroyRef,
-    applicant: Applicant | undefined,
-    onDialogClosed: () => void
-  ): void {
+  public openCreateOrEdit(applicant: Applicant | undefined): void {
     if (!applicant) {
-      this._openDialog(destroyRef, undefined, onDialogClosed);
+      this._openDialog(undefined);
       return;
     }
 
     this._applicants
       .getByKey(applicant.id)
-      .pipe(takeUntilDestroyed(destroyRef))
+      .pipe(take(1))
       .subscribe({
-        next: (fullApplicant) =>
-          this._openDialog(destroyRef, fullApplicant, onDialogClosed),
-        error: () => this._openDialog(destroyRef, applicant, onDialogClosed),
+        next: (fullApplicant) => this._openDialog(fullApplicant),
+        error: () => this._openDialog(applicant),
       });
   }
 
-  private _openDialog(
-    destroyRef: DestroyRef,
-    applicant: Applicant | undefined,
-    onDialogClosed: () => void
-  ): void {
+  private _openDialog(applicant: Applicant | undefined): void {
     this._dialog
       .open(NewApplicantComponent, {
         ...APP_CONFIG.DIALOG_CONFIG,
@@ -58,8 +51,17 @@ export class ApplicantEditDialogService {
       })
       .afterClosed()
       .pipe(
-        takeUntilDestroyed(destroyRef),
-        tap(onDialogClosed),
+        take(1),
+        tap(() =>
+          this._store.dispatch(
+            applicantFormDialogClosed({
+              suppressPointerExpandUntil:
+                performance.now() +
+                APP_CONFIG.APPLICANTS
+                  .NEW_APPLICANT_FAB_SUPPRESS_POINTER_EXPAND_AFTER_DIALOG_MS,
+            })
+          )
+        ),
         filter((result): result is NewApplicantDialogCloseResult =>
           Boolean(result)
         )

@@ -32,6 +32,8 @@ describe('Applicants Reducer', () => {
       filterByCountry: null,
       viewType: ViewTypes.GRID,
       locationSuggestions: [],
+      newApplicantFabExpanded: false,
+      suppressNewApplicantFabPointerExpandUntil: 0,
     };
   });
 
@@ -44,12 +46,22 @@ describe('Applicants Reducer', () => {
     });
   });
 
-  describe('setGlobalFilter action', () => {
-    it('should update the global filter', () => {
-      const action = ApplicantsActions.setGlobalFilter({ filter: 'test' });
+  describe('syncApplicantFiltersFromUrl action', () => {
+    it('should sync all list filters from the URL', () => {
+      const action = ApplicantsActions.syncApplicantFiltersFromUrl({
+        filters: {
+          globalFilter: 'test',
+          skill: 'Angular',
+          status: ApplicationStatus.Shortlisted,
+          country: 'USA',
+        },
+      });
       const state = applicantsReducer(initialState, action);
 
       expect(state.filter).toBe('test');
+      expect(state.filterBySkill).toBe('Angular');
+      expect(state.filterByStatus).toBe(ApplicationStatus.Shortlisted);
+      expect(state.filterByCountry).toBe('USA');
     });
   });
 
@@ -100,6 +112,31 @@ describe('Applicants Reducer', () => {
       );
 
       expect(state.locationSuggestions).toEqual([]);
+    });
+  });
+
+  describe('new applicant FAB UI', () => {
+    it('collapses FAB and records suppress window when the form dialog closes', () => {
+      const expanded = {
+        ...initialState,
+        newApplicantFabExpanded: true,
+      };
+      const action = ApplicantsActions.applicantFormDialogClosed({
+        suppressPointerExpandUntil: 1500,
+      });
+      const state = applicantsReducer(expanded, action);
+
+      expect(state.newApplicantFabExpanded).toBeFalse();
+      expect(state.suppressNewApplicantFabPointerExpandUntil).toBe(1500);
+    });
+
+    it('updates FAB expanded flag', () => {
+      const action = ApplicantsActions.setNewApplicantFabExpanded({
+        expanded: true,
+      });
+      const state = applicantsReducer(initialState, action);
+
+      expect(state.newApplicantFabExpanded).toBeTrue();
     });
   });
 });

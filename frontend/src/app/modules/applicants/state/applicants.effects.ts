@@ -1,11 +1,23 @@
 import { Injectable } from '@angular/core';
-
+import { NavigationEnd, Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { mapResponse } from '@ngrx/operators';
-import { catchError, concatMap, exhaustMap, map, of, switchMap } from 'rxjs';
+import { concatLatestFrom, mapResponse } from '@ngrx/operators';
+import { Store } from '@ngrx/store';
+import {
+  catchError,
+  concatMap,
+  exhaustMap,
+  filter,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 
+import { APP_CONFIG } from '../../../config/app.config';
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
+import { FullState } from '../../../models/full-state.model';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import {
   concatWithErrorNotification,
@@ -13,24 +25,39 @@ import {
 } from '../../../utilities/notification.utils';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
+import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
+import {
+  mergeApplicantListFilters,
+  navigateApplicantFiltersUrl,
+  parseApplicantFiltersFromQueryParams,
+} from '../utilities/applicant-filters.util';
 import {
   addApplicant,
   addApplicantFailure,
   addApplicantSuccess,
-  updateApplicant,
-  updateApplicantFailure,
-  updateApplicantSuccess,
+  applicantsRosterLoaded,
   deleteApplicant,
   deleteApplicantFailure,
   deleteApplicantSuccess,
   loadApplicants,
   loadApplicantsFailure,
-  applicantsRosterLoaded,
+  openApplicantForm,
+  patchApplicantFilters,
   searchLocationSuggestions,
   searchLocationSuggestionsFailure,
   searchLocationSuggestionsSuccess,
+  syncApplicantFiltersFromUrl,
+  updateApplicant,
+  updateApplicantFailure,
+  updateApplicantSuccess,
 } from './applicants.actions';
+import {
+  selectFilterByCountry,
+  selectFilterBySkill,
+  selectFilterByStatus,
+  selectGlobalFilter,
+} from './applicants.selectors';
 
 /**
  * Flattening: switchMap cancels stale reads (list, geocode); exhaustMap ignores duplicate
@@ -40,9 +67,64 @@ import {
 export class ApplicantsEffects {
   public constructor(
     private readonly _actions$: Actions,
+    private readonly _store: Store<FullState>,
+    private readonly _router: Router,
     private readonly _applicants: ApplicantEntityCollectionService,
-    private readonly _citySearchService: CitySearchService
+    private readonly _citySearchService: CitySearchService,
+    private readonly _editDialog: ApplicantEditDialogService
   ) {}
+
+  routerApplicantFiltersSync$ = createEffect(() =>
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      filter(() => this._router.url.startsWith(APP_CONFIG.ROUTES.APPLICANTS)),
+      map(() => {
+        let route = this._router.routerState.root;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+        return syncApplicantFiltersFromUrl({
+          filters: parseApplicantFiltersFromQueryParams(
+            route.snapshot.queryParamMap
+          ),
+        });
+      })
+    )
+  );
+
+  patchApplicantFilters$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(patchApplicantFilters),
+        concatLatestFrom(() => [
+          this._store.select(selectGlobalFilter),
+          this._store.select(selectFilterBySkill),
+          this._store.select(selectFilterByStatus),
+          this._store.select(selectFilterByCountry),
+        ]),
+        tap(([{ partial }, globalFilter, skill, status, country]) => {
+          void navigateApplicantFiltersUrl(
+            this._router,
+            mergeApplicantListFilters(
+              { globalFilter, skill, status, country },
+              partial
+            )
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  openApplicantForm$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(openApplicantForm),
+        tap(({ applicant }) => {
+          this._editDialog.openCreateOrEdit(applicant);
+        })
+      ),
+    { dispatch: false }
+  );
 
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(

@@ -25,9 +25,9 @@ import {
   selectSortDirection,
   selectSortedApplicants,
 } from '../../state/applicants.selectors';
+import { patchApplicantFilters } from '../../state/applicants.actions';
 import { confirmDeleteApplicant } from '../../utilities/confirm-delete.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
-import { toggleSkillFilter } from '../../utilities/toggle-skill-filter.util';
 
 @Component({
   selector: 'app-applicant-grid',
@@ -135,7 +135,12 @@ export class ApplicantGridComponent implements AfterViewInit {
    * @param skill - The skill name clicked by the user.
    */
   public filterBySkill(skill: string): void {
-    toggleSkillFilter(this._store, skill);
+    const current = this.activeSkillFilter();
+    this._store.dispatch(
+      patchApplicantFilters({
+        partial: { skill: current === skill ? null : skill },
+      })
+    );
   }
 
   public confirmRemoveApplicant(applicant: Applicant): void {

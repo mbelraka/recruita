@@ -31,6 +31,15 @@ export interface ApplicantUiState {
 
   /** Geocoding autocomplete labels ("City, Country") for the new-applicant location field. */
   locationSuggestions: string[];
+
+  /** Whether the new-applicant FAB label is visible. */
+  newApplicantFabExpanded: boolean;
+
+  /**
+   * `performance.now()` threshold until pointer-enter is ignored on the FAB shell
+   * (avoids spurious expand after the dialog overlay closes).
+   */
+  suppressNewApplicantFabPointerExpandUntil: number;
 }
 
 /** @deprecated Use {@link ApplicantUiState}. Kept for gradual migration of imports. */

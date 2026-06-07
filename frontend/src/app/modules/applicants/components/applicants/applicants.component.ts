@@ -3,10 +3,8 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  signal,
   viewChild,
 } from '@angular/core';
-
 import { Store } from '@ngrx/store';
 
 import {
@@ -20,12 +18,10 @@ import { isViewType, ViewTypes } from '../../enums/view-types.enum';
 import { SortDirection } from '../../enums/sort-direction.enum';
 import { Applicant } from '../../models/applicant.model';
 import { isApplicationStatus } from '../../utilities/application-status.util';
-import { ApplicantEditDialogService } from '../../services/applicant-edit-dialog.service';
 import {
-  setFilterByCountry,
-  setFilterBySkill,
-  setFilterByStatus,
-  setGlobalFilter,
+  openApplicantForm,
+  patchApplicantFilters,
+  setNewApplicantFabExpanded,
   setSortBy,
   setViewType,
 } from '../../state/applicants.actions';
@@ -34,8 +30,10 @@ import {
   selectFilterBySkill,
   selectFilterByStatus,
   selectGlobalFilter,
+  selectNewApplicantFabExpanded,
   selectSortBy,
   selectSortDirection,
+  selectSuppressNewApplicantFabPointerExpandUntil,
   selectUniqueApplicationStatuses,
   selectUniqueCountries,
   selectViewType,
@@ -49,7 +47,6 @@ import {
 })
 export class ApplicantsComponent {
   private readonly _destroyRef = inject(DestroyRef);
-  private readonly _editDialog = inject(ApplicantEditDialogService);
   private readonly _store = inject(Store<FullState>);
 
   private readonly _newApplicantFabShellEl = viewChild<ElementRef<HTMLElement>>(
@@ -64,10 +61,13 @@ export class ApplicantsComponent {
   private _newApplicantFabExpandTimer: ReturnType<typeof setTimeout> | null =
     null;
 
-  private _suppressNewApplicantFabPointerExpandUntil = 0;
+  private _searchUrlSyncTimer: ReturnType<typeof setTimeout> | null = null;
 
-  /** Drives FAB label visibility; delayed pointer-leave avoids hover flicker at the edge during resize. */
-  public readonly newApplicantFabExpanded = signal(false);
+  public readonly newApplicantFabExpanded = this._store.selectSignal(
+    selectNewApplicantFabExpanded
+  );
+  private readonly _suppressNewApplicantFabPointerExpandUntil =
+    this._store.selectSignal(selectSuppressNewApplicantFabPointerExpandUntil);
 
   public readonly fade = {
     base: FADE_IN_OUT_BASE_CLASS,
@@ -94,18 +94,21 @@ export class ApplicantsComponent {
   protected readonly defaultSortDirection = SortDirection.Asc;
 
   public constructor() {
-    this._store.dispatch(setFilterBySkill({ skill: null }));
-    this._destroyRef.onDestroy((): void =>
-      this._clearNewApplicantFabExpandTimer()
-    );
+    this._destroyRef.onDestroy((): void => {
+      this._clearNewApplicantFabExpandTimer();
+      if (this._searchUrlSyncTimer !== null) {
+        clearTimeout(this._searchUrlSyncTimer);
+        this._searchUrlSyncTimer = null;
+      }
+    });
   }
 
   public onNewApplicantFabShellPointerEnter(): void {
-    if (performance.now() < this._suppressNewApplicantFabPointerExpandUntil) {
+    if (performance.now() < this._suppressNewApplicantFabPointerExpandUntil()) {
       return;
     }
     this._clearNewApplicantFabExpandTimer();
-    this.newApplicantFabExpanded.set(true);
+    this._store.dispatch(setNewApplicantFabExpanded({ expanded: true }));
   }
 
   public onNewApplicantFabShellPointerLeave(): void {
@@ -113,14 +116,14 @@ export class ApplicantsComponent {
     this._newApplicantFabExpandTimer = setTimeout((): void => {
       this._newApplicantFabExpandTimer = null;
       if (!this._isNewApplicantButtonFocused()) {
-        this.newApplicantFabExpanded.set(false);
+        this._store.dispatch(setNewApplicantFabExpanded({ expanded: false }));
       }
     }, APP_CONFIG.APPLICANTS.NEW_APPLICANT_FAB_POINTER_LEAVE_MS);
   }
 
   public onNewApplicantButtonFocusIn(): void {
     this._clearNewApplicantFabExpandTimer();
-    this.newApplicantFabExpanded.set(true);
+    this._store.dispatch(setNewApplicantFabExpanded({ expanded: true }));
   }
 
   public onNewApplicantButtonFocusOut(event: FocusEvent): void {
@@ -132,10 +135,10 @@ export class ApplicantsComponent {
     }
     const shell = this._newApplicantFabShellEl()?.nativeElement;
     if (shell?.matches(':hover')) {
-      this.newApplicantFabExpanded.set(true);
+      this._store.dispatch(setNewApplicantFabExpanded({ expanded: true }));
       return;
     }
-    this.newApplicantFabExpanded.set(false);
+    this._store.dispatch(setNewApplicantFabExpanded({ expanded: false }));
   }
 
   private _isNewApplicantButtonFocused(): boolean {
@@ -155,18 +158,28 @@ export class ApplicantsComponent {
     if (!input) {
       return;
     }
-    this._store.dispatch(setGlobalFilter({ filter: input.value }));
+    if (this._searchUrlSyncTimer !== null) {
+      clearTimeout(this._searchUrlSyncTimer);
+    }
+    this._searchUrlSyncTimer = setTimeout((): void => {
+      this._searchUrlSyncTimer = null;
+      this._store.dispatch(
+        patchApplicantFilters({ partial: { globalFilter: input.value } })
+      );
+    }, APP_CONFIG.APPLICANTS.FILTER_SEARCH_URL_DEBOUNCE_MS);
   }
 
   public clearSearch(): void {
-    this._store.dispatch(setGlobalFilter({ filter: '' }));
+    this._store.dispatch(
+      patchApplicantFilters({ partial: { globalFilter: '' } })
+    );
     queueMicrotask((): void => {
       this._searchInput()?.nativeElement?.focus();
     });
   }
 
   public clearSkillFilter(): void {
-    this._store.dispatch(setFilterBySkill({ skill: null }));
+    this._store.dispatch(patchApplicantFilters({ partial: { skill: null } }));
   }
 
   public onStatusFilterChange(value: string | null | undefined): void {
@@ -176,12 +189,14 @@ export class ApplicantsComponent {
         : isApplicationStatus(value)
           ? value
           : null;
-    this._store.dispatch(setFilterByStatus({ status }));
+    this._store.dispatch(patchApplicantFilters({ partial: { status } }));
   }
 
   public onCountryFilterChange(value: string | null | undefined): void {
     this._store.dispatch(
-      setFilterByCountry({ country: value === undefined ? null : value })
+      patchApplicantFilters({
+        partial: { country: value === undefined ? null : value },
+      })
     );
   }
 
@@ -220,17 +235,6 @@ export class ApplicantsComponent {
   }
 
   public openForm(applicant?: Applicant): void {
-    this._editDialog.openCreateOrEdit(this._destroyRef, applicant, () =>
-      this._onNewApplicantDialogClosed()
-    );
-  }
-
-  private _onNewApplicantDialogClosed(): void {
-    this._clearNewApplicantFabExpandTimer();
-    this.newApplicantFabExpanded.set(false);
-    this._suppressNewApplicantFabPointerExpandUntil =
-      performance.now() +
-      APP_CONFIG.APPLICANTS
-        .NEW_APPLICANT_FAB_SUPPRESS_POINTER_EXPAND_AFTER_DIALOG_MS;
+    this._store.dispatch(openApplicantForm({ applicant }));
   }
 }

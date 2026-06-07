@@ -4,7 +4,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { Sort } from '@angular/material/sort';
-
 import { LayoutBreakpointService } from 'src/app/services/layout-breakpoint.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
@@ -16,7 +15,6 @@ describe('ApplicantListComponent', () => {
   let component: ApplicantListComponent;
   let fixture: ComponentFixture<ApplicantListComponent>;
   let mockStore: jasmine.SpyObj<Store>;
-
   const mockApplicant = createApplicant({
     id: '1',
     name: 'John Doe',
@@ -30,7 +28,6 @@ describe('ApplicantListComponent', () => {
       'dispatch',
     ]);
     mockApplicantViewSelectSignals(mockStore);
-
     await TestBed.configureTestingModule({
       declarations: [ApplicantListComponent],
       imports: [TranslateModule.forRoot(), SharedModule],
@@ -92,9 +89,13 @@ describe('ApplicantListComponent', () => {
   });
 
   describe('Utilities and Events', () => {
-    it('should filter by skill', () => {
+    it('should toggle skill filter via NgRx', () => {
       component.filterBySkill('Angular');
-      expect(mockStore.dispatch).toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        ApplicantsActions.patchApplicantFilters({
+          partial: { skill: 'Angular' },
+        })
+      );
     });
 
     it('should calculate stagger delay correctly', () => {

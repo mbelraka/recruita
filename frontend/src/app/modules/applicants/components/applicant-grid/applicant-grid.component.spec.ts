@@ -3,19 +3,19 @@ import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { SharedModule } from 'src/app/shared/shared.module';
 import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
 import { ApplicantGridComponent } from './applicant-grid.component';
+import * as ApplicantsActions from '../../state/applicants.actions';
 
 describe('ApplicantGridComponent', () => {
   let component: ApplicantGridComponent;
   let fixture: ComponentFixture<ApplicantGridComponent>;
   let mockStore: jasmine.SpyObj<Store>;
   let mockDialog: jasmine.SpyObj<MatDialog>;
-
   const mockApplicant = createApplicant({
     id: '1',
     name: 'John Doe',
@@ -31,7 +31,6 @@ describe('ApplicantGridComponent', () => {
     mockApplicantViewSelectSignals(mockStore);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockDialog.open.and.returnValue({ afterClosed: () => EMPTY } as any);
-
     await TestBed.configureTestingModule({
       declarations: [ApplicantGridComponent],
       imports: [TranslateModule.forRoot(), SharedModule],
@@ -79,9 +78,13 @@ describe('ApplicantGridComponent', () => {
       expect(delay).toBeGreaterThanOrEqual(0);
     });
 
-    it('should filter by skill', () => {
+    it('should toggle skill filter via NgRx', () => {
       component.filterBySkill('Angular');
-      expect(mockStore.dispatch).toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        ApplicantsActions.patchApplicantFilters({
+          partial: { skill: 'Angular' },
+        })
+      );
     });
 
     it('should confirm remove applicant', () => {

@@ -1,72 +1,74 @@
 import { createAction, props } from '@ngrx/store';
 
-import { ApplicationStatus } from '../enums/application-status.enum';
+import { Languages } from '../../../enums/language.enum';
 import { Applicant } from '../models/applicant.model';
-import { ApplicantActionTypes } from '../enums/applicant-action-types.enum';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
-import { Languages } from '../../../enums/language.enum';
+import { ApplicantListFilters } from '../utilities/applicant-filters.util';
 
-// Load Applicants
-export const loadApplicants = createAction(ApplicantActionTypes.LoadApplicants);
+/** Roster CRUD (NgRx Data effects). */
+export const loadApplicants = createAction('[Applicants] Load Applicants');
 export const loadApplicantsFailure = createAction(
-  ApplicantActionTypes.LoadApplicantsFailure,
+  '[Applicants] Load Applicants Failure',
   props<{ error: string }>()
 );
 export const applicantsRosterLoaded = createAction(
-  ApplicantActionTypes.ApplicantsRosterLoaded
+  '[Applicants] Roster Loaded'
 );
 
-// Add Applicant
 export const addApplicant = createAction(
-  ApplicantActionTypes.AddApplicant,
+  '[Applicants] Add Applicant',
   props<{ applicant: Applicant }>()
 );
 export const addApplicantSuccess = createAction(
-  ApplicantActionTypes.AddApplicantSuccess,
+  '[Applicants] Add Applicant Success',
   props<{ applicant: Applicant }>()
 );
 export const addApplicantFailure = createAction(
-  ApplicantActionTypes.AddApplicantFailure,
+  '[Applicants] Add Applicant Failure',
   props<{ error: string }>()
 );
 
-// Update Applicant
 export const updateApplicant = createAction(
-  ApplicantActionTypes.UpdateApplicant,
+  '[Applicants] Update Applicant',
   props<{ applicant: Applicant }>()
 );
 export const updateApplicantSuccess = createAction(
-  ApplicantActionTypes.UpdateApplicantSuccess,
+  '[Applicants] Update Applicant Success',
   props<{ applicant: Applicant }>()
 );
 export const updateApplicantFailure = createAction(
-  ApplicantActionTypes.UpdateApplicantFailure,
+  '[Applicants] Update Applicant Failure',
   props<{ error: string }>()
 );
 
-// Delete Applicant
 export const deleteApplicant = createAction(
-  ApplicantActionTypes.DeleteApplicant,
+  '[Applicants] Delete Applicant',
   props<{ id: string }>()
 );
 export const deleteApplicantSuccess = createAction(
-  ApplicantActionTypes.DeleteApplicantSuccess,
+  '[Applicants] Delete Applicant Success',
   props<{ id: string }>()
 );
 export const deleteApplicantFailure = createAction(
-  ApplicantActionTypes.DeleteApplicantFailure,
+  '[Applicants] Delete Applicant Failure',
   props<{ error: string }>()
 );
 
-// Set Filters
-export const setGlobalFilter = createAction(
-  ApplicantActionTypes.SetGlobalFilter,
-  props<{ filter: string }>()
+/** List filters: URL → store (reducer) or UI/smart-action → URL (effect). */
+export const syncApplicantFiltersFromUrl = createAction(
+  '[Applicants] Sync Filters From URL',
+  props<{ filters: ApplicantListFilters }>()
 );
 
+export const patchApplicantFilters = createAction(
+  '[Applicants] Patch Filters',
+  props<{ partial: Partial<ApplicantListFilters> }>()
+);
+
+/** List view preferences (store only). */
 export const setSortBy = createAction(
-  ApplicantActionTypes.SetSortBy,
+  '[Applicants] Set Sort By',
   props<{
     sortBy: keyof Applicant | null;
     sortDirection?: SortDirection;
@@ -74,37 +76,38 @@ export const setSortBy = createAction(
 );
 
 export const setViewType = createAction(
-  ApplicantActionTypes.SetViewType,
+  '[Applicants] Set View Type',
   props<{ viewType: ViewTypes }>()
 );
 
-export const setFilterBySkill = createAction(
-  ApplicantActionTypes.SetFilterBySkill,
-  props<{ skill: string | null }>()
+/** Applicant form dialog and FAB shell. */
+export const openApplicantForm = createAction(
+  '[Applicants] Open Applicant Form',
+  props<{ applicant?: Applicant | undefined }>()
 );
 
-export const setFilterByStatus = createAction(
-  ApplicantActionTypes.SetFilterByStatus,
-  props<{ status: ApplicationStatus | null }>()
+export const applicantFormDialogClosed = createAction(
+  '[Applicants] Applicant Form Dialog Closed',
+  props<{ suppressPointerExpandUntil: number }>()
 );
 
-export const setFilterByCountry = createAction(
-  ApplicantActionTypes.SetFilterByCountry,
-  props<{ country: string | null }>()
+export const setNewApplicantFabExpanded = createAction(
+  '[Applicants] Set New Applicant FAB Expanded',
+  props<{ expanded: boolean }>()
 );
 
-// Location autocomplete (geocoding)
+/** Location autocomplete (geocoding). */
 export const searchLocationSuggestions = createAction(
-  ApplicantActionTypes.SearchLocationSuggestions,
+  '[Applicants] Search Location Suggestions',
   props<{ query: string; language: Languages }>()
 );
 export const searchLocationSuggestionsSuccess = createAction(
-  ApplicantActionTypes.SearchLocationSuggestionsSuccess,
+  '[Applicants] Search Location Suggestions Success',
   props<{ suggestions: string[] }>()
 );
 export const searchLocationSuggestionsFailure = createAction(
-  ApplicantActionTypes.SearchLocationSuggestionsFailure
+  '[Applicants] Search Location Suggestions Failure'
 );
 export const clearLocationSuggestions = createAction(
-  ApplicantActionTypes.ClearLocationSuggestions
+  '[Applicants] Clear Location Suggestions'
 );

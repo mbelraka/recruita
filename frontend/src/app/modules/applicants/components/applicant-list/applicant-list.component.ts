@@ -29,24 +29,11 @@ import {
   selectSortedApplicants,
 } from '../../state/applicants.selectors';
 import {
-  APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
   applicantSortStoreKeyFromUiColumn,
   applicantSortUiColumnFromStoreKey,
 } from '../../utilities/applicant-sort-column.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
-import { toggleSkillFilter } from '../../utilities/toggle-skill-filter.util';
-
-const APPLICANT_LIST_COLUMNS_FULL = [
-  'name',
-  'currentJobTitle',
-  'yearsOfExperience',
-  'applicationStatus',
-  'email',
-  'phone',
-  APPLICANT_AVAILABILITY_SORT_UI_COLUMN,
-  'location',
-  'skills',
-] as const;
+import { patchApplicantFilters } from '../../state/applicants.actions';
 
 @Component({
   selector: 'app-applicant-list',
@@ -95,31 +82,9 @@ export class ApplicantListComponent {
   public readonly pagedApplicants = this._pagination.pagedItems;
 
   /** Columns to display in the list view (reduced on narrower viewports). */
-  public readonly displayedColumns = computed((): string[] => {
-    switch (this._layout.widthTier()) {
-      case 'xs':
-        return ['name', 'applicationStatus', 'currentJobTitle'];
-      case 'sm':
-        return [
-          'name',
-          'currentJobTitle',
-          'yearsOfExperience',
-          'applicationStatus',
-          'email',
-        ];
-      case 'md':
-        return [
-          'name',
-          'currentJobTitle',
-          'yearsOfExperience',
-          'applicationStatus',
-          'email',
-          'location',
-        ];
-      default:
-        return [...APPLICANT_LIST_COLUMNS_FULL];
-    }
-  });
+  public readonly displayedColumns = computed(() =>
+    APP_CONFIG.getApplicantListDisplayedColumns(this._layout.widthTier())
+  );
 
   public constructor(private readonly _store: Store<FullState>) {
     effect(() => {
@@ -173,7 +138,12 @@ export class ApplicantListComponent {
   }
 
   public filterBySkill(skill: string): void {
-    toggleSkillFilter(this._store, skill);
+    const current = this.activeSkillFilter();
+    this._store.dispatch(
+      patchApplicantFilters({
+        partial: { skill: current === skill ? null : skill },
+      })
+    );
   }
 
   public onRowClick(event: MouseEvent, applicant: Applicant): void {

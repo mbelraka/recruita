@@ -30,7 +30,8 @@ class ActionParserControllerTest {
     String body =
         """
         {
-          "command": "Find React developers"
+          "command": "Find React developers",
+          "language": "en"
         }
         """;
 

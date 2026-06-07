@@ -70,7 +70,7 @@ recruita:
   action:
     parse-path: /api/action/parse
     groq:
-      temperature: 0.1
+      temperature: 0
       max-tokens: 500
       model: llama-3.3-70b-versatile
     prompt-catalog:

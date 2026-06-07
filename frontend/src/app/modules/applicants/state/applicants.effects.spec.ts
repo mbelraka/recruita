@@ -1,9 +1,19 @@
 import { TestBed } from '@angular/core/testing';
+import { Router, NavigationEnd } from '@angular/router';
 import { createApplicant } from '../utilities/applicant-domain.util';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { firstValueFrom, of, ReplaySubject, throwError } from 'rxjs';
+import { provideMockStore } from '@ngrx/store/testing';
+import {
+  defaultIfEmpty,
+  firstValueFrom,
+  of,
+  ReplaySubject,
+  Subject,
+  throwError,
+} from 'rxjs';
 
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
+import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
   addApplicant,
@@ -14,6 +24,7 @@ import {
   deleteApplicantFailure,
   loadApplicants,
   loadApplicantsFailure,
+  openApplicantForm,
   updateApplicant,
   updateApplicantFailure,
 } from './applicants.actions';
@@ -21,17 +32,21 @@ import { ApplicantsEffects } from './applicants.effects';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 
 describe('ApplicantsEffects', () => {
-  let actions$: ReplaySubject<
-    ReturnType<
-      | typeof loadApplicants
-      | typeof addApplicant
-      | typeof addApplicantSuccess
-      | typeof updateApplicant
-      | typeof deleteApplicant
-    >
-  >;
+  let actions$: ReplaySubject<unknown>;
   let effects: ApplicantsEffects;
   let collection: jasmine.SpyObj<ApplicantEntityCollectionService>;
+  let routerEvents$: Subject<NavigationEnd>;
+  let mockRouter: {
+    events: Subject<NavigationEnd>;
+    url: string;
+    routerState: {
+      root: {
+        firstChild: null;
+        snapshot: { queryParamMap: { get: () => null } };
+      };
+    };
+  };
+  let mockEditDialog: jasmine.SpyObj<ApplicantEditDialogService>;
 
   const sample = createApplicant({
     id: 'a-1',
@@ -48,11 +63,30 @@ describe('ApplicantsEffects', () => {
       ['loadRoster', 'add', 'update', 'delete']
     );
 
+    routerEvents$ = new Subject<NavigationEnd>();
+    mockRouter = {
+      events: routerEvents$,
+      url: '/applicants',
+      routerState: {
+        root: {
+          firstChild: null,
+          snapshot: { queryParamMap: { get: () => null } },
+        },
+      },
+    };
+    mockEditDialog = jasmine.createSpyObj<ApplicantEditDialogService>(
+      'ApplicantEditDialogService',
+      ['openCreateOrEdit']
+    );
+
     TestBed.configureTestingModule({
       providers: [
         ApplicantsEffects,
         provideMockActions(() => actions$),
         { provide: ApplicantEntityCollectionService, useValue: collection },
+        provideMockStore(),
+        { provide: Router, useValue: mockRouter },
+        { provide: ApplicantEditDialogService, useValue: mockEditDialog },
         {
           provide: CitySearchService,
           useValue: jasmine.createSpyObj<CitySearchService>(
@@ -124,6 +158,15 @@ describe('ApplicantsEffects', () => {
 
     const action = await firstValueFrom(effects.deleteApplicant$);
     expect(action).toEqual(deleteApplicantFailure({ error: 'delete failed' }));
+  });
+
+  it('opens the applicant form dialog from NgRx', async () => {
+    actions$.next(openApplicantForm({ applicant: sample }));
+
+    await firstValueFrom(
+      effects.openApplicantForm$.pipe(defaultIfEmpty(undefined))
+    );
+    expect(mockEditDialog.openCreateOrEdit).toHaveBeenCalledWith(sample);
   });
 
   it('invalidates match results after a successful applicant mutation', async () => {

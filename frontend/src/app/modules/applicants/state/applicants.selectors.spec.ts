@@ -69,6 +69,8 @@ describe('Applicants Selectors', () => {
     filterByCountry: null,
     viewType: ViewTypes.GRID,
     locationSuggestions: ['USA', 'UK', 'France'],
+    newApplicantFabExpanded: false,
+    suppressNewApplicantFabPointerExpandUntil: 0,
   };
 
   const appState = {

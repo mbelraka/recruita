@@ -5,6 +5,7 @@ import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-propert
 import { Applicant } from '../modules/applicants/models/applicant.model';
 import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
+import { LayoutWidthTier } from '../services/layout-breakpoint.service';
 
 /** Canonical in-app route paths (shared by nav links and smart-action execution). */
 export const APP_ROUTES = {
@@ -248,6 +249,8 @@ export const APP_CONFIG = {
     NEW_APPLICANT_CHIP_SEPARATOR_KEYS: [ENTER, COMMA] as const,
     /** NgRx location geocode: debounce after `searchLocationSuggestions` before calling the API (ms). */
     LOCATION_SUGGESTIONS_DEBOUNCE_MS: 350,
+    /** Debounce writing the applicants search box value into the URL query string (ms). */
+    FILTER_SEARCH_URL_DEBOUNCE_MS: 350,
     /** Open-Meteo geocoding API base URL (location autocomplete). */
     LOCATION_GEOCODE_SEARCH_URL:
       'https://geocoding-api.open-meteo.com/v1/search',
@@ -272,6 +275,44 @@ export const APP_CONFIG = {
     LIST_ROW_ENTER_STAGGER_STEP_MS: 40,
     /** Rows per page in list view (grid uses dynamic columns per row). */
     LIST_ROWS_PER_PAGE: 10,
+    /**
+     * List table mat-column ids per viewport tier (`lg` uses `FULL`).
+     * `availability` is the UI column for store key `availableFrom`.
+     */
+    LIST_DISPLAYED_COLUMNS: {
+      FULL: [
+        'name',
+        'currentJobTitle',
+        'yearsOfExperience',
+        'applicationStatus',
+        'email',
+        'phone',
+        'availability',
+        'location',
+        'skills',
+      ] as const,
+      BY_WIDTH_TIER: {
+        xs: ['name', 'applicationStatus', 'currentJobTitle'] as const,
+        sm: [
+          'name',
+          'currentJobTitle',
+          'yearsOfExperience',
+          'applicationStatus',
+          'email',
+        ] as const,
+        md: [
+          'name',
+          'currentJobTitle',
+          'yearsOfExperience',
+          'applicationStatus',
+          'email',
+          'location',
+        ] as const,
+      } as const satisfies Record<
+        Exclude<LayoutWidthTier, 'lg'>,
+        readonly string[]
+      >,
+    } as const,
     /** New-applicant years-of-experience numeric input constraints. */
     YEARS_OF_EXPERIENCE_MIN: 0,
     YEARS_OF_EXPERIENCE_MAX: 80,
@@ -427,5 +468,14 @@ export const APP_CONFIG = {
         APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE
       ]
     );
+  },
+
+  getApplicantListDisplayedColumns: (widthTier: LayoutWidthTier): string[] => {
+    if (widthTier === 'lg') {
+      return [...APP_CONFIG.APPLICANTS.LIST_DISPLAYED_COLUMNS.FULL];
+    }
+    return [
+      ...APP_CONFIG.APPLICANTS.LIST_DISPLAYED_COLUMNS.BY_WIDTH_TIER[widthTier],
+    ];
   },
 };

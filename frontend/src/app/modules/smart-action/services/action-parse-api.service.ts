@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, timeout } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { Languages } from '../../../enums/language.enum';
 import { ParseActionResponse } from '../models/parse-action-response.model';
 
 @Injectable({ providedIn: 'root' })
@@ -11,11 +12,14 @@ export class ActionParseApiService {
 
   public constructor(private readonly _http: HttpClient) {}
 
-  public parseCommand(command: string): Observable<ParseActionResponse> {
+  public parseCommand(
+    command: string,
+    language: Languages
+  ): Observable<ParseActionResponse> {
     return this._http
       .post<ParseActionResponse>(
         this._api.PARSE_PATH,
-        { command },
+        { command, language },
         { withCredentials: true }
       )
       .pipe(timeout({ first: this._api.REQUEST_TIMEOUT_MS }));
