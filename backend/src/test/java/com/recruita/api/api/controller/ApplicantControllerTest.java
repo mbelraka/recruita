@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicantControllerTest {
@@ -39,7 +40,7 @@ class ApplicantControllerTest {
                 "a-1", "Alex", null, null, null, null, null, null, null, List.of()));
     when(applicantApplicationService.listSummaries()).thenReturn(summaries);
 
-    List<ApplicantSummaryDto> result = controller.listApplicantSummaries();
+    List<ApplicantSummaryDto> result = controller.listApplicantSummaries().getBody();
 
     assertEquals(summaries, result);
     verify(applicantApplicationService).listSummaries();
@@ -54,7 +55,7 @@ class ApplicantControllerTest {
                 null));
     when(applicantApplicationService.listFull()).thenReturn(applicants);
 
-    List<ApplicantDto> result = controller.listApplicantsFull();
+    List<ApplicantDto> result = controller.listApplicantsFull().getBody();
 
     assertEquals(applicants, result);
     verify(applicantApplicationService).listFull();
@@ -68,7 +69,7 @@ class ApplicantControllerTest {
             null);
     when(applicantApplicationService.findById("a-1")).thenReturn(applicant);
 
-    ApplicantDto result = controller.getApplicant("a-1");
+    ApplicantDto result = controller.getApplicant("a-1").getBody();
 
     assertEquals(applicant, result);
     verify(applicantApplicationService).findById("a-1");
@@ -82,9 +83,10 @@ class ApplicantControllerTest {
             null);
     when(applicantApplicationService.create(SAVE_REQUEST)).thenReturn(applicant);
 
-    ApplicantDto result = controller.createApplicant(SAVE_REQUEST);
+    var response = controller.createApplicant(SAVE_REQUEST);
 
-    assertEquals(applicant, result);
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(applicant, response.getBody());
     verify(applicantApplicationService).create(SAVE_REQUEST);
   }
 
@@ -96,7 +98,7 @@ class ApplicantControllerTest {
             null);
     when(applicantApplicationService.update("a-1", SAVE_REQUEST)).thenReturn(applicant);
 
-    ApplicantDto result = controller.updateApplicant("a-1", SAVE_REQUEST);
+    ApplicantDto result = controller.updateApplicant("a-1", SAVE_REQUEST).getBody();
 
     assertEquals(applicant, result);
     verify(applicantApplicationService).update("a-1", SAVE_REQUEST);
@@ -104,8 +106,9 @@ class ApplicantControllerTest {
 
   @Test
   void deleteApplicantDelegatesToService() {
-    controller.deleteApplicant("a-1");
+    var response = controller.deleteApplicant("a-1");
 
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     verify(applicantApplicationService).delete("a-1");
   }
 }

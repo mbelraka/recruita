@@ -1,8 +1,4 @@
-import { ApplicantApiSummaryRecord } from './applicant-api-summary-record.model';
+import type { ApplicantDto } from '../../../generated/api/types';
 
 /** JSON detail shape from Spring `ApplicantDto` (camelCase). */
-export interface ApplicantApiRecord extends ApplicantApiSummaryRecord {
-  readonly notes?: string;
-  readonly createdAt?: string;
-  readonly updatedAt?: string;
-}
+export type ApplicantApiRecord = ApplicantDto;

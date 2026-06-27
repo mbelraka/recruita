@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { APP_CONFIG } from '../../../config/app.config';
 import { MATCH_SCORE_PREFIX } from '../../../utilities/reg-ex';
 import {
-  MATCH_API_SCORE_COLLECTION_KEYS,
   MATCH_SCORE_CORRELATION_ID_KEYS,
   MATCH_SCORE_NAME_KEYS,
   MATCH_SCORE_NESTED_NUMERIC_KEYS,
@@ -17,6 +16,10 @@ import {
   firstDefinedTrimmedString,
   firstDefinedValue,
 } from '../utilities/first-defined-property.util';
+import {
+  asMatchScoreListCarrier,
+  readMatchScoreLists,
+} from '../utilities/match-api.mapper';
 
 @Injectable({ providedIn: 'root' })
 export class MatchGroqResponseParser {
@@ -25,17 +28,9 @@ export class MatchGroqResponseParser {
   }
 
   public parseScores(response: MatchApiResponse): ParsedMatchScoreItem[] {
-    return this._getRawScores(response)
+    return readMatchScoreLists(asMatchScoreListCarrier(response))
       .map((item, index) => this._toParsedScoreItem(item, index))
       .filter((item): item is ParsedMatchScoreItem => item !== null);
-  }
-
-  private _getRawScores(response: MatchApiResponse): MatchScoreItem[] {
-    const list = firstDefinedValue(response, MATCH_API_SCORE_COLLECTION_KEYS);
-    if (list === undefined) {
-      return [];
-    }
-    return Array.isArray(list) ? list : [];
   }
 
   private _toParsedScoreItem(

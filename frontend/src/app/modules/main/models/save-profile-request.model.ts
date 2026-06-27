@@ -1,11 +1,4 @@
-import { Languages } from '../../../enums/language.enum';
+import type { SaveProfileRequestDto } from '../../../generated/api/types';
 
 /** Request body for POST/PUT `/api/profiles`. */
-export interface SaveProfileRequest {
-  readonly id: string;
-  readonly privacyNoticeAccepted: boolean;
-  readonly lastLanguage: Languages;
-  readonly optionalRemoteTranslation: boolean;
-  readonly optionalGeocoding: boolean;
-  readonly optionalAiMatching: boolean;
-}
+export type SaveProfileRequest = SaveProfileRequestDto;

@@ -13,6 +13,7 @@ frontend/coverage/
 package-lock.json
 .angular/
 frontend/.angular/
+frontend/src/app/generated/
 .husky/_/
 _config.yml
 frontend/_config.yml

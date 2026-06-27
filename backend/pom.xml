@@ -39,6 +39,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
     <!-- Spring Boot 3.4.x requires springdoc 2.7+ (2.6.x targets Boot 3.3). -->
     <springdoc.version>2.8.17</springdoc.version>
+    <openapi-generator.version>7.12.0</openapi-generator.version>
     <jacoco.coverage.minimum>0.80</jacoco.coverage.minimum>
     <jacoco.package.coverage.minimum>0.70</jacoco.package.coverage.minimum>
     <jacoco.class.branch.minimum>0.70</jacoco.class.branch.minimum>
@@ -123,6 +124,86 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator.version}</version>
+        <executions>
+          <execution>
+            <id>generate-spring-api-interfaces</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <inputSpec>${project.basedir}/openapi/openapi.yaml</inputSpec>
+              <generatorName>spring</generatorName>
+              <apiPackage>com.recruita.api.generated.api</apiPackage>
+              <modelPackage>com.recruita.api.generated.model</modelPackage>
+              <generateApis>true</generateApis>
+              <generateModels>false</generateModels>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <ignoreFileOverride>${project.basedir}/openapi/.openapi-generator-ignore</ignoreFileOverride>
+              <configOptions>
+                <library>spring-boot</library>
+                <interfaceOnly>true</interfaceOnly>
+                <skipDefaultInterface>true</skipDefaultInterface>
+                <useSpringBoot3>true</useSpringBoot3>
+                <useTags>true</useTags>
+                <documentationProvider>none</documentationProvider>
+                <annotationLibrary>none</annotationLibrary>
+                <useBeanValidation>true</useBeanValidation>
+                <performBeanValidation>false</performBeanValidation>
+                <openApiNullable>false</openApiNullable>
+                <dateLibrary>java8</dateLibrary>
+                <useJakartaEe>true</useJakartaEe>
+                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+              </configOptions>
+              <importMappings>
+                <importMapping>HealthResponse=com.recruita.api.api.dto.HealthResponse</importMapping>
+                <importMapping>ApplicantDto=com.recruita.api.api.dto.applicant.ApplicantDto</importMapping>
+                <importMapping>ApplicantSummaryDto=com.recruita.api.api.dto.applicant.ApplicantSummaryDto</importMapping>
+                <importMapping>SaveApplicantRequestDto=com.recruita.api.api.dto.applicant.SaveApplicantRequestDto</importMapping>
+                <importMapping>ProfileDto=com.recruita.api.api.dto.profile.ProfileDto</importMapping>
+                <importMapping>SaveProfileRequestDto=com.recruita.api.api.dto.profile.SaveProfileRequestDto</importMapping>
+                <importMapping>MatchRequestDto=com.recruita.api.api.dto.match.MatchRequestDto</importMapping>
+                <importMapping>MatchCandidateDto=com.recruita.api.api.dto.match.MatchCandidateDto</importMapping>
+                <importMapping>MatchScoreDto=com.recruita.api.api.dto.match.MatchScoreDto</importMapping>
+                <importMapping>MatchResponseDto=com.recruita.api.api.dto.match.MatchResponseDto</importMapping>
+                <importMapping>MatchWireResponse=com.recruita.api.match.evaluation.MatchEvaluationResult</importMapping>
+                <importMapping>CandidateProfileDto=com.recruita.api.api.dto.match.MatchScoreDto.CandidateProfileDto</importMapping>
+                <importMapping>ParseActionCommandRequest=com.recruita.api.action.model.ParseActionCommandRequest</importMapping>
+                <importMapping>ParseActionResponse=com.recruita.api.action.model.ParseActionResponse</importMapping>
+                <importMapping>UiLanguage=com.recruita.api.common.enums.UiLanguage</importMapping>
+              </importMappings>
+              <typeMappings>
+                <typeMapping>ApplicationStatus=String</typeMapping>
+                <typeMapping>Date=LocalDate</typeMapping>
+                <typeMapping>DateTime=OffsetDateTime</typeMapping>
+                <typeMapping>MatchWireResponse=com.recruita.api.match.evaluation.MatchEvaluationResult</typeMapping>
+              </typeMappings>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-openapi-generated-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -191,6 +272,9 @@
         <version>${spotless.version}</version>
         <configuration>
           <java>
+            <excludes>
+              <exclude>**/generated/**</exclude>
+            </excludes>
             <toggleOffOn />
             <importOrder>
               <wildcardsLast>true</wildcardsLast>
@@ -233,6 +317,7 @@
           <failsOnError>true</failsOnError>
           <linkXRef>false</linkXRef>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <excludes>**/generated/**</excludes>
         </configuration>
         <executions>
           <execution>
@@ -269,6 +354,7 @@
           <includeTests>true</includeTests>
           <excludeRoots>
             <excludeRoot>${project.build.directory}/generated-sources/annotations</excludeRoot>
+            <excludeRoot>${project.build.directory}/generated-sources/openapi</excludeRoot>
           </excludeRoots>
           <linkXRef>false</linkXRef>
         </configuration>

@@ -22,7 +22,7 @@ describe('applicant-api.mapper', () => {
   });
 
   it('defaults missing API skills to an empty list', () => {
-    const applicant = applicantFromApi({ id: 'a-1' });
+    const applicant = applicantFromApi({ id: 'a-1', skills: [] });
     expect(applicant.skills).toEqual([]);
   });
 

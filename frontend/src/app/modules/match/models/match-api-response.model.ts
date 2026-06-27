@@ -1,7 +1,4 @@
-import { MatchScoreItem } from './match-score-item.model';
+import type { MatchWireResponse } from '../../../generated/api/types';
 
-export interface MatchApiResponse {
-  scores?: MatchScoreItem[];
-  results?: MatchScoreItem[];
-  candidates?: MatchScoreItem[];
-}
+/** Match endpoint wire payload (deterministic or Groq-shaped). */
+export type MatchApiResponse = MatchWireResponse;

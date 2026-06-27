@@ -1,15 +1,14 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { map, Observable, throwError } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
+import { MatchService } from '../../../generated/api-client/services/match.service';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { MatchErrorMessage } from '../enums/match-error-message.enum';
-import { MatchApiResponse } from '../models/match-api-response.model';
 import { MatchProxyRequestBody } from '../models/match-proxy-request-body.model';
 import { MatchCandidateResult } from '../models/match-candidate-result.model';
 import { ParsedMatchScoreItem } from '../models/parsed-match-score-item.model';
@@ -17,6 +16,7 @@ import {
   createMatchLlmCorrelationId,
   toPrivacyPreservingCandidatePayload,
 } from '../utilities/match-candidate-privacy.util';
+import { toMatchRequestDto } from '../utilities/match-api.mapper';
 import { MatchGroqResponseParser } from './match-groq-response.parser';
 
 @Injectable({ providedIn: 'root' })
@@ -26,7 +26,7 @@ export class MatchCandidatesService {
   }
 
   public constructor(
-    private readonly _http: HttpClient,
+    private readonly _matchApi: MatchService,
     private readonly _privacy: PrivacyConsentService,
     private readonly _groqParser: MatchGroqResponseParser
   ) {}
@@ -58,8 +58,8 @@ export class MatchCandidatesService {
         language
       );
 
-    return this._http
-      .post<MatchApiResponse>(this.config.GROQ.MATCH_ENDPOINT, requestBody)
+    return this._matchApi
+      .match({ body: toMatchRequestDto(requestBody) })
       .pipe(
         map((response) =>
           this._mergeAndRankResults(

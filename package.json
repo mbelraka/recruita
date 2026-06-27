@@ -45,11 +45,16 @@
     "letify": "npm run letify -w @recruita/frontend",
     "test:backend": "sh scripts/run-mvn.sh test -q",
     "verify:backend": "sh scripts/run-mvn.sh verify -q",
-    "validate:openapi:backend": "sh scripts/validate-openapi.sh",
+    "export:openapi": "sh scripts/export-openapi-spec.sh",
+    "codegen:api": "sh scripts/codegen-openapi-frontend.sh",
+    "codegen:api:check": "sh scripts/codegen-openapi-check.sh",
+    "validate:openapi:contract": "sh scripts/validate-openapi-spec.sh",
+    "validate:openapi:drift": "sh scripts/validate-openapi-drift.sh",
+    "validate:openapi:backend": "npm run validate:openapi:drift",
     "precommit:frontend": "npm run validate:ci:frontend",
     "precommit:backend": "npm run validate:ci:backend",
-    "validate:ci:frontend": "npm run quality -w @recruita/frontend && npm run test:ci -w @recruita/frontend && npm run doctor:full -w @recruita/frontend && npm run security:audit -w @recruita/frontend && npm run letify -w @recruita/frontend && npm run build:prod -w @recruita/frontend",
-    "validate:ci:backend": "npm run quality:backend && npm run verify:backend",
+    "validate:ci:frontend": "npm run codegen:api:check && npm run quality -w @recruita/frontend && npm run test:ci -w @recruita/frontend && npm run doctor:full -w @recruita/frontend && npm run security:audit -w @recruita/frontend && npm run letify -w @recruita/frontend && npm run build:prod -w @recruita/frontend",
+    "validate:ci:backend": "npm run quality:backend && npm run verify:backend && npm run validate:openapi:contract",
     "validate:ci": "npm run validate:ci:frontend && npm run validate:ci:backend",
     "validate": "npm run validate:ci",
     "lockfile:check": "npm install --package-lock-only --ignore-scripts && git diff --exit-code package-lock.json",
@@ -65,6 +70,10 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "ng-openapi-gen": "^1.0.5",
+    "openapi-diff": "^0.24.1",
+    "@stoplight/prism-cli": "^5.15.11",
+    "yaml": "^2.8.1",
     "patch-package": "^8.0.1",
     "prettier": "^3.0.0"
   },
@@ -74,7 +83,7 @@
   },
   "lint-staged": {
     "frontend/src/**/*.{ts,html}": [
-      "bash -c 'cd frontend && eslint --fix --max-warnings=0 \"$@\"' _",
+      "bash -c 'cd frontend && filtered=(); for f in \"$@\"; do [[ \"$f\" != *src/app/generated/* ]] && filtered+=(\"$f\"); done; ((${#filtered[@]})) && eslint --fix --max-warnings=0 \"${filtered[@]}\"' _",
       "prettier --write"
     ],
     "frontend/e2e/**/*.ts": [

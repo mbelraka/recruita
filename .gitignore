@@ -61,6 +61,8 @@ backend/.env
 # Java / Maven
 backend/target/
 backend/recruita-api/
+backend/openapi/openapi.runtime.json
+backend/openapi/openapi.prism.yaml
 
 # System files
 .DS_Store

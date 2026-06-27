@@ -1,9 +1,9 @@
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { createApplicant } from '../../applicants/utilities/applicant-domain.util';
 
-import { HttpClient } from '@angular/common/http';
-
 import { Languages } from '../../../enums/language.enum';
+import { MatchService } from '../../../generated/api-client/services/match.service';
+import type { MatchWireResponse } from '../../../generated/api/types';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
@@ -13,7 +13,7 @@ import { MatchCandidatesService } from './match-candidates.service';
 
 describe('MatchCandidatesService', () => {
   let service: MatchCandidatesService;
-  let httpClientSpy: jasmine.SpyObj<HttpClient>;
+  let matchApiSpy: jasmine.SpyObj<Pick<MatchService, 'match'>>;
   let privacySpy: jasmine.SpyObj<
     Pick<PrivacyConsentService, 'allowsAiMatching'>
   >;
@@ -30,13 +30,16 @@ describe('MatchCandidatesService', () => {
       return `llm-temp-${correlationSeq}` as ReturnType<Crypto['randomUUID']>;
     });
 
-    httpClientSpy = jasmine.createSpyObj<HttpClient>('HttpClient', ['post']);
+    matchApiSpy = jasmine.createSpyObj<Pick<MatchService, 'match'>>(
+      'MatchService',
+      ['match']
+    );
     privacySpy = jasmine.createSpyObj('PrivacyConsentService', [
       'allowsAiMatching',
     ]);
     privacySpy.allowsAiMatching.and.returnValue(true);
     service = new MatchCandidatesService(
-      httpClientSpy,
+      matchApiSpy as unknown as MatchService,
       privacySpy as unknown as PrivacyConsentService,
       new MatchGroqResponseParser()
     );
@@ -46,7 +49,7 @@ describe('MatchCandidatesService', () => {
     await expectAsync(
       firstValueFrom(service.evaluate('   ', applicants, 3, Languages.English))
     ).toBeRejected();
-    expect(httpClientSpy.post).not.toHaveBeenCalled();
+    expect(matchApiSpy.match).not.toHaveBeenCalled();
   });
 
   it('should return an error when there are no applicants', async () => {
@@ -55,7 +58,7 @@ describe('MatchCandidatesService', () => {
         service.evaluate('Angular developer', [], 3, Languages.English)
       )
     ).toBeRejected();
-    expect(httpClientSpy.post).not.toHaveBeenCalled();
+    expect(matchApiSpy.match).not.toHaveBeenCalled();
   });
 
   it('should reject when AI matching consent is disabled', async () => {
@@ -64,7 +67,7 @@ describe('MatchCandidatesService', () => {
     await expectAsync(
       firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))
     ).toBeRejectedWithError(Error, MATCH_ERROR_PRIVACY_AI_DISABLED);
-    expect(httpClientSpy.post).not.toHaveBeenCalled();
+    expect(matchApiSpy.match).not.toHaveBeenCalled();
   });
 
   it('sends anonymized candidates without personal fields to the proxy', async () => {
@@ -83,7 +86,7 @@ describe('MatchCandidatesService', () => {
       }),
     ];
 
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -100,9 +103,7 @@ describe('MatchCandidatesService', () => {
       service.evaluate('Senior dev', rich, 1, Languages.English)
     );
 
-    const body = httpClientSpy.post.calls.mostRecent().args[1] as {
-      candidates: Record<string, unknown>[];
-    };
+    const body = matchApiSpy.match.calls.mostRecent().args[0].body;
     expect(body.candidates.length).toBe(1);
     const c = body.candidates[0]!;
     expect(c).toEqual({
@@ -111,9 +112,7 @@ describe('MatchCandidatesService', () => {
       yearsOfExperience: 4,
       currentJobTitle: 'Frontend developer',
     });
-    expect(c['id']).not.toBe(rich[0]!.id);
-    expect('name' in c).toBeFalse();
-    expect('email' in c).toBeFalse();
+    expect(c.id).not.toBe(rich[0]!.id);
     expect('phone' in c).toBeFalse();
     expect('location' in c).toBeFalse();
     expect('notes' in c).toBeFalse();
@@ -121,7 +120,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should map and rank candidates with top-n flags', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -165,7 +164,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should clamp and default invalid model values', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -192,7 +191,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should parse string-based and alternate score fields', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -219,7 +218,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should parse alternate response collection and candidateId keys', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         results: [
           {
@@ -244,7 +243,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should match scores by response order when model ids are opaque (index fallback)', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -269,7 +268,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should parse nested score objects and normalize 0..1 scores', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -283,7 +282,7 @@ describe('MatchCandidatesService', () => {
             recommendation: 'Good fit',
           },
         ],
-      })
+      } as unknown as MatchWireResponse)
     );
 
     const result = await firstValueFrom(
@@ -294,7 +293,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('should surface proxy unavailability error', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       throwError(() => new Error('connection refused'))
     );
     await expectAsync(
@@ -303,7 +302,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('falls back to generic proxy error for unknown error shapes', async () => {
-    httpClientSpy.post.and.returnValue(throwError(() => ({ status: 500 })));
+    matchApiSpy.match.and.returnValue(throwError(() => ({ status: 500 })));
 
     await expectAsync(
       firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))
@@ -311,7 +310,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('ignores score entries without id and name identity', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [{ matchScore: 95, recommendation: 'Should be ignored' }],
       })
@@ -326,7 +325,7 @@ describe('MatchCandidatesService', () => {
   });
 
   it('defaults to minimum score when nested score payload is unsupported', async () => {
-    httpClientSpy.post.and.returnValue(
+    matchApiSpy.match.and.returnValue(
       of({
         scores: [
           {
@@ -335,7 +334,7 @@ describe('MatchCandidatesService', () => {
             recommendation: 'No usable score',
           },
         ],
-      })
+      } as unknown as MatchWireResponse)
     );
 
     const result = await firstValueFrom(

@@ -1,14 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-import {
-  installApplicantsApiMock,
-  seededApplicantCount,
-} from './support/applicants-api.mock';
+import { seededApplicantCount } from './support/demo-applicant-count';
 
 test.describe('Match candidates flow', () => {
   test('evaluates seeded applicants and marks top three', async ({ page }) => {
-    installApplicantsApiMock(page);
-
     let candidatesCount = 0;
 
     await page.route('**/api/match', async (route) => {
@@ -32,12 +27,19 @@ test.describe('Match candidates flow', () => {
       });
     });
 
-    // Applicants feature loads from the mocked API (preloaded demo rows).
+    // Applicants feature loads from the Prism mock (OpenAPI examples).
+    const applicantsResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/applicants') &&
+        response.request().method() === 'GET' &&
+        !response.url().includes('/full')
+    );
     await page.goto('/applicants');
     await expect(page).toHaveURL(/\/applicants(\/|$)/);
-    await expect(page.locator('.applicant-grid__card')).toHaveCount(
-      seededApplicantCount
-    );
+    const response = await applicantsResponse;
+    const applicants = await response.json();
+    expect(applicants.length).toBe(seededApplicantCount);
+    await expect(page.locator('.applicant-grid__card').first()).toBeVisible();
 
     await page.goto('/match');
     await expect(page).toHaveURL(/\/match(\/|$)/);
@@ -49,15 +51,22 @@ test.describe('Match candidates flow', () => {
       'Senior Angular engineer with strong NgRx, TypeScript, and scalable UI architecture experience.'
     );
 
-    await page.getByRole('button', { name: /evaluate candidates/i }).click();
+    await page.getByRole('button', { name: /analyze and match/i }).click();
 
-    await expect(page.getByText(/evaluating candidates/i)).toBeVisible();
-    await expect(page.getByText(/evaluating candidates/i)).toBeHidden();
+    await expect(
+      page.getByText(/evaluating candidates|analyzing/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/evaluating candidates|analyzing/i)
+    ).toBeHidden();
 
-    await expect(page.locator('.match-candidates__card')).toHaveCount(
-      candidatesCount
-    );
-    await expect(page.locator('.match-candidates__card--top')).toHaveCount(3);
-    await expect(page.getByText(/Evaluated .* Top 3/i)).toBeVisible();
+    await expect(page.locator('.match-candidates__card')).toHaveCount(3);
+    expect(candidatesCount).toBe(seededApplicantCount);
+    await expect(
+      page.getByRole('heading', { name: /top candidates/i })
+    ).toBeVisible();
+    await expect(
+      page.locator('.match-candidates__score-top').first()
+    ).toBeVisible();
   });
 });

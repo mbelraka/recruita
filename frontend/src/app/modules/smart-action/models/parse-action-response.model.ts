@@ -1,5 +1,3 @@
-export interface ParseActionResponse {
-  readonly valid: boolean;
-  readonly action: Record<string, unknown>;
-  readonly errors: readonly string[];
-}
+import type { ParseActionResponse as ParseActionResponseDto } from '../../../generated/api/types';
+
+export type ParseActionResponse = ParseActionResponseDto;

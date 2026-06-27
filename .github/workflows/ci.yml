@@ -77,7 +77,7 @@ jobs:
             backend/.mvn/wrapper/maven-wrapper.properties
       - name: Backend CI
         run: npm run validate:ci:backend
-      - name: Validate OpenAPI spec
+      - name: Validate OpenAPI drift (springdoc vs contract)
         env:
           GROQ_API_KEY: ci-openapi-validation-key
-        run: npm run validate:openapi:backend
+        run: npm run validate:openapi:drift

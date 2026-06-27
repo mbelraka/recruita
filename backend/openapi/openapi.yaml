@@ -1,0 +1,498 @@
+openapi: 3.0.3
+info:
+  title: Recruita API
+  description: >-
+    Applicant management, session profiles, health checks, and consent-gated AI
+    candidate matching.
+  contact:
+    name: Recruita Team
+    url: https://github.com/mbelraka/recruita
+  version: 1.0.0
+
+servers:
+  - url: ''
+    description: Relative to the SPA origin (dev proxy forwards /api to Spring on port 3001)
+
+tags:
+  - name: Health
+    description: Operational health checks
+  - name: Applicants
+    description: Applicant roster CRUD (requires recruita.persistence.enabled=true)
+  - name: Profiles
+    description: Session profile and privacy consent flags (persistence profile required)
+  - name: Match
+    description: Score anonymized candidates against a job description
+  - name: Smart Action
+    description: Parse natural-language recruiter commands into structured actions
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/applicants:
+    get:
+      tags: [Applicants]
+      summary: List applicant summaries
+      operationId: listApplicantSummaries
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicantSummaryDto'
+    post:
+      tags: [Applicants]
+      summary: Create applicant
+      operationId: createApplicant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveApplicantRequestDto'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicantDto'
+
+  /api/applicants/full:
+    get:
+      tags: [Applicants]
+      summary: List applicants with full fields
+      operationId: listApplicantsFull
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicantDto'
+
+  /api/applicants/{id}:
+    get:
+      tags: [Applicants]
+      summary: Get applicant by id
+      operationId: getApplicant
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicantDto'
+    put:
+      tags: [Applicants]
+      summary: Update applicant
+      operationId: updateApplicant
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveApplicantRequestDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicantDto'
+    delete:
+      tags: [Applicants]
+      summary: Delete applicant
+      operationId: deleteApplicant
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '204':
+          description: No Content
+
+  /api/profiles:
+    post:
+      tags: [Profiles]
+      summary: Create profile
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveProfileRequestDto'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDto'
+
+  /api/profiles/{id}:
+    get:
+      tags: [Profiles]
+      summary: Get profile by id
+      operationId: getProfile
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDto'
+    put:
+      tags: [Profiles]
+      summary: Update profile
+      operationId: updateProfile
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveProfileRequestDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDto'
+
+  /api/match:
+    post:
+      tags: [Match]
+      summary: Evaluate match scores
+      operationId: match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequestDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchWireResponse'
+
+  /api/match-job:
+    post:
+      tags: [Match]
+      summary: Evaluate match scores (legacy path)
+      operationId: matchLegacy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequestDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchWireResponse'
+
+  /api/action/parse:
+    post:
+      tags: [Smart Action]
+      summary: Parse natural-language command
+      operationId: parse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParseActionCommandRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseActionResponse'
+
+components:
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    HealthResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - received
+        - screening
+        - interview_scheduled
+        - shortlisted
+        - offer_extended
+        - rejected
+        - withdrawn
+
+    UiLanguage:
+      type: string
+      enum: [en, de, fr, it, rm, es]
+
+    ApplicantSummaryDto:
+      type: object
+      required: [id, skills]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        location:
+          type: string
+        yearsOfExperience:
+          type: number
+          format: double
+        applicationStatus:
+          $ref: '#/components/schemas/ApplicationStatus'
+        currentJobTitle:
+          type: string
+        availableFrom:
+          type: string
+          format: date
+        skills:
+          type: array
+          items:
+            type: string
+
+    SaveApplicantRequestDto:
+      allOf:
+        - $ref: '#/components/schemas/ApplicantSummaryDto'
+        - type: object
+          required:
+            - name
+            - email
+            - phone
+            - location
+            - yearsOfExperience
+            - applicationStatus
+            - currentJobTitle
+          properties:
+            notes:
+              type: string
+
+    ApplicantDto:
+      allOf:
+        - $ref: '#/components/schemas/ApplicantSummaryDto'
+        - type: object
+          properties:
+            notes:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    SaveProfileRequestDto:
+      type: object
+      required:
+        - id
+        - privacyNoticeAccepted
+        - lastLanguage
+        - optionalRemoteTranslation
+        - optionalGeocoding
+        - optionalAiMatching
+      properties:
+        id:
+          type: string
+        privacyNoticeAccepted:
+          type: boolean
+        lastLanguage:
+          $ref: '#/components/schemas/UiLanguage'
+        optionalRemoteTranslation:
+          type: boolean
+        optionalGeocoding:
+          type: boolean
+        optionalAiMatching:
+          type: boolean
+
+    ProfileDto:
+      allOf:
+        - $ref: '#/components/schemas/SaveProfileRequestDto'
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    MatchCandidateDto:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        yearsOfExperience:
+          type: number
+          format: double
+        currentJobTitle:
+          type: string
+
+    MatchRequestDto:
+      type: object
+      required: [candidates]
+      properties:
+        jobDescription:
+          type: string
+          description: Free-text job description to score against.
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchCandidateDto'
+        deterministic:
+          type: boolean
+          description: When true, uses the built-in deterministic rubric instead of Groq.
+        model:
+          type: string
+        temperature:
+          type: number
+          format: double
+        topP:
+          type: number
+          format: double
+        seed:
+          type: integer
+          format: int32
+
+    CandidateProfileDto:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+        yearsExperience:
+          type: number
+          format: double
+        topJobTitles:
+          type: array
+          items:
+            type: string
+        education:
+          type: string
+
+    MatchScoreDto:
+      type: object
+      properties:
+        id:
+          type: string
+        matchScore:
+          type: integer
+          format: int32
+        matchingSkills:
+          type: array
+          items:
+            type: string
+        missingSkills:
+          type: array
+          items:
+            type: string
+        candidateProfile:
+          $ref: '#/components/schemas/CandidateProfileDto'
+        recommendation:
+          type: string
+
+    MatchResponseDto:
+      type: object
+      properties:
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchScoreDto'
+
+    MatchWireResponse:
+      description: >-
+        Deterministic mode returns `scores`. Groq mode may return LLM-shaped
+        payloads with `scores`, `results`, or `candidates`.
+      type: object
+      properties:
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchScoreDto'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchScoreDto'
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchScoreDto'
+      additionalProperties: true
+
+    ParseActionCommandRequest:
+      type: object
+      required: [command]
+      properties:
+        command:
+          type: string
+        language:
+          $ref: '#/components/schemas/UiLanguage'
+
+    ParseActionResponse:
+      type: object
+      required: [valid, action, errors]
+      properties:
+        valid:
+          type: boolean
+        action:
+          type: object
+          additionalProperties: true
+        errors:
+          type: array
+          items:
+            type: string

@@ -1,15 +1,12 @@
 package com.recruita.api.api.controller;
 
 import com.recruita.api.api.dto.match.MatchRequestDto;
+import com.recruita.api.generated.api.MatchApi;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import com.recruita.api.match.service.MatchApplicationService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(
@@ -18,8 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
         "Score anonymized candidates against a job description via Groq or deterministic rubric")
 @Validated
 @RestController
-@RequestMapping
-public class MatchController {
+public class MatchController implements MatchApi {
 
   private final MatchApplicationService matchApplicationService;
 
@@ -27,15 +23,13 @@ public class MatchController {
     this.matchApplicationService = matchApplicationService;
   }
 
-  @Operation(summary = "Evaluate match scores")
-  @PostMapping(path = "#{@apiRoutePaths.matchPath}")
-  public MatchEvaluationResult match(@Valid @RequestBody MatchRequestDto request) {
-    return matchApplicationService.evaluate(request);
+  @Override
+  public ResponseEntity<MatchEvaluationResult> match(MatchRequestDto request) {
+    return ResponseEntity.ok(matchApplicationService.evaluate(request));
   }
 
-  @Operation(summary = "Evaluate match scores (legacy path)")
-  @PostMapping(path = "#{@apiRoutePaths.matchLegacyPath}")
-  public MatchEvaluationResult matchLegacy(@Valid @RequestBody MatchRequestDto request) {
-    return matchApplicationService.evaluate(request);
+  @Override
+  public ResponseEntity<MatchEvaluationResult> matchLegacy(MatchRequestDto request) {
+    return match(request);
   }
 }
