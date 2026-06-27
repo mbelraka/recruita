@@ -57,7 +57,7 @@ export class PdfApplicantExporter {
 
     let yPosition = height - this._config.PDF.BODY_TOP_OFFSET;
 
-    applicants.forEach((applicant, index) => {
+    for (const [index, applicant] of applicants.entries()) {
       const text = this._buildRowText(applicant, index, language);
       const wrappedLines = wrapPdfText(text, maxLineChars);
       const blockHeight = wrappedLines.length * lineHeight;
@@ -81,7 +81,7 @@ export class PdfApplicantExporter {
         ),
       });
       yPosition -= blockHeight + this._config.PDF.BODY.ITEM_SPACING;
-    });
+    }
 
     this._drawFooters(pdfDoc);
     return pdfDoc.save();
@@ -92,7 +92,7 @@ export class PdfApplicantExporter {
     const totalPages = pages.length;
     const { FONT_SIZE, BOTTOM_OFFSET, RIGHT_PADDING } = this._config.PDF.FOOTER;
 
-    pages.forEach((pdfPage, pageIndex) => {
+    for (const [pageIndex, pdfPage] of pages.entries()) {
       const pageLabel = `${pageIndex + 1} / ${totalPages}`;
       const { width } = pdfPage.getSize();
       const approxTextWidth =
@@ -107,7 +107,7 @@ export class PdfApplicantExporter {
           this._config.PDF.BODY_COLOR.b
         ),
       });
-    });
+    }
   }
 
   private _buildRowText(

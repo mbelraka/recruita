@@ -13,12 +13,15 @@ export function sortDirectionFromMaterial(
   direction: MaterialSortDirectionInput
 ): SortDirection | undefined {
   switch (direction) {
-    case SortDirection.Asc:
+    case 'asc': {
       return SortDirection.Asc;
-    case SortDirection.Desc:
+    }
+    case 'desc': {
       return SortDirection.Desc;
-    default:
+    }
+    default: {
       return undefined;
+    }
   }
 }
 

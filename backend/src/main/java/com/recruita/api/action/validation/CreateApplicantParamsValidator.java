@@ -67,7 +67,7 @@ public class CreateApplicantParamsValidator {
     JsonNode currentJobTitle = params.get(ActionParamKey.CURRENT_JOB_TITLE);
     if (currentJobTitle == null
         || !currentJobTitle.isTextual()
-        || currentJobTitle.asText().trim().isEmpty()) {
+        || currentJobTitle.asText().isBlank()) {
       errors.add("currentJobTitle is required");
     }
 

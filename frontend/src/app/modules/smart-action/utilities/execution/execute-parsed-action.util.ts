@@ -33,22 +33,30 @@ function executeExecutableAction(
   deps: SmartActionExecutionDeps
 ): Observable<ActionResult> {
   switch (action.type) {
-    case ActionType.FilterApplicants:
+    case ActionType.FilterApplicants: {
       return executeFilterApplicants(action.params, deps);
-    case ActionType.UpdateStatus:
+    }
+    case ActionType.UpdateStatus: {
       return executeUpdateStatus(action.params, deps);
-    case ActionType.ExportData:
+    }
+    case ActionType.ExportData: {
       return executeExportData(action.params.format, deps);
-    case ActionType.CreateApplicant:
+    }
+    case ActionType.CreateApplicant: {
       return executeCreateApplicant(action.params, deps);
-    case ActionType.DeleteApplicant:
+    }
+    case ActionType.DeleteApplicant: {
       return executeDeleteApplicant(action.params, deps);
-    case ActionType.GenerateReport:
+    }
+    case ActionType.GenerateReport: {
       return executeGenerateReport(action.params.reportType, deps);
-    case ActionType.MatchJob:
+    }
+    case ActionType.MatchJob: {
       return executeMatchJob(action.params, deps);
-    case ActionType.BulkUpdate:
+    }
+    case ActionType.BulkUpdate: {
       return executeBulkUpdate(action.params, deps);
+    }
     default: {
       const _exhaustive: never = action;
       return of({

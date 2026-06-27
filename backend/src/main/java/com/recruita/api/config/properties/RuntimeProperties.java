@@ -2,6 +2,7 @@ package com.recruita.api.config.properties;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class RuntimeProperties {
 
@@ -22,7 +23,7 @@ public class RuntimeProperties {
   }
 
   private boolean isTruthy(String raw) {
-    String value = raw.trim().toLowerCase();
+    String value = raw.trim().toLowerCase(Locale.ROOT);
     return envTruthyValues.stream().anyMatch(truthy -> truthy.equalsIgnoreCase(value));
   }
 

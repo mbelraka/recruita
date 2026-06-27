@@ -67,10 +67,10 @@ describe('ApplicantDataService', () => {
 
     const applicants = await promise;
     expect(applicants.length).toBe(1);
-    expect(applicants[0].id).toBe('a-1');
-    expect(applicants[0].name).toBe('Alex');
-    expect(applicants[0].availableFrom).toEqual(new Date('2026-06-01'));
-    expect(applicants[0].notes).toBeUndefined();
+    expect(applicants[0]!.id).toBe('a-1');
+    expect(applicants[0]!.name).toBe('Alex');
+    expect(applicants[0]!.availableFrom).toEqual(new Date('2026-06-01'));
+    expect(applicants[0]!.notes).toBeUndefined();
   });
 
   it('lists full applicants with notes for export refresh', async () => {
@@ -81,7 +81,7 @@ describe('ApplicantDataService', () => {
     req.flush([{ id: 'a-1', name: 'Alex', skills: [], notes: 'detail' }]);
 
     const applicants = await promise;
-    expect(applicants[0].notes).toBe('detail');
+    expect(applicants[0]!.notes).toBe('detail');
   });
 
   it('loads a single applicant by id', async () => {

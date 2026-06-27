@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { DataServiceError } from '@ngrx/data';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import {
@@ -13,8 +14,11 @@ import {
 
 import { PrivacyConsentDialogMode } from '../../../enums/privacy-consent-dialog-mode.enum';
 import { APP_CONFIG } from '../../../config/app.config';
+import { HttpStatusCode } from '../../../enums/http-status-code.enum';
+import { HttpApiError } from '../../../models/http-api-error.model';
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
+import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { Languages } from '../../../enums/language.enum';
 import { setLanguage } from '../../../state/app.actions';
 import { initialMainState } from './main.reducer';
@@ -41,6 +45,7 @@ describe('MainEffects', () => {
   let effects: MainEffects;
   let profiles: jasmine.SpyObj<ProfileEntityCollectionService>;
   let privacyDialog: jasmine.SpyObj<PrivacyConsentDialogService>;
+  let privacy: jasmine.SpyObj<PrivacyConsentService>;
   let store: MockStore;
 
   const profile = {
@@ -83,6 +88,13 @@ describe('MainEffects', () => {
         }),
         { provide: ProfileEntityCollectionService, useValue: profiles },
         {
+          provide: PrivacyConsentService,
+          useValue: jasmine.createSpyObj<PrivacyConsentService>(
+            'PrivacyConsentService',
+            ['isConsentCompleteAndCurrent']
+          ),
+        },
+        {
           provide: PrivacyConsentDialogService,
           useValue: jasmine.createSpyObj<PrivacyConsentDialogService>(
             'PrivacyConsentDialogService',
@@ -93,6 +105,10 @@ describe('MainEffects', () => {
     });
 
     effects = TestBed.inject(MainEffects);
+    privacy = TestBed.inject(
+      PrivacyConsentService
+    ) as jasmine.SpyObj<PrivacyConsentService>;
+    privacy.isConsentCompleteAndCurrent.and.returnValue(false);
     privacyDialog = TestBed.inject(
       PrivacyConsentDialogService
     ) as jasmine.SpyObj<PrivacyConsentDialogService>;
@@ -130,20 +146,59 @@ describe('MainEffects', () => {
     subscription.unsubscribe();
   });
 
-  it('dispatches loadProfileFailure when the API fails', () => {
-    profiles.getByKey.and.returnValue(throwError(() => new Error('offline')));
+  it('retries transient failures before dispatching loadProfileFailure', fakeAsync(() => {
+    profiles.getByKey.and.callFake(() =>
+      throwError(
+        () => new HttpApiError('offline', HttpApiError.NO_RESPONSE_STATUS)
+      )
+    );
     const emitted: unknown[] = [];
     const subscription = effects.loadProfile$.subscribe((action) =>
       emitted.push(action)
     );
 
     actions$.next(loadProfile());
+    tick(
+      APP_CONFIG.PROFILE.LOAD_RETRY.COUNT *
+        APP_CONFIG.PROFILE.LOAD_RETRY.DELAY_MS
+    );
 
+    expect(profiles.getByKey).toHaveBeenCalledTimes(
+      APP_CONFIG.PROFILE.LOAD_RETRY.COUNT + 1
+    );
     expect(emitted[0]).toEqual(
       jasmine.objectContaining({ type: loadProfileFailure.type })
     );
     subscription.unsubscribe();
-  });
+  }));
+
+  it('fails fast without retrying when the profile is definitively missing (404)', fakeAsync(() => {
+    profiles.getByKey.and.callFake(() =>
+      throwError(
+        () =>
+          new DataServiceError(
+            new HttpApiError('Profile not found.', HttpStatusCode.NotFound),
+            null
+          )
+      )
+    );
+    const emitted: unknown[] = [];
+    const subscription = effects.loadProfile$.subscribe((action) =>
+      emitted.push(action)
+    );
+
+    actions$.next(loadProfile());
+    tick(
+      APP_CONFIG.PROFILE.LOAD_RETRY.COUNT *
+        APP_CONFIG.PROFILE.LOAD_RETRY.DELAY_MS
+    );
+
+    expect(profiles.getByKey).toHaveBeenCalledTimes(1);
+    expect(emitted[0]).toEqual(
+      jasmine.objectContaining({ type: loadProfileFailure.type })
+    );
+    subscription.unsubscribe();
+  }));
 
   it('syncs profile into the entity cache before opening the privacy gate', () => {
     const accepted = {
@@ -156,7 +211,9 @@ describe('MainEffects', () => {
     actions$.next(loadProfileSuccess({ profile: accepted }));
 
     expect(profiles.syncProfileInCache).toHaveBeenCalledWith(accepted);
-    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
+    expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalledWith(
+      accepted
+    );
     subscription.unsubscribe();
   });
 
@@ -167,6 +224,17 @@ describe('MainEffects', () => {
     actions$.next(loadProfileFailure({ error: 'offline' }));
 
     expect(privacyDialog.openConsentDialogIfRequired).toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('skips the privacy gate when profile load fails but consent is already complete', () => {
+    privacy.isConsentCompleteAndCurrent.and.returnValue(true);
+    const subscription =
+      effects.openPrivacyGateAfterProfileLoadFailure$.subscribe();
+
+    actions$.next(loadProfileFailure({ error: 'offline' }));
+
+    expect(privacyDialog.openConsentDialogIfRequired).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
 
@@ -236,7 +304,7 @@ describe('MainEffects', () => {
       },
       profile
     );
-    expect(emitted[0].type).toBe(persistPrivacyConsentOutcomeSuccess.type);
+    expect(emitted[0]!.type).toBe(persistPrivacyConsentOutcomeSuccess.type);
   });
 
   it('reloads profile when the privacy API save fails', async () => {
@@ -252,8 +320,8 @@ describe('MainEffects', () => {
     );
 
     const emitted = await emittedPromise;
-    expect(emitted[0].type).toBe(loadProfile.type);
-    expect(emitted[1].type).toBe(persistPrivacyConsentOutcomeFailure.type);
+    expect(emitted[0]!.type).toBe(loadProfile.type);
+    expect(emitted[1]!.type).toBe(persistPrivacyConsentOutcomeFailure.type);
   });
 
   it('persists language changes to the profile', async () => {

@@ -29,6 +29,7 @@ import { loadProfile } from '../../../modules/main/state/profile.actions';
 import { LocalizationService } from '../../../services/localization.service';
 import { selectAppLanguage } from '../../../state/app.selectors';
 import { isLanguage } from '../../../utilities/language.utils';
+import { translateInstantString } from '../../../utilities/localization.utils';
 
 @Component({
   selector: 'app-root-shell',
@@ -87,7 +88,10 @@ export class RootComponent implements OnInit {
   }
 
   public getLanguageLabel(language: Languages): string {
-    return this._translate.instant(`language.names.${language}`);
+    return translateInstantString(
+      this._translate,
+      `language.names.${language}`
+    );
   }
 
   private _initApplicantsState(): void {

@@ -6,13 +6,7 @@ import {
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import {
-  catchError,
-  Observable,
-  throwError,
-  timeout,
-  TimeoutError,
-} from 'rxjs';
+import { catchError, Observable, throwError, timeout } from 'rxjs';
 
 import { APP_CONFIG } from '../../config/app.config';
 import { ApplicantApiErrorMessage } from '../../modules/applicants/enums/applicant-api-error-message.enum';
@@ -21,10 +15,10 @@ import { MatchErrorMessage } from '../../modules/match/enums/match-error-message
 import type { HttpApiErrorMessages } from '../../models/http-api-error-messages.model';
 import { toHttpApiServiceError } from '../../utilities/http-api-error.util';
 
-type HttpApiPolicy = {
+interface HttpApiPolicy {
   readonly timeoutMs: number;
   readonly messages: HttpApiErrorMessages;
-};
+}
 
 @Injectable()
 export class HttpApiInterceptor implements HttpInterceptor {
@@ -40,11 +34,7 @@ export class HttpApiInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       timeout({ first: policy.timeoutMs }),
       catchError((error: unknown) =>
-        throwError(() =>
-          error instanceof TimeoutError
-            ? new Error(policy.messages.requestTimeout)
-            : toHttpApiServiceError(error, policy.messages)
-        )
+        throwError(() => toHttpApiServiceError(error, policy.messages))
       )
     );
   }

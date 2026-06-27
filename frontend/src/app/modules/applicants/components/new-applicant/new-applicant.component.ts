@@ -1,5 +1,5 @@
+import { Component, DestroyRef, Inject, Optional, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Component, Inject, Optional } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -32,6 +32,8 @@ import { emailFieldValidator } from '../../../../utilities/validators/email-fiel
   standalone: false,
 })
 export class NewApplicantComponent {
+  private readonly _destroyRef = inject(DestroyRef);
+
   public readonly isEditMode: boolean;
   private _currentLanguage: Languages =
     APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
@@ -120,7 +122,7 @@ export class NewApplicantComponent {
         startWith(this.fgNewApplicant.controls.location.value),
         debounceTime(APP_CONFIG.APPLICANTS.LOCATION_SUGGESTIONS_DEBOUNCE_MS),
         distinctUntilChanged(),
-        takeUntilDestroyed()
+        takeUntilDestroyed(this._destroyRef)
       )
       .subscribe((raw) =>
         this._store.dispatch(
@@ -133,7 +135,7 @@ export class NewApplicantComponent {
 
     this._store
       .select(selectAppLanguage)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((language) => {
         this._currentLanguage = language;
       });
@@ -197,7 +199,7 @@ export class NewApplicantComponent {
 
   public removeSkill(skill: string): void {
     const index = this.skills.indexOf(skill);
-    if (index >= 0) {
+    if (index !== -1) {
       this.skills.splice(index, 1);
     }
   }

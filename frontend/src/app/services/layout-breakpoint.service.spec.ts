@@ -4,10 +4,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { LayoutBreakpointService } from './layout-breakpoint.service';
 
-type BreakpointState = {
+interface BreakpointState {
   breakpoints: Record<string, boolean>;
   matches: boolean;
-};
+}
 
 describe('LayoutBreakpointService', () => {
   let observe$: BehaviorSubject<BreakpointState>;

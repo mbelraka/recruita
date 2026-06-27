@@ -6,7 +6,8 @@ const initialRecords: ApplicantApiWriteRecord[] =
   buildDemoApplicants().map(applicantToApiWrite);
 
 function toSummary(record: ApplicantApiWriteRecord) {
-  const { notes: _notes, ...summary } = record;
+  const { notes, ...summary } = record;
+  void notes;
   return summary;
 }
 

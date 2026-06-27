@@ -4,7 +4,7 @@ import {
   NON_ALPHANUMERIC_TO_SPACE,
   UNICODE_COMBINING_MARKS,
   WHITESPACE_RUN,
-} from './RegEx';
+} from './reg-ex';
 
 function toLocalizationKeySegment(value: string): string {
   const normalized = value
@@ -29,6 +29,15 @@ function toLocalizationKeySegment(value: string): string {
     .join('');
 }
 
+/** `TranslateService.instant` is typed as `any`; narrow to a string for safe use. */
+export function translateInstantString(
+  translate: TranslateService,
+  key: string
+): string {
+  const value: unknown = translate.instant(key);
+  return typeof value === 'string' ? value : key;
+}
+
 export function localizeTextByNamespace(
   value: string,
   namespace: string,
@@ -45,6 +54,6 @@ export function localizeTextByNamespace(
   }
 
   const key = `${namespace}.${keySegment}`;
-  const translated = translate.instant(key);
+  const translated = translateInstantString(translate, key);
   return translated === key ? raw : translated;
 }

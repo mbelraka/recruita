@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class SecurityProperties {
 
@@ -74,7 +75,7 @@ public class SecurityProperties {
     private java.util.List<String> trustProxyTruthyValues = java.util.Arrays.asList("1", "true");
 
     public boolean isTrustProxy() {
-      String normalized = trustProxy == null ? "" : trustProxy.trim().toLowerCase();
+      String normalized = trustProxy == null ? "" : trustProxy.trim().toLowerCase(Locale.ROOT);
       return trustProxyTruthyValues.stream().anyMatch(value -> value.equalsIgnoreCase(normalized));
     }
 

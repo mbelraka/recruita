@@ -16,8 +16,14 @@
       },
       "extends": [
         "plugin:@angular-eslint/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-type-checked",
+        "plugin:rxjs/recommended",
+        "plugin:@microsoft/sdl/recommended",
+        "plugin:unicorn/recommended",
         "plugin:prettier/recommended"
       ],
+      "plugins": ["rxjs-angular"],
       "rules": {
         "@angular-eslint/directive-selector": [
           "error",
@@ -28,7 +34,68 @@
           { "type": "element", "prefix": "app", "style": "kebab-case" }
         ],
         "@angular-eslint/prefer-standalone": "off",
-        "@angular-eslint/prefer-inject": "off"
+        "@angular-eslint/prefer-inject": "off",
+        "@typescript-eslint/unbound-method": [
+          "error",
+          { "ignoreStatic": true }
+        ],
+        "@typescript-eslint/no-deprecated": "error",
+        "@typescript-eslint/no-empty-object-type": "error",
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/no-extraneous-class": [
+          "error",
+          { "allowWithDecorator": true }
+        ],
+        "@typescript-eslint/no-unsafe-argument": "error",
+        "@typescript-eslint/no-unsafe-assignment": "error",
+        "@typescript-eslint/no-unsafe-call": "error",
+        "@typescript-eslint/no-unsafe-enum-comparison": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+        ],
+        "@typescript-eslint/prefer-as-const": "error",
+        "@typescript-eslint/no-unnecessary-template-expression": "error",
+        "@typescript-eslint/no-unnecessary-type-arguments": "error",
+        "@typescript-eslint/no-useless-constructor": "error",
+        "@typescript-eslint/no-empty-function": [
+          "error",
+          { "allow": ["arrowFunctions", "constructors", "methods"] }
+        ],
+        "@typescript-eslint/no-inferrable-types": "error",
+        "rxjs-angular/prefer-async-pipe": "off",
+        "rxjs-angular/prefer-composition": "off",
+        "rxjs-angular/prefer-takeuntil": [
+          "error",
+          { "alias": ["takeUntilDestroyed"], "checkDestroy": false }
+        ],
+        "unicorn/no-null": "off",
+        "unicorn/prevent-abbreviations": "off",
+        "unicorn/no-useless-undefined": "off",
+        "unicorn/consistent-function-scoping": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "unicorn/no-array-reduce": "off",
+        "unicorn/prefer-top-level-await": "off",
+        "unicorn/filename-case": ["error", { "case": "kebabCase" }]
+      }
+    },
+    {
+      "files": ["*.spec.ts", "e2e/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/unbound-method": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/no-deprecated": "off",
+        "rxjs-angular/prefer-async-pipe": "off",
+        "rxjs-angular/prefer-composition": "off",
+        "rxjs-angular/prefer-takeuntil": "off",
+        "rxjs/no-ignored-subscription": "off",
+        "unicorn/consistent-function-scoping": "off"
       }
     },
     {

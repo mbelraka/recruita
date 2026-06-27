@@ -44,7 +44,7 @@ public class GroqMatchEvaluationService {
       throw ex;
     } catch (Exception ex) {
       throw new MatchServiceUnavailableException(
-          ex.getMessage(), properties.getRuntime().shouldSuppressErrorDetail());
+          ex.getMessage(), properties.getRuntime().shouldSuppressErrorDetail(), ex);
     }
   }
 }

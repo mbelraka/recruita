@@ -7,5 +7,5 @@ export function mapParseActionResponse(
   if (!response.valid) {
     return null;
   }
-  return response.action as ParsedAction;
+  return response.action as unknown as ParsedAction;
 }

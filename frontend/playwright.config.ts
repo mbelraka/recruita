@@ -12,7 +12,7 @@ export default defineConfig({
   workers: process.env['CI'] ? 1 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:4200',
+    baseURL: 'https://127.0.0.1:4200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -25,7 +25,7 @@ export default defineConfig({
   webServer: {
     command:
       'npx ng serve --host 127.0.0.1 --port 4200 --configuration development',
-    url: 'http://127.0.0.1:4200',
+    url: 'https://127.0.0.1:4200',
     reuseExistingServer: !process.env['CI'],
     timeout: 180_000,
   },

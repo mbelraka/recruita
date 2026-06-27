@@ -184,7 +184,7 @@ describe('Applicants Selectors', () => {
         'name',
         SortDirection.Asc
       );
-      expect(sorted[0].name).toBe('Alice Smith');
+      expect(sorted[0]!.name).toBe('Alice Smith');
     });
 
     it('should sort by name desc', () => {
@@ -193,7 +193,7 @@ describe('Applicants Selectors', () => {
         'name',
         SortDirection.Desc
       );
-      expect(sorted[0].name).toBe('John Doe');
+      expect(sorted[0]!.name).toBe('John Doe');
     });
 
     it('should sort by yearsOfExperience with nulls first', () => {
@@ -202,10 +202,10 @@ describe('Applicants Selectors', () => {
         'yearsOfExperience',
         SortDirection.Asc
       );
-      expect(sorted[0].name).toBe('Jane Doe'); // undefined
-      expect(sorted[1].name).toBe('Bob'); // null
-      expect(sorted[2].name).toBe('John Doe'); // 5
-      expect(sorted[3].name).toBe('Alice Smith'); // 8
+      expect(sorted[0]!.name).toBe('Jane Doe'); // undefined
+      expect(sorted[1]!.name).toBe('Bob'); // null
+      expect(sorted[2]!.name).toBe('John Doe'); // 5
+      expect(sorted[3]!.name).toBe('Alice Smith'); // 8
     });
 
     it('should sort by availableFrom (dates, nulls and NaNs first)', () => {
@@ -214,10 +214,10 @@ describe('Applicants Selectors', () => {
         'availableFrom',
         SortDirection.Asc
       );
-      expect(sorted[0].name).toBe('Alice Smith'); // NaN (mapped to undefined in model)
-      expect(sorted[1].name).toBe('Bob'); // null (mapped to undefined in model)
-      expect(sorted[2].name).toBe('John Doe'); // Jan 1
-      expect(sorted[3].name).toBe('Jane Doe'); // Feb 1
+      expect(sorted[0]!.name).toBe('Alice Smith'); // NaN (mapped to undefined in model)
+      expect(sorted[1]!.name).toBe('Bob'); // null (mapped to undefined in model)
+      expect(sorted[2]!.name).toBe('John Doe'); // Jan 1
+      expect(sorted[3]!.name).toBe('Jane Doe'); // Feb 1
     });
 
     it('should sort by skills (arrays)', () => {
@@ -248,15 +248,14 @@ describe('Applicants Selectors', () => {
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('John Doe');
+      expect(result[0]!.name).toBe('John Doe');
     });
 
     it('should not match notes on roster rows until detail is cached', () => {
-      const rosterOnly = mockApplicants.map(
-        ({ notes: _notes, ...applicant }) => ({
-          ...applicant,
-        })
-      );
+      const rosterOnly = mockApplicants.map(({ notes, ...applicant }) => {
+        void notes;
+        return applicant;
+      });
       const state = {
         app: initialAppState,
         applicants: { ...uiState, filter: 'Good candidate' },
@@ -278,7 +277,7 @@ describe('Applicants Selectors', () => {
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
-      expect(result[0].id).toBe('1');
+      expect(result[0]!.id).toBe('1');
     });
 
     it('should filter by skill filter', () => {
@@ -302,7 +301,7 @@ describe('Applicants Selectors', () => {
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('Jane Doe');
+      expect(result[0]!.name).toBe('Jane Doe');
     });
 
     it('should filter by country filter', () => {
@@ -313,7 +312,7 @@ describe('Applicants Selectors', () => {
       };
       const result = fromSelectors.selectSortedApplicants(state);
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('Alice Smith');
+      expect(result[0]!.name).toBe('Alice Smith');
     });
 
     it('should extract country from location', () => {

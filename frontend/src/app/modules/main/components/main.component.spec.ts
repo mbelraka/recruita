@@ -20,7 +20,7 @@ import { MainLangRefreshHostDirective } from 'src/app/modules/main/directives/ma
 import { MAIN_LANG_REFRESH_ZONE } from 'src/app/modules/main/constants/main-lang-refresh.constants';
 import type { MainLangRefreshZone } from 'src/app/modules/main/models/main-lang-refresh-zone.model';
 
-type MainComponentPrivate = {
+interface MainComponentPrivate {
   _restartTranslatedLangRefresh(): void;
   _prefersReducedMotion(): boolean;
   _isCopyLangRefreshAnimation(event: AnimationEvent): boolean;
@@ -33,10 +33,10 @@ type MainComponentPrivate = {
       ) => Record<MainLangRefreshZone, boolean>
     ): void;
   };
-  _langRefreshHosts(): Array<{
+  _langRefreshHosts(): {
     elementRef: { nativeElement: HTMLElement };
-  }>;
-};
+  }[];
+}
 
 describe('MainComponent', () => {
   let fixture: ComponentFixture<MainComponent>;
@@ -159,23 +159,23 @@ describe('MainComponent', () => {
   });
 
   it('should return false when prefers reduced motion and matchMedia is unavailable', () => {
-    const originalMatchMedia = window.matchMedia;
+    const originalMatchMedia = globalThis.matchMedia;
 
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       configurable: true,
       value: undefined,
     });
 
     expect(componentPrivate._prefersReducedMotion()).toBeFalse();
 
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(globalThis, 'matchMedia', {
       configurable: true,
       value: originalMatchMedia,
     });
   });
 
   it('should detect prefers reduced motion from matchMedia', () => {
-    spyOn(window, 'matchMedia').and.returnValue({
+    spyOn(globalThis, 'matchMedia').and.returnValue({
       matches: true,
     } as MediaQueryList);
 
@@ -217,10 +217,10 @@ describe('MainComponent', () => {
       'offsetWidth',
       'get'
     ).and.returnValue(320);
-    spyOn(window, 'matchMedia').and.returnValue({
+    spyOn(globalThis, 'matchMedia').and.returnValue({
       matches: false,
     } as MediaQueryList);
-    spyOn(window, 'requestAnimationFrame').and.callFake(
+    spyOn(globalThis, 'requestAnimationFrame').and.callFake(
       (callback: FrameRequestCallback): number => {
         callback(0);
         return 1;
@@ -243,10 +243,10 @@ describe('MainComponent', () => {
   }));
 
   it('should skip the restart flow when reduced motion is preferred', () => {
-    spyOn(window, 'matchMedia').and.returnValue({
+    spyOn(globalThis, 'matchMedia').and.returnValue({
       matches: true,
     } as MediaQueryList);
-    const requestAnimationFrameSpy = spyOn(window, 'requestAnimationFrame');
+    const requestAnimationFrameSpy = spyOn(globalThis, 'requestAnimationFrame');
 
     componentPrivate._restartTranslatedLangRefresh();
 

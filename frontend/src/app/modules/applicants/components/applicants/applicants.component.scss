@@ -123,12 +123,7 @@
 
 .new-applicant-fab-shell {
   --new-applicant-fab-shell-inset: var(--app-space-md, 24px);
-
-  @include bp.bp-down(sm) {
-    --new-applicant-fab-shell-inset: var(--app-space-sm);
-  }
   --new-applicant-fab-shell-pad: 12px;
-
   position: fixed;
   z-index: 10;
   right: calc(
@@ -141,4 +136,8 @@
   display: inline-flex;
   align-items: flex-end;
   justify-content: flex-end;
+
+  @include bp.bp-down(sm) {
+    --new-applicant-fab-shell-inset: var(--app-space-sm);
+  }
 }

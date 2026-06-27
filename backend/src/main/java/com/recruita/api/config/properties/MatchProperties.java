@@ -57,6 +57,10 @@ public class MatchProperties {
     private boolean enabled = true;
     @NotBlank private String store = "memory";
     @Positive private long ttlSeconds = 3600;
+
+    /** Upper bound for the in-memory store; Redis manages its own memory. */
+    @Positive private long maxEntries = 1_000;
+
     @NotBlank private String keyPrefix = "recruita:match:";
     @Valid @NotNull private MatchCacheKeyProperties keyFields = new MatchCacheKeyProperties();
     @NotBlank private String nullCanonicalLiteral = "null";
@@ -83,6 +87,14 @@ public class MatchProperties {
 
     public void setTtlSeconds(long ttlSeconds) {
       this.ttlSeconds = ttlSeconds;
+    }
+
+    public long getMaxEntries() {
+      return maxEntries;
+    }
+
+    public void setMaxEntries(long maxEntries) {
+      this.maxEntries = maxEntries;
     }
 
     public String getKeyPrefix() {

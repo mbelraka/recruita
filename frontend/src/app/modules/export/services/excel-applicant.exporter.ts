@@ -22,17 +22,16 @@ export class ExcelApplicantExporter {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(this._config.EXCEL.WORKSHEET_NAME);
     worksheet.columns = this._getColumns();
-    applicants.forEach((applicant, index) =>
-      worksheet.addRow(this._toRow(applicant, language, index))
-    );
+    for (const [index, applicant] of applicants.entries())
+      worksheet.addRow(this._toRow(applicant, language, index));
     return workbook.xlsx.writeBuffer();
   }
 
-  private _getColumns(): Array<{
+  private _getColumns(): {
     header: string;
     key: string;
     width: number;
-  }> {
+  }[] {
     const headerKeyByColumn: Record<string, string> = {
       index: '#',
       ...this._config.CSV.HEADER_LABEL_KEYS,

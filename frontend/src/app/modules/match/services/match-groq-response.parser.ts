@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { APP_CONFIG } from '../../../config/app.config';
-import { MATCH_SCORE_PREFIX } from '../../../utilities/RegEx';
+import { MATCH_SCORE_PREFIX } from '../../../utilities/reg-ex';
 import {
   MATCH_API_SCORE_COLLECTION_KEYS,
   MATCH_SCORE_CORRELATION_ID_KEYS,
@@ -128,7 +128,7 @@ export class MatchGroqResponseParser {
       if (!text) {
         return Number.NaN;
       }
-      const numeric = text.replace(',', '.').replace(/[^\d.-]/g, '');
+      const numeric = text.replace(',', '.').replaceAll(/[^\d.-]/g, '');
       return Number(numeric);
     }
 

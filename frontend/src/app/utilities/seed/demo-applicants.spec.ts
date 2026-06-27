@@ -5,6 +5,6 @@ describe('demo-applicants', () => {
   it('builds the canonical demo roster', () => {
     const demos = buildDemoApplicants();
     expect(demos.length).toBe(11);
-    expect(isValidApplicant(demos[0])).toBeTrue();
+    expect(isValidApplicant(demos[0]!)).toBeTrue();
   });
 });

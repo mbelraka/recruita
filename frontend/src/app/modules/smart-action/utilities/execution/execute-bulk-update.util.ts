@@ -1,6 +1,5 @@
 import { map, take } from 'rxjs';
 
-import { ApplicationStatus } from '../../../applicants/enums/application-status.enum';
 import { Applicant } from '../../../applicants/models/applicant.model';
 import { updateApplicant } from '../../../applicants/state/applicants.actions';
 import { selectAllApplicants } from '../../../applicants/state/applicants.selectors';
@@ -17,19 +16,18 @@ export function executeBulkUpdate(
     take(1),
     map((applicants): ActionResult => {
       const targets = applyLocalApplicantFilters(applicants, params.filters);
-      targets.forEach((applicant) => {
+      for (const applicant of targets) {
         const updated: Applicant = {
           ...applicant,
           ...(params.updates.applicationStatus
             ? {
-                applicationStatus: params.updates
-                  .applicationStatus as ApplicationStatus,
+                applicationStatus: params.updates.applicationStatus,
               }
             : {}),
           ...(params.updates.notes ? { notes: params.updates.notes } : {}),
         };
         deps.store.dispatch(updateApplicant({ applicant: updated }));
-      });
+      }
       return {
         success: true,
         message: `Updated ${targets.length} applicants.`,

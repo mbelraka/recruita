@@ -31,16 +31,16 @@ export function saveExportBlob(
 function sanitizeFileNameStem(value: string): string {
   const sanitized = value
     .trim()
-    .replace(/[\\/:*?"<>|]+/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replaceAll(/[\\/:*?"<>|]+/g, '')
+    .replaceAll(/\s+/g, '-')
+    .replaceAll(/-+/g, '-')
+    .replaceAll(/^-|-$/g, '');
   return sanitized || APP_CONFIG.EXPORT.FILE_NAME_FALLBACK;
 }
 
 export function wrapPdfText(text: string, maxLineChars: number): string[] {
   const words = text.split(/\s+/).filter(Boolean);
-  if (!words.length) {
+  if (words.length === 0) {
     return [''];
   }
 

@@ -6,24 +6,30 @@ import {
   catchError,
   concat,
   concatMap,
+  defer,
   EMPTY,
   exhaustMap,
   filter,
   map,
   of,
+  retry,
   switchMap,
   take,
   tap,
+  throwError,
+  timer,
   withLatestFrom,
 } from 'rxjs';
 
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
+import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { APP_CONFIG } from '../../../config/app.config';
 import { FullState } from '../../../models/full-state.model';
 import { setLanguage } from '../../../state/app.actions';
 import { selectAppLanguage } from '../../../state/app.selectors';
 import { buildPrivacyConsentSaveRequest } from '../../../utilities/build-save-profile-request.util';
 import { getErrorMessage } from '../../../utilities/error.utils';
+import { isTransientHttpApiError } from '../../../utilities/http-api-error.util';
 import { isLanguage } from '../../../utilities/language.utils';
 import {
   isPrivacyConsentDialogCloseResult,
@@ -52,6 +58,7 @@ export class MainEffects {
   public constructor(
     private readonly _actions$: Actions,
     private readonly _profiles: ProfileEntityCollectionService,
+    private readonly _privacy: PrivacyConsentService,
     private readonly _privacyDialog: PrivacyConsentDialogService,
     private readonly _store: Store<FullState>
   ) {}
@@ -60,7 +67,18 @@ export class MainEffects {
     this._actions$.pipe(
       ofType(loadProfile),
       switchMap(() =>
-        this._profiles.getByKey(APP_CONFIG.PROFILE.DEFAULT_ID).pipe(
+        defer(() =>
+          this._profiles.getByKey(APP_CONFIG.PROFILE.DEFAULT_ID)
+        ).pipe(
+          retry({
+            count: APP_CONFIG.PROFILE.LOAD_RETRY.COUNT,
+            delay: (error: unknown) =>
+              // Retry only connection-class failures (backend still starting);
+              // definitive answers like 404 fail fast so the privacy gate opens.
+              isTransientHttpApiError(error)
+                ? timer(APP_CONFIG.PROFILE.LOAD_RETRY.DELAY_MS)
+                : throwError(() => error),
+          }),
           tap((profile) => this._profiles.syncProfileInCache(profile)),
           concatMap((profile) =>
             concat(
@@ -84,7 +102,7 @@ export class MainEffects {
         ofType(loadProfileSuccess),
         tap(({ profile }) => {
           this._profiles.syncProfileInCache(profile);
-          this._privacyDialog.openConsentDialogIfRequired();
+          this._privacyDialog.openConsentDialogIfRequired(profile);
         })
       ),
     { dispatch: false }
@@ -94,7 +112,11 @@ export class MainEffects {
     () =>
       this._actions$.pipe(
         ofType(loadProfileFailure),
-        tap(() => this._privacyDialog.openConsentDialogIfRequired())
+        tap(() => {
+          if (!this._privacy.isConsentCompleteAndCurrent()) {
+            this._privacyDialog.openConsentDialogIfRequired();
+          }
+        })
       ),
     { dispatch: false }
   );
@@ -159,7 +181,11 @@ export class MainEffects {
           take(1),
           withLatestFrom(this._store.select(selectProfile)),
           concatMap(([, profile]) => {
-            if (profile?.lastLanguage === language) {
+            if (!profile) {
+              return EMPTY;
+            }
+
+            if (profile.lastLanguage === language) {
               return EMPTY;
             }
 

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
 import { createApplicant } from '../utilities/applicant-domain.util';
+import { DataServiceError } from '@ngrx/data';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import {
@@ -12,6 +13,9 @@ import {
   throwError,
 } from 'rxjs';
 
+import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
+import { HttpStatusCode } from '../../../enums/http-status-code.enum';
+import { HttpApiError } from '../../../models/http-api-error.model';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
@@ -140,14 +144,42 @@ describe('ApplicantsEffects', () => {
 
   it('dispatches updateApplicantFailure when update fails', async () => {
     collection.update.and.returnValue(
-      throwError(() => new Error('Applicant not found.'))
+      throwError(() => new Error('update failed'))
     );
     actions$.next(updateApplicant({ applicant: sample }));
 
     const action = await firstValueFrom(effects.updateApplicant$);
-    expect(action).toEqual(
+    expect(action).toEqual(updateApplicantFailure({ error: 'update failed' }));
+  });
+
+  it('shows the localized not-found toast on a 404 update failure', () => {
+    collection.update.and.returnValue(
+      throwError(
+        () =>
+          new DataServiceError(
+            new HttpApiError('Applicant not found.', HttpStatusCode.NotFound),
+            null
+          )
+      )
+    );
+    actions$.next(updateApplicant({ applicant: sample }));
+
+    const emitted: unknown[] = [];
+    const subscription = effects.updateApplicant$.subscribe((action) =>
+      emitted.push(action)
+    );
+
+    expect(emitted[0]).toEqual(
       updateApplicantFailure({ error: 'Applicant not found.' })
     );
+    expect(emitted[1]).toEqual(
+      jasmine.objectContaining({
+        notification: jasmine.objectContaining({
+          messageKey: NOTIFICATION_MESSAGE_KEYS.applicantNotFound,
+        }),
+      })
+    );
+    subscription.unsubscribe();
   });
 
   it('dispatches deleteApplicantFailure when delete fails', async () => {

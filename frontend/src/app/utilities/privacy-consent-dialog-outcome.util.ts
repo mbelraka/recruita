@@ -55,12 +55,15 @@ export function privacyChoicesFromDialogResult(
   result: PrivacyConsentDialogCloseResult
 ): PrivacyConsentFormState {
   switch (result.mode) {
-    case PrivacyConsentDialogMode.Necessary:
+    case PrivacyConsentDialogMode.Necessary: {
       return ALL_DISABLED;
-    case PrivacyConsentDialogMode.All:
+    }
+    case PrivacyConsentDialogMode.All: {
       return ALL_ENABLED;
-    case PrivacyConsentDialogMode.Custom:
+    }
+    case PrivacyConsentDialogMode.Custom: {
       return result.choices;
+    }
     default: {
       const _exhaustive: never = result;
       return _exhaustive;

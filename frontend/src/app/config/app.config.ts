@@ -223,9 +223,14 @@ export const APP_CONFIG = {
   PROFILE: {
     /** Shared profile until a full profile UI exists. Must match `recruita.profile-api.admin-id`. */
     DEFAULT_ID: 'admin',
+    /** Retries while Spring is still starting (`npm run dev` races the Angular proxy). */
+    LOAD_RETRY: {
+      COUNT: 8,
+      DELAY_MS: 500,
+    } as const,
     API: {
       BASE_PATH: '/api/profiles',
-      REQUEST_TIMEOUT_MS: 15000,
+      REQUEST_TIMEOUT_MS: 15_000,
       /** User-facing copy: `ProfileApiErrorMessage`. */
     } as const,
   } as const,
@@ -235,7 +240,7 @@ export const APP_CONFIG = {
     API: {
       BASE_PATH: '/api/applicants',
       FULL_LIST_PATH: '/api/applicants/full',
-      REQUEST_TIMEOUT_MS: 15000,
+      REQUEST_TIMEOUT_MS: 15_000,
       /** User-facing copy: `ApplicantApiErrorMessage`. */
     } as const,
     /** Collapse debounce after pointer leaves the new-applicant FAB shell (ms); avoids edge flicker during resize. */
@@ -351,17 +356,17 @@ export const APP_CONFIG = {
         labelKey: 'applicantList.location',
       },
       { value: 'skills', sortKey: 'skills', labelKey: 'applicantList.skills' },
-    ] as const satisfies ReadonlyArray<{
+    ] as const satisfies readonly {
       readonly value: string;
       readonly sortKey: keyof Applicant;
       readonly labelKey: string;
-    }>,
+    }[],
   } as const,
 
   SMART_ACTION: {
     API: {
       PARSE_PATH: '/api/action/parse',
-      REQUEST_TIMEOUT_MS: 10000,
+      REQUEST_TIMEOUT_MS: 10_000,
     },
     INPUT: {
       MAX_COMMAND_LENGTH: 500,
@@ -389,7 +394,7 @@ export const APP_CONFIG = {
 
   MATCH: {
     TOP_CANDIDATES_COUNT: 3,
-    REQUEST_TIMEOUT_MS: 30000,
+    REQUEST_TIMEOUT_MS: 30_000,
     /** Extra headroom for NgRx effect `timeout` above the HTTP client deadline (ms). */
     EFFECT_TIMEOUT_GRACE_MS: 1000,
     /** User-facing copy: `MatchErrorMessage`. */

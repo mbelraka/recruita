@@ -2,6 +2,7 @@ package com.recruita.api.config.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Objects;
 import java.util.function.Supplier;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -22,7 +23,7 @@ public final class SpaCsrfTokenRequestHandler implements CsrfTokenRequestHandler
   public void handle(
       HttpServletRequest request, HttpServletResponse response, Supplier<CsrfToken> csrfToken) {
     this.xor.handle(request, response, csrfToken);
-    csrfToken.get();
+    Objects.requireNonNull(csrfToken.get());
   }
 
   @Override

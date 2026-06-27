@@ -9,6 +9,11 @@ public class MatchServiceUnavailableException extends RuntimeException {
     this.suppressDetail = suppressDetail;
   }
 
+  public MatchServiceUnavailableException(String message, boolean suppressDetail, Throwable cause) {
+    super(message, cause);
+    this.suppressDetail = suppressDetail;
+  }
+
   public boolean suppressDetail() {
     return suppressDetail;
   }

@@ -21,7 +21,7 @@ public final class PromptTextSupport {
 
   public static void appendParagraph(StringBuilder buffer, String paragraph) {
     if (!buffer.isEmpty()) {
-      buffer.append('\n').append('\n');
+      buffer.append("\n\n");
     }
     buffer.append(paragraph);
   }

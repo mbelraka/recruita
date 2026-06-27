@@ -164,6 +164,7 @@ recruita:
       enabled: true
       store: memory
       ttl-seconds: 3600
+      max-entries: 1000
       key-prefix: 'recruita:match:'
       null-canonical-literal: 'null'
       key-fields:

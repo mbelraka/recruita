@@ -62,11 +62,7 @@ export const selectOptionalAiMatching = createSelector(
   (profile) => profile?.optionalAiMatching === true
 );
 
-export const selectPrivacyConsentComplete = createSelector(
-  selectProfileLoaded,
-  selectPrivacyNoticeAccepted,
-  (loaded, accepted) => loaded && accepted
-);
+export const selectPrivacyConsentComplete = selectPrivacyNoticeAccepted;
 
 export const selectAllowsAiMatching = createSelector(
   selectPrivacyConsentComplete,

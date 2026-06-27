@@ -9,6 +9,7 @@ import { Languages } from '../enums/language.enum';
 import { FullState } from '../models/full-state.model';
 import { setLanguage } from '../state/app.actions';
 import { selectAppLanguage } from '../state/app.selectors';
+import { translateInstantString } from '../utilities/localization.utils';
 
 @Injectable({ providedIn: 'root' })
 export class LocalizationService implements OnDestroy {
@@ -47,7 +48,8 @@ export class LocalizationService implements OnDestroy {
   }
 
   private applyDocumentTitle(): void {
-    const translated = this.translate.instant(
+    const translated = translateInstantString(
+      this.translate,
       APP_CONFIG.APP.SITE_TITLE_I18N_KEY
     );
     document.title =

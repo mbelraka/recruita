@@ -6,7 +6,7 @@ export const APPLICANT_YEARS_OF_EXPERIENCE_MAX = 80;
 export function applicantYearsOfExperienceValidator(
   control: AbstractControl
 ): ValidationErrors | null {
-  const raw = control.value;
+  const raw: unknown = control.value;
   if (raw === null || raw === undefined || raw === '') {
     return null;
   }

@@ -5,7 +5,7 @@ export const APPLICANT_PHONE_PATTERN = /^[\d+().\s-]{5,}$/;
 export const WHITESPACE_RUN = /\s+/g;
 
 /** After NFD/NFKD normalization, strip combining diacritical marks (e.g. for i18n key segments). */
-export const UNICODE_COMBINING_MARKS = /[\u0300-\u036f]/g;
+export const UNICODE_COMBINING_MARKS = /[\u0300-\u036F]/g;
 
 /** Replace non-alphanumeric runs with a single space. */
 export const NON_ALPHANUMERIC_TO_SPACE = /[^a-zA-Z0-9]+/g;

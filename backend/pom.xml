@@ -32,10 +32,16 @@
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <archunit.version>1.4.2</archunit.version>
+    <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+    <errorprone.version>2.50.0</errorprone.version>
+    <rewrite-maven-plugin.version>5.39.2</rewrite-maven-plugin.version>
+    <rewrite-spring.version>5.11.0</rewrite-spring.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <!-- Spring Boot 3.4.x requires springdoc 2.7+ (2.6.x targets Boot 3.3). -->
     <springdoc.version>2.8.17</springdoc.version>
     <jacoco.coverage.minimum>0.80</jacoco.coverage.minimum>
+    <jacoco.package.coverage.minimum>0.70</jacoco.package.coverage.minimum>
+    <jacoco.class.branch.minimum>0.70</jacoco.class.branch.minimum>
   </properties>
 
   <dependencies>
@@ -62,6 +68,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    <dependency>
+      <!-- In-memory match cache with TTL + size bound (version from Spring Boot BOM). -->
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
     </dependency>
     <dependency>
       <groupId>org.flywaydb</groupId>
@@ -115,7 +126,29 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
+          <fork>true</fork>
+          <showWarnings>true</showWarnings>
+          <compilerArgs>
+            <arg>-XDcompilePolicy=simple</arg>
+            <arg>--should-stop=ifError=FLOW</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+            <arg>-Xplugin:ErrorProne @${project.basedir}/config/errorprone/flags.cfg</arg>
+          </compilerArgs>
           <annotationProcessorPaths>
+            <path>
+              <groupId>com.google.errorprone</groupId>
+              <artifactId>error_prone_core</artifactId>
+              <version>${errorprone.version}</version>
+            </path>
             <path>
               <groupId>org.mapstruct</groupId>
               <artifactId>mapstruct-processor</artifactId>
@@ -158,6 +191,11 @@
         <version>${spotless.version}</version>
         <configuration>
           <java>
+            <toggleOffOn />
+            <importOrder>
+              <wildcardsLast>true</wildcardsLast>
+              <order>java,javax,jakarta,org,com,com.recruita</order>
+            </importOrder>
             <googleJavaFormat>
               <version>${google-java-format.version}</version>
               <style>GOOGLE</style>
@@ -219,6 +257,32 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${maven-pmd-plugin.version}</version>
+        <configuration>
+          <rulesets>
+            <ruleset>config/pmd/ruleset.xml</ruleset>
+          </rulesets>
+          <targetJdk>21</targetJdk>
+          <failOnViolation>true</failOnViolation>
+          <includeTests>true</includeTests>
+          <excludeRoots>
+            <excludeRoot>${project.build.directory}/generated-sources/annotations</excludeRoot>
+          </excludeRoots>
+          <linkXRef>false</linkXRef>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pmd-verify</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <version>${spotbugs-maven-plugin.version}</version>
@@ -253,7 +317,9 @@
           <excludes>
             <exclude>com/recruita/api/RecruitaApiApplication.class</exclude>
             <exclude>com/recruita/api/config/properties/**</exclude>
+            <exclude>com/recruita/api/config/validation/**</exclude>
             <exclude>com/recruita/api/persistence/**</exclude>
+            <exclude>com/recruita/api/match/cache/store/**</exclude>
             <exclude>com/recruita/api/**/mapper/*MapperImpl.class</exclude>
           </excludes>
         </configuration>
@@ -303,6 +369,45 @@
                     </limit>
                   </limits>
                 </rule>
+                <rule>
+                  <element>PACKAGE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${jacoco.package.coverage.minimum}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+                <rule>
+                  <element>CLASS</element>
+                  <excludes>
+                    <exclude>com.recruita.api.RecruitaApiApplication</exclude>
+                    <exclude>com.recruita.api.config.*</exclude>
+                    <exclude>com.recruita.api.persistence.*</exclude>
+                    <exclude>com.recruita.api.*.mapper.*</exclude>
+                    <exclude>com.recruita.api.*.mapper.*MapperImpl</exclude>
+                    <exclude>com.recruita.api.api.dto.*</exclude>
+                    <exclude>com.recruita.api.common.enums.*</exclude>
+                    <exclude>com.recruita.api.action.model.*</exclude>
+                    <exclude>com.recruita.api.match.domain.*</exclude>
+                    <exclude>com.recruita.api.match.cache.*</exclude>
+                    <exclude>com.recruita.api.match.normalization.*</exclude>
+                    <exclude>com.recruita.api.match.evaluation.GroqMatchEvaluationStrategy</exclude>
+                    <exclude>com.recruita.api.action.prompt.*</exclude>
+                    <exclude>com.recruita.api.observability.*</exclude>
+                    <exclude>com.recruita.api.action.validation.*</exclude>
+                    <exclude>com.recruita.api.api.advice.*</exclude>
+                    <exclude>com.recruita.api.api.controller.*</exclude>
+                  </excludes>
+                  <limits>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${jacoco.class.branch.minimum}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
               </rules>
             </configuration>
           </execution>
@@ -349,7 +454,33 @@
       <properties>
         <checkstyle.skip>true</checkstyle.skip>
         <spotbugs.skip>true</spotbugs.skip>
+        <pmd.skip>true</pmd.skip>
       </properties>
+    </profile>
+    <profile>
+      <id>rewrite</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.openrewrite.maven</groupId>
+            <artifactId>rewrite-maven-plugin</artifactId>
+            <version>${rewrite-maven-plugin.version}</version>
+            <configuration>
+              <activeRecipes>
+                <recipe>org.openrewrite.staticanalysis.CommonStaticAnalysis</recipe>
+                <recipe>org.openrewrite.java.format.AutoFormat</recipe>
+              </activeRecipes>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>org.openrewrite.recipe</groupId>
+                <artifactId>rewrite-static-analysis</artifactId>
+                <version>1.17.0</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
     <profile>
       <id>security-audit</id>

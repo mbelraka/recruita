@@ -91,7 +91,7 @@ describe('Applicants roster (NgRx Data integration)', () => {
     );
 
     expect(applicants.length).toBe(1);
-    expect(applicants[0].id).toBe('a-1');
-    expect(applicants[0].name).toBe('Alex');
+    expect(applicants[0]!.id).toBe('a-1');
+    expect(applicants[0]!.name).toBe('Alex');
   });
 });

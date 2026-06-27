@@ -19,7 +19,7 @@ public class DeleteApplicantParamsValidator {
     JsonNode applicantIdentifier = params.get(ActionParamKey.APPLICANT_IDENTIFIER);
     if (applicantIdentifier == null
         || !applicantIdentifier.isTextual()
-        || applicantIdentifier.asText().trim().isEmpty()) {
+        || applicantIdentifier.asText().isBlank()) {
       return ParamsValidationResult.invalid(
           List.of("applicantIdentifier is required and must be a non-empty string"));
     }

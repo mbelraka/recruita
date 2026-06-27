@@ -48,7 +48,7 @@ describe('applicant-api.mapper', () => {
     ]);
 
     expect(applicants.map((a) => a.id)).toEqual(['a-1', 'a-2']);
-    expect(applicants[0].notes).toBeUndefined();
+    expect(applicants[0]!.notes).toBeUndefined();
   });
 
   it('maps full API records with notes', () => {

@@ -22,7 +22,7 @@ public class UpdateStatusParamsValidator {
     JsonNode applicantIdentifier = params.get(ActionParamKey.APPLICANT_IDENTIFIER);
     if (applicantIdentifier == null
         || !applicantIdentifier.isTextual()
-        || applicantIdentifier.asText().trim().isEmpty()) {
+        || applicantIdentifier.asText().isBlank()) {
       errors.add("applicantIdentifier is required and must be a non-empty string");
     }
 

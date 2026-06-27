@@ -9,7 +9,13 @@ import {
 export function emailFieldValidator(
   control: AbstractControl
 ): ValidationErrors | null {
-  const trimmed = (control.value ?? '').toString().trim();
+  const raw: unknown = control.value;
+  const trimmed =
+    typeof raw === 'string'
+      ? raw.trim()
+      : typeof raw === 'number' || typeof raw === 'boolean'
+        ? String(raw).trim()
+        : '';
   if (!trimmed) {
     return { required: true };
   }

@@ -13,7 +13,7 @@ test.describe('Match candidates flow', () => {
 
     await page.route('**/api/match', async (route) => {
       const payload = route.request().postDataJSON() as {
-        candidates?: Array<{ id: string }>;
+        candidates?: { id: string }[];
       };
       const candidates = payload.candidates ?? [];
       candidatesCount = candidates.length;

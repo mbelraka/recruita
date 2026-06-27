@@ -29,7 +29,7 @@ public class MatchJobParamsValidator {
     JsonNode jobDescription = params.get(ActionParamKey.JOB_DESCRIPTION);
     if (jobDescription == null
         || !jobDescription.isTextual()
-        || jobDescription.asText().trim().isEmpty()) {
+        || jobDescription.asText().isBlank()) {
       errors.add("jobDescription is required");
     }
 

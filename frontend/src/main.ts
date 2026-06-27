@@ -11,14 +11,14 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 // Unregister service workers during development
-if (!environment.production) {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .getRegistrations()
-      .then((registrations): void =>
-        registrations.forEach((registration) => registration.unregister())
-      );
-  }
+if (!environment.production && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker
+    .getRegistrations()
+    .then((registrations): void => {
+      for (const registration of registrations) {
+        void registration.unregister();
+      }
+    });
 }
 
 // Enable production mode for production builds
@@ -29,7 +29,7 @@ if (environment.production) {
 // Bootstrap the application
 platformBrowser()
   .bootstrapModule(AppModule)
-  .catch((err: unknown): void => console.error(err));
+  .catch((error: unknown): void => console.error(error));
 
 registerLocaleData(en);
 registerLocaleData(de);

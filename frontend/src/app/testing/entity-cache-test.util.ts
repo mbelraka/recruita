@@ -5,12 +5,12 @@ import { ENTITY_CACHE_STATE_KEY } from '../core/entity-data/entity-cache.selecto
 import type { Profile } from '../modules/main/models/profile.model';
 import { Applicant } from '../modules/applicants/models/applicant.model';
 
-type TestEntityCollection<T> = {
+interface TestEntityCollection<T> {
   ids: string[];
   entities: Record<string, T>;
   loading: boolean;
   loaded: boolean;
-};
+}
 
 export function buildApplicantEntityCache(
   applicants: Applicant[],

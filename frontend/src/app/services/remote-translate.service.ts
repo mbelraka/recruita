@@ -161,6 +161,6 @@ export class RemoteTranslateService {
 
   private _normalizeText(text: string | null | undefined): string | null {
     const trimmed = text?.trim() ?? '';
-    return trimmed ? trimmed : null;
+    return trimmed || null;
   }
 }

@@ -101,17 +101,17 @@ describe('MatchCandidatesService', () => {
     );
 
     const body = httpClientSpy.post.calls.mostRecent().args[1] as {
-      candidates: Array<Record<string, unknown>>;
+      candidates: Record<string, unknown>[];
     };
     expect(body.candidates.length).toBe(1);
-    const c = body.candidates[0];
+    const c = body.candidates[0]!;
     expect(c).toEqual({
       id: 'llm-temp-1',
       skills: ['Angular'],
       yearsOfExperience: 4,
       currentJobTitle: 'Frontend developer',
     });
-    expect(c['id']).not.toBe(rich[0].id);
+    expect(c['id']).not.toBe(rich[0]!.id);
     expect('name' in c).toBeFalse();
     expect('email' in c).toBeFalse();
     expect('phone' in c).toBeFalse();
@@ -158,10 +158,10 @@ describe('MatchCandidatesService', () => {
       service.evaluate('Senior frontend role', applicants, 1, Languages.English)
     );
     expect(result.length).toBe(2);
-    expect(result[0].applicant.id).toBe('a2');
-    expect(result[0].isTopCandidate).toBeTrue();
-    expect(result[1].isTopCandidate).toBeFalse();
-    expect(result[0].reasoning).toBe('Great fit');
+    expect(result[0]!.applicant.id).toBe('a2');
+    expect(result[0]!.isTopCandidate).toBeTrue();
+    expect(result[1]!.isTopCandidate).toBeFalse();
+    expect(result[0]!.reasoning).toBe('Great fit');
   });
 
   it('should clamp and default invalid model values', async () => {

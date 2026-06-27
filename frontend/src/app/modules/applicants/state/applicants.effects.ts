@@ -17,8 +17,10 @@ import {
 import { APP_CONFIG } from '../../../config/app.config';
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
+import { HttpStatusCode } from '../../../enums/http-status-code.enum';
 import { FullState } from '../../../models/full-state.model';
 import { getErrorMessage } from '../../../utilities/error.utils';
+import { hasHttpApiErrorStatus } from '../../../utilities/http-api-error.util';
 import {
   concatWithErrorNotification,
   concatWithNotification,
@@ -197,7 +199,7 @@ export class ApplicantsEffects {
           ),
           catchError((error: unknown) => {
             const errMsg = getErrorMessage(error);
-            if (errMsg.toLowerCase().includes('not found')) {
+            if (hasHttpApiErrorStatus(error, HttpStatusCode.NotFound)) {
               return concatWithErrorNotification(
                 updateApplicantFailure({ error: errMsg }),
                 undefined,

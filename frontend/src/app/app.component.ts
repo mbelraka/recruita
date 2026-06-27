@@ -11,11 +11,8 @@ import { appendSnackBarMotionStyleElement } from './utilities/snack-bar-motion';
 export class AppComponent {
   private readonly _injector = inject(Injector);
 
-  /**
-   * Eagerly injects `LocalizationService` so it bootstraps at app start.
-   * The service syncs translations and Material date locale via its constructor.
-   */
-  public constructor(_localization: LocalizationService) {
+  public constructor() {
+    inject(LocalizationService);
     afterNextRender(
       () => {
         appendSnackBarMotionStyleElement();

@@ -24,10 +24,10 @@ import { SortDirection } from '../../enums/sort-direction.enum';
 import * as ApplicantsActions from '../../state/applicants.actions';
 import * as Selectors from '../../state/applicants.selectors';
 
-type ApplicantsComponentPrivate = {
+interface ApplicantsComponentPrivate {
   _newApplicantButtonEl(): ElementRef<HTMLButtonElement> | undefined;
   _newApplicantFabShellEl(): ElementRef<HTMLElement> | undefined;
-};
+}
 
 describe('ApplicantsComponent', () => {
   let component: ApplicantsComponent;
@@ -118,7 +118,7 @@ describe('ApplicantsComponent', () => {
     it('should keep FAB expanded when focus moves inside the button host', () => {
       const relatedTarget = document.createElement('span');
       const button = document.createElement('button');
-      button.appendChild(relatedTarget);
+      button.append(relatedTarget);
 
       spyOn(componentPrivate, '_newApplicantButtonEl').and.returnValue(
         new ElementRef(button)

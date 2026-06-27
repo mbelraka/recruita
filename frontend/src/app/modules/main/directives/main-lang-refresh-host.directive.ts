@@ -20,7 +20,9 @@ import type { MainLangRefreshZone } from 'src/app/modules/main/models/main-lang-
   standalone: false,
 })
 export class MainLangRefreshHostDirective {
-  private readonly _main = inject(forwardRef(() => MainComponent));
+  private readonly _main = inject(
+    forwardRef(() => MainComponent)
+  ) as MainComponent;
   readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly appMainLangRefreshHost = input.required<MainLangRefreshZone>();

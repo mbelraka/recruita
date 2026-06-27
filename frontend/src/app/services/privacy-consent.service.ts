@@ -88,8 +88,8 @@ export class PrivacyConsentService {
 
   /** Reload the app; NgRx rehydrates from the API (server profile and applicants unchanged). */
   public eraseSessionDataAndReload(): void {
-    if (typeof window !== 'undefined') {
-      window.location.assign(PRIVACY_POST_ERASE_APP_PATH);
+    if (typeof globalThis !== 'undefined') {
+      globalThis.location.assign(PRIVACY_POST_ERASE_APP_PATH);
     }
   }
 

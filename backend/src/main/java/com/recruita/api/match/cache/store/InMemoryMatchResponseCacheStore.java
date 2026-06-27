@@ -1,9 +1,13 @@
 package com.recruita.api.match.cache.store;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Ticker;
+import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
-import java.util.Map;
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +19,27 @@ import org.springframework.stereotype.Component;
     matchIfMissing = true)
 public class InMemoryMatchResponseCacheStore implements MatchResponseCacheStore {
 
-  private final Map<String, MatchEvaluationResult> cache = new ConcurrentHashMap<>();
+  private final Cache<String, MatchEvaluationResult> cache;
+
+  @Autowired
+  public InMemoryMatchResponseCacheStore(RecruitaProperties properties) {
+    this(properties, Ticker.systemTicker());
+  }
+
+  /** Visible for tests: a fake {@link Ticker} lets TTL expiry be exercised without sleeping. */
+  InMemoryMatchResponseCacheStore(RecruitaProperties properties, Ticker ticker) {
+    var cacheProperties = properties.getMatch().getCache();
+    this.cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofSeconds(cacheProperties.getTtlSeconds()))
+            .maximumSize(cacheProperties.getMaxEntries())
+            .ticker(ticker)
+            .build();
+  }
 
   @Override
   public Optional<MatchEvaluationResult> get(String cacheKey) {
-    MatchEvaluationResult cached = cache.get(cacheKey);
+    MatchEvaluationResult cached = cache.getIfPresent(cacheKey);
     return cached == null ? Optional.empty() : Optional.of(copy(cached));
   }
 

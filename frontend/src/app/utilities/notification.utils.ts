@@ -27,13 +27,13 @@ function toAppNotification(payload: NotifyPayload): AppNotification {
 
   if (messageKey !== undefined) {
     next =
-      messageParams !== undefined
-        ? { type, messageKey, messageParams }
-        : { type, messageKey };
-  } else if (message !== undefined) {
-    next = { type, message: stripTrailingPeriod(message) };
-  } else {
+      messageParams === undefined
+        ? { type, messageKey }
+        : { type, messageKey, messageParams };
+  } else if (message === undefined) {
     throw new Error('NotifyPayload requires messageKey or message');
+  } else {
+    next = { type, message: stripTrailingPeriod(message) };
   }
 
   if (!useErrorDuration) {

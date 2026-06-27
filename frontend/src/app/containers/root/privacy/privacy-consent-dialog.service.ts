@@ -6,6 +6,7 @@ import { take } from 'rxjs';
 
 import { PRIVACY_CONSENT_DIALOG_PANEL } from '../../../constants/privacy.constants';
 import { FullState } from '../../../models/full-state.model';
+import type { Profile } from '../../../modules/main/models/profile.model';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { isPrivacyConsentDialogCloseResult } from '../../../utilities/privacy-consent-dialog-outcome.util';
 import { persistPrivacyConsentOutcome } from '../../../modules/main/state/profile.actions';
@@ -23,8 +24,13 @@ export class PrivacyConsentDialogService {
 
   /**
    * Gate: shows the modal only when consent is incomplete or stale.
+   * When a profile payload is available (e.g. right after load), prefer it over store signals
+   * so we do not flash the dialog before the entity cache has settled.
    */
-  public openConsentDialogIfRequired(): void {
+  public openConsentDialogIfRequired(profile?: Profile | null): void {
+    if (profile?.privacyNoticeAccepted === true) {
+      return;
+    }
     if (this._privacy.isConsentCompleteAndCurrent()) {
       return;
     }

@@ -70,16 +70,16 @@
 .export-action-card {
   aspect-ratio: 1 / 1;
   padding: var(--app-space-md);
-
-  @include bp.bp-down(md) {
-    aspect-ratio: auto;
-    min-height: 12rem;
-  }
   border-radius: 0;
   background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @include bp.bp-down(md) {
+    aspect-ratio: auto;
+    min-height: 12rem;
+  }
 }
 
 .export-action-card__button {

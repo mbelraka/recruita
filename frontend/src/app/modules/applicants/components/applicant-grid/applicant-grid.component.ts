@@ -144,7 +144,11 @@ export class ApplicantGridComponent implements AfterViewInit {
   }
 
   public confirmRemoveApplicant(applicant: Applicant): void {
-    confirmDeleteApplicant(this._dialog, this._store, applicant);
+    confirmDeleteApplicant(
+      this._dialog,
+      this._store as Store<FullState>,
+      applicant
+    );
   }
 
   private _updateColumnsFromWidth(widthPx: number): void {

@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import * as FileSaver from 'file-saver';
+import * as fileSaver from 'file-saver';
 
 import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
 import { createApplicant } from '../../applicants/utilities/applicant-domain.util';
@@ -36,7 +36,7 @@ describe('ExportService', () => {
   });
 
   it('exports CSV via saveAs with configured filename', async () => {
-    const saveAsSpy = spyOn(FileSaver, 'saveAs');
+    const saveAsSpy = spyOn(fileSaver, 'saveAs');
     const applicants: Applicant[] = [
       createApplicant({
         id: '1',
@@ -70,7 +70,7 @@ describe('ExportService', () => {
   });
 
   it('exports JSON with indentation and exportIndex', async () => {
-    const saveAsSpy = spyOn(FileSaver, 'saveAs');
+    const saveAsSpy = spyOn(fileSaver, 'saveAs');
     const applicants: Applicant[] = [
       createApplicant({
         id: 'a-1',

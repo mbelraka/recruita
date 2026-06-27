@@ -46,9 +46,7 @@ export function createApplicant(init?: ApplicantInit): Applicant {
   let parsedAvailableFrom: Date | undefined;
   if (availableFrom !== undefined && availableFrom !== null) {
     const d =
-      availableFrom instanceof Date
-        ? availableFrom
-        : new Date(availableFrom as string | number);
+      availableFrom instanceof Date ? availableFrom : new Date(availableFrom);
     if (!Number.isNaN(d.getTime())) {
       parsedAvailableFrom = d;
     }
@@ -63,12 +61,12 @@ export function createApplicant(init?: ApplicantInit): Applicant {
   return {
     ...rest,
     id: id ?? '',
-    ...(name !== undefined ? { name } : {}),
-    ...(parsedYears !== undefined ? { yearsOfExperience: parsedYears } : {}),
-    ...(parsedAvailableFrom !== undefined
-      ? { availableFrom: parsedAvailableFrom }
-      : {}),
-    ...(parsedStatus !== undefined ? { applicationStatus: parsedStatus } : {}),
+    ...(name === undefined ? {} : { name }),
+    ...(parsedYears === undefined ? {} : { yearsOfExperience: parsedYears }),
+    ...(parsedAvailableFrom === undefined
+      ? {}
+      : { availableFrom: parsedAvailableFrom }),
+    ...(parsedStatus === undefined ? {} : { applicationStatus: parsedStatus }),
   };
 }
 

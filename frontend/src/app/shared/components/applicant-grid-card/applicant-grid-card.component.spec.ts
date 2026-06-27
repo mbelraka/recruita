@@ -35,7 +35,7 @@ describe('ApplicantGridCardComponent', () => {
     const deleteButton = document.createElement('button');
     deleteButton.className = 'applicant-shared-card__delete';
     const icon = document.createElement('span');
-    deleteButton.appendChild(icon);
+    deleteButton.append(icon);
 
     const event = {
       target: icon,

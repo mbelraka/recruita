@@ -45,22 +45,20 @@ public class MatchOperationLoggingAspect {
           result.scoreCount(matchResponseScoresField),
           System.currentTimeMillis() - started);
       return result;
-    } catch (Throwable throwable) {
-      if (throwable instanceof MatchValidationException
-          || throwable instanceof MatchServiceUnavailableException) {
-        LOG.debug(
-            observability.getMatchEvaluateRejectedTemplate(),
-            deterministic,
-            candidateCount,
-            System.currentTimeMillis() - started);
-      } else {
-        LOG.warn(
-            observability.getMatchEvaluateFailedTemplate(),
-            deterministic,
-            candidateCount,
-            System.currentTimeMillis() - started);
-      }
-      throw throwable;
+    } catch (MatchValidationException | MatchServiceUnavailableException ex) {
+      LOG.debug(
+          observability.getMatchEvaluateRejectedTemplate(),
+          deterministic,
+          candidateCount,
+          System.currentTimeMillis() - started);
+      throw ex;
+    } catch (Exception ex) {
+      LOG.warn(
+          observability.getMatchEvaluateFailedTemplate(),
+          deterministic,
+          candidateCount,
+          System.currentTimeMillis() - started);
+      throw ex;
     }
   }
 }

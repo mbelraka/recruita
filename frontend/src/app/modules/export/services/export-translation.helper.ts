@@ -4,7 +4,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
-import { WHITESPACE_RUN } from '../../../utilities/RegEx';
+import { WHITESPACE_RUN } from '../../../utilities/reg-ex';
+import { translateInstantString } from '../../../utilities/localization.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ExportTranslationHelper {
@@ -18,7 +19,7 @@ export class ExportTranslationHelper {
     if (!key) {
       return fallback;
     }
-    const translated = this._translate.instant(key);
+    const translated = translateInstantString(this._translate, key);
     return translated && translated !== key ? translated : fallback;
   }
 

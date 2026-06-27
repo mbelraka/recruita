@@ -52,13 +52,17 @@ export class LocaleLocationPipe implements PipeTransform {
       return raw;
     }
 
-    const countryToken = parts[parts.length - 1];
+    const countryToken = parts.at(-1);
+    if (!countryToken) {
+      return raw;
+    }
     const localizedCountry = this._localizeCountry(countryToken);
     if (!localizedCountry) {
       return raw;
     }
 
-    parts[parts.length - 1] = localizedCountry;
+    const lastIndex = parts.length - 1;
+    parts[lastIndex] = localizedCountry;
     return parts.join(', ');
   }
 

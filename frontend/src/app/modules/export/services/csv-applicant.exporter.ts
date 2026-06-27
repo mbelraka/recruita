@@ -6,7 +6,7 @@ import { Applicant } from '../../applicants/models/applicant.model';
 import {
   CSV_DOUBLE_QUOTE,
   CSV_FIELD_NEEDS_QUOTING,
-} from '../../../utilities/RegEx';
+} from '../../../utilities/reg-ex';
 import { ExportTranslationHelper } from './export-translation.helper';
 
 @Injectable({ providedIn: 'root' })

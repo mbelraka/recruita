@@ -47,7 +47,7 @@ describe('applicant-domain.util', () => {
     expect(applicantStr.availableFrom).toBeInstanceOf(Date);
 
     const applicantNum = createApplicant({
-      availableFrom: 1704067200000,
+      availableFrom: 1_704_067_200_000,
     } as Parameters<typeof createApplicant>[0]);
     expect(applicantNum.availableFrom).toBeInstanceOf(Date);
 

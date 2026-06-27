@@ -61,12 +61,12 @@ export function mergeApplicantListFilters(
 ): ApplicantListFilters {
   return {
     globalFilter:
-      partial.globalFilter !== undefined
-        ? partial.globalFilter
-        : current.globalFilter,
-    skill: partial.skill !== undefined ? partial.skill : current.skill,
-    status: partial.status !== undefined ? partial.status : current.status,
-    country: partial.country !== undefined ? partial.country : current.country,
+      partial.globalFilter === undefined
+        ? current.globalFilter
+        : partial.globalFilter,
+    skill: partial.skill === undefined ? current.skill : partial.skill,
+    status: partial.status === undefined ? current.status : partial.status,
+    country: partial.country === undefined ? current.country : partial.country,
     minExperience: partial.minExperience,
     maxExperience: partial.maxExperience,
   };

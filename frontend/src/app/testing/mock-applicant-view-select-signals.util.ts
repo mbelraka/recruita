@@ -1,6 +1,5 @@
 import { signal } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
 
 import { SortDirection } from '../modules/applicants/enums/sort-direction.enum';
 import { Applicant } from '../modules/applicants/models/applicant.model';
@@ -44,13 +43,4 @@ export function mockApplicantViewSelectSignals(
     }
     return signal(null);
   });
-
-  if (mockStore.select) {
-    (mockStore.select as jasmine.Spy).and.callFake((selector: unknown) => {
-      if (selector === Selectors.selectFilterBySkill) {
-        return of(activeSkillFilter);
-      }
-      return of(null);
-    });
-  }
 }

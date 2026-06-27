@@ -62,8 +62,8 @@ export class ApplicantEditDialogService {
             })
           )
         ),
-        filter((result): result is NewApplicantDialogCloseResult =>
-          Boolean(result)
+        filter(
+          (result): result is NewApplicantDialogCloseResult => result != null
         )
       )
       .subscribe((result) => {

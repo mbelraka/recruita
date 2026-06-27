@@ -44,11 +44,11 @@ export function appendSnackBarMotionStyleElement(): void {
   if (typeof document === 'undefined') {
     return;
   }
-  if (document.getElementById('app-snackbar-motion-overrides')) {
+  if (document.querySelector('#app-snackbar-motion-overrides')) {
     return;
   }
   const style = document.createElement('style');
   style.id = 'app-snackbar-motion-overrides';
   style.textContent = SNACK_BAR_MOTION_STYLE_TEXT;
-  document.head.appendChild(style);
+  document.head.append(style);
 }

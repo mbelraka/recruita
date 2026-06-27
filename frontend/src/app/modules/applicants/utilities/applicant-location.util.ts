@@ -25,5 +25,5 @@ export function countryFromLocation(
   if (parts.length === 0) {
     return null;
   }
-  return parts[parts.length - 1] ?? null;
+  return parts.at(-1) ?? null;
 }

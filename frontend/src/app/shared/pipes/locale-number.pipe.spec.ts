@@ -54,7 +54,7 @@ describe('LocaleNumberPipe', () => {
 
   it('should return empty string for invalid numbers', () => {
     expect(pipe.transform('invalid')).toBe('');
-    expect(pipe.transform(NaN)).toBe('');
+    expect(pipe.transform(Number.NaN)).toBe('');
   });
 
   it('should format number with default settings', () => {
