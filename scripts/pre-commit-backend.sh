@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 set -eu
-cd "$(dirname "$0")/.." || exit 1
+ROOT="$(CDPATH= cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
 echo "pre-commit: backend — validate:ci:backend"
-npm run precommit:backend
+"$ROOT/scripts/bin/npm" run precommit:backend

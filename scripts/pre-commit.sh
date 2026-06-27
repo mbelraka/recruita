@@ -7,11 +7,11 @@ ROOT="$(CDPATH= cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 . "$ROOT/scripts/clean-npm-env.sh"
 
-npx lint-staged
+"$ROOT/scripts/bin/npm" exec lint-staged
 
 if sh scripts/has-staged-lockfile-changes.sh; then
   echo "pre-commit: Lockfile — running lockfile:check"
-  npm run lockfile:check
+  "$ROOT/scripts/bin/npm" run lockfile:check
 fi
 
 if sh scripts/has-staged-frontend-changes.sh; then

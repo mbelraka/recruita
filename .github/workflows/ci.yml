@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-toolchain
       - name: Verify package-lock.json matches package.json
-        run: npm run lockfile:check
+        run: ./scripts/bin/npm run lockfile:check
 
   frontend:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
           cache-npm: true
           npm-ci: true
       - name: Frontend CI
-        run: npm run validate:ci:frontend
+        run: ./scripts/bin/npm run validate:ci:frontend
 
   backend:
     runs-on: ubuntu-latest
@@ -76,8 +76,8 @@ jobs:
             backend/pom.xml
             backend/.mvn/wrapper/maven-wrapper.properties
       - name: Backend CI
-        run: npm run validate:ci:backend
+        run: ./scripts/bin/npm run validate:ci:backend
       - name: Validate OpenAPI drift (springdoc vs contract)
         env:
           GROQ_API_KEY: ci-openapi-validation-key
-        run: npm run validate:openapi:drift
+        run: ./scripts/bin/npm run validate:openapi:drift

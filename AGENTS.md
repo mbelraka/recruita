@@ -9,12 +9,14 @@
 ## Commands (prefer these)
 
 ```bash
-npm run dev                 # full stack
-npm run validate:ci         # CI parity
-npm run quality             # fast: format + lint both stacks
-npm run validate:ci:frontend
-npm run validate:ci:backend
+sh scripts/npm-run.sh run dev          # full stack (no npm devdir warnings)
+sh scripts/npm-run.sh run validate:ci  # CI parity
+sh scripts/npm-run.sh run quality      # fast: format + lint both stacks
+sh scripts/npm-run.sh run validate:ci:frontend
+sh scripts/npm-run.sh run validate:ci:backend
 ```
+
+Plain `npm run …` also works; nested script steps use `scripts/bin/npm` via `.npmrc` `script-shell`. For zero `devdir` warnings in Cursor/agent shells, prefer `sh scripts/npm-run.sh run …`.
 
 Backend Maven: `npm run verify:backend` (or `sh scripts/run-mvn.sh verify`)
 
@@ -25,7 +27,7 @@ Optional DB/Redis: `npm run dev` starts Docker (Compose project **recruita**) an
 - No magic strings in Java — use `application.yml` + `@ConfigurationProperties`.
 - No Node backend; do not reintroduce `backend/package.json` or Express.
 - After `package.json` dependency changes: `npm install` and commit `package-lock.json`.
-- Cursor injects `npm_config_devdir` for sandbox npm/node-gyp caches. `.cursor/sandbox.json` disables that injection; integrated terminals prepend `scripts/bin` to `PATH` (transparent npm shim); pre-commit/CI source `scripts/clean-npm-env.sh`.
+- Cursor injects `npm_config_devdir` for sandbox npm/node-gyp caches. Use `sh scripts/npm-run.sh run …` in agent shells, or `./scripts/bin/npm` / integrated terminals with `scripts/bin` on `PATH` (see `.vscode/settings.json`). Pre-commit and CI use the shim; npm lifecycle scripts run via `.npmrc` `script-shell` (`scripts/npm-script-shell.sh`).
 
 ## Pre-commit scope
 

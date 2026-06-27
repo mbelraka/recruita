@@ -57,7 +57,7 @@
     "validate:ci:backend": "npm run quality:backend && npm run verify:backend && npm run validate:openapi:contract",
     "validate:ci": "npm run validate:ci:frontend && npm run validate:ci:backend",
     "validate": "npm run validate:ci",
-    "lockfile:check": "npm install --package-lock-only --ignore-scripts && git diff --exit-code package-lock.json",
+    "lockfile:check": "npm install --package-lock-only --ignore-scripts --loglevel=error && git diff --exit-code package-lock.json",
     "postinstall": "patch-package",
     "prepare": "husky"
   },
@@ -82,8 +82,11 @@
     "npm": ">=10.9.2"
   },
   "lint-staged": {
-    "frontend/src/**/*.{ts,html}": [
-      "bash -c 'cd frontend && filtered=(); for f in \"$@\"; do [[ \"$f\" != *src/app/generated/* ]] && filtered+=(\"$f\"); done; ((${#filtered[@]})) && eslint --fix --max-warnings=0 \"${filtered[@]}\"' _",
+    "frontend/src/**/!(*generated*)/*.{ts,html}": [
+      "bash -c 'cd frontend && eslint --fix --max-warnings=0 \"$@\"' _",
+      "prettier --write"
+    ],
+    "frontend/src/app/generated/**/*.{ts,html}": [
       "prettier --write"
     ],
     "frontend/e2e/**/*.ts": [

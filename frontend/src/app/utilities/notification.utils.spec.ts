@@ -1,3 +1,5 @@
+import { Action } from '@ngrx/store';
+
 import { AppNotificationType } from '../enums/app-notification-type.enum';
 import { addApplicantFailure } from '../modules/applicants/state/applicants.actions';
 
@@ -34,15 +36,33 @@ describe('notification.utils', () => {
 
   it('concatWithErrorNotification uses fallback key when detail is empty', (done) => {
     const failure = addApplicantFailure({ error: 'x' });
+    const seen: Action[] = [];
     concatWithErrorNotification(failure, undefined).subscribe({
-      complete: () => done(),
+      next: (action) => seen.push(action),
+      complete: () => {
+        expect(seen.length).toBe(2);
+        expect(seen[0]).toEqual(failure);
+        const notification = seen[1];
+        expect(notification).toBeDefined();
+        expect(notification!.type).toBe('[App] Show Notification');
+        done();
+      },
     });
   });
 
   it('concatWithErrorNotification uses detail text when provided', (done) => {
     const failure = addApplicantFailure({ error: 'x' });
+    const seen: Action[] = [];
     concatWithErrorNotification(failure, 'create failed').subscribe({
-      complete: () => done(),
+      next: (action) => seen.push(action),
+      complete: () => {
+        expect(seen.length).toBe(2);
+        expect(seen[0]).toEqual(failure);
+        const notification = seen[1];
+        expect(notification).toBeDefined();
+        expect(notification!.type).toBe('[App] Show Notification');
+        done();
+      },
     });
   });
 });
