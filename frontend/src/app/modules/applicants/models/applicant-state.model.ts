@@ -47,6 +47,3 @@ export interface ApplicantUiState {
    */
   suppressNewApplicantFabPointerExpandUntil: number;
 }
-
-/** @deprecated Use {@link ApplicantUiState}. Kept for gradual migration of imports. */
-export type ApplicantState = ApplicantUiState;

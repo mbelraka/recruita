@@ -76,4 +76,18 @@ class MatchResponseNormalizerTest {
     assertInstanceOf(MatchResponseDto.class, response);
     assertEquals(0, response.scores().size());
   }
+
+  @Test
+  void normalizeReturnsEmptyScoresForNullPayload() {
+    MatchResponseDto response = normalizer.normalize(null);
+
+    assertEquals(0, response.scores().size());
+  }
+
+  @Test
+  void toResponseDtoReturnsEmptyScoresForNullGroqPayload() {
+    MatchResponseDto response = normalizer.toResponseDto(new MatchEvaluationResult.Groq(null));
+
+    assertEquals(0, response.scores().size());
+  }
 }

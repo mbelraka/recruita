@@ -42,18 +42,13 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
 
   @Override
   @Transactional(readOnly = true)
-  public RosterWatermark rosterWatermark() {
-    return rosterWatermarkService.current();
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public Optional<List<ApplicantSummaryDto>> listSummariesIfNotModified(String ifNoneMatch) {
+  public ApplicantSummaryListResult listSummaries(String ifNoneMatch) {
     RosterWatermark watermark = rosterWatermarkService.current();
     if (matchesIfNoneMatch(ifNoneMatch, watermark.etag())) {
-      return Optional.empty();
+      return new ApplicantSummaryListResult(watermark, Optional.empty());
     }
-    return Optional.of(mapper.toSummaryDtoList(repository.findAll(LIST_SORT)));
+    return new ApplicantSummaryListResult(
+        watermark, Optional.of(mapper.toSummaryDtoList(repository.findAll(LIST_SORT))));
   }
 
   @Override

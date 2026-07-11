@@ -2,6 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 
+import { LAYOUT_WIDTH_TIER_MEDIA_QUERIES } from '../constants/layout-breakpoints.constants';
 import { LayoutBreakpointService } from './layout-breakpoint.service';
 
 interface BreakpointState {
@@ -34,7 +35,7 @@ describe('LayoutBreakpointService', () => {
   it('maps max-width 599.98px to xs tier', () => {
     const service = TestBed.inject(LayoutBreakpointService);
     observe$.next({
-      breakpoints: { '(max-width: 599.98px)': true },
+      breakpoints: { [LAYOUT_WIDTH_TIER_MEDIA_QUERIES.xs]: true },
       matches: true,
     });
     expect(service.widthTier()).toBe('xs');

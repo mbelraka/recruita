@@ -188,43 +188,49 @@ class DefaultApplicantApplicationServiceTest {
   }
 
   @Test
-  void rosterWatermarkExposesCurrentGeneration() {
+  void listSummariesReturnsCurrentWatermarkWithBody() {
+    ApplicantEntity entity = new ApplicantEntity();
+    entity.setId("a-1");
     when(rosterVersionService.current()).thenReturn(7L);
     when(repository.findMaxUpdatedAt()).thenReturn(Optional.of(Instant.ofEpochMilli(1000)));
     when(repository.count()).thenReturn(2L);
+    when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
 
-    var watermark = service.rosterWatermark();
+    var result = service.listSummaries(null);
 
-    assertEquals(7L, watermark.version());
-    assertEquals(2L, watermark.applicantCount());
-    assertEquals("\"roster-v7-1000-2\"", watermark.etag());
+    assertEquals(7L, result.watermark().version());
+    assertEquals(2L, result.watermark().applicantCount());
+    assertEquals("\"roster-v7-1000-2\"", result.watermark().etag());
+    assertTrue(result.summaries().isPresent());
   }
 
   @Test
-  void listSummariesIfNotModifiedReturnsEmptyWhenEtagMatches() {
+  void listSummariesReturnsEmptyWhenEtagMatches() {
     when(rosterVersionService.current()).thenReturn(7L);
     when(repository.findMaxUpdatedAt()).thenReturn(Optional.of(Instant.ofEpochMilli(1000)));
     when(repository.count()).thenReturn(2L);
 
-    var result = service.listSummariesIfNotModified("\"roster-v7-1000-2\"");
+    var result = service.listSummaries("\"roster-v7-1000-2\"");
 
-    assertTrue(result.isEmpty());
+    assertTrue(result.summaries().isEmpty());
+    assertEquals("\"roster-v7-1000-2\"", result.watermark().etag());
     verify(repository, never()).findAll(any(Sort.class));
   }
 
   @Test
-  void listSummariesIfNotModifiedMatchesOneOfSeveralEtags() {
+  void listSummariesMatchesOneOfSeveralEtags() {
     when(rosterVersionService.current()).thenReturn(7L);
     when(repository.findMaxUpdatedAt()).thenReturn(Optional.of(Instant.ofEpochMilli(1000)));
     when(repository.count()).thenReturn(2L);
 
-    var result = service.listSummariesIfNotModified("\"stale\", \"roster-v7-1000-2\"");
+    var result = service.listSummaries("\"stale\", \"roster-v7-1000-2\"");
 
-    assertTrue(result.isEmpty());
+    assertTrue(result.summaries().isEmpty());
+    assertEquals("\"roster-v7-1000-2\"", result.watermark().etag());
   }
 
   @Test
-  void listSummariesIfNotModifiedReturnsRosterWhenEtagDiffers() {
+  void listSummariesReturnsRosterWhenEtagDiffers() {
     ApplicantEntity entity = new ApplicantEntity();
     entity.setId("a-1");
     entity.setName("Alex");
@@ -233,14 +239,15 @@ class DefaultApplicantApplicationServiceTest {
     when(repository.count()).thenReturn(2L);
     when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
 
-    var result = service.listSummariesIfNotModified("\"roster-v1-0-0\"");
+    var result = service.listSummaries("\"roster-v1-0-0\"");
 
-    assertTrue(result.isPresent());
-    assertEquals(1, result.get().size());
+    assertTrue(result.summaries().isPresent());
+    assertEquals(1, result.summaries().get().size());
+    assertEquals("\"roster-v7-1000-2\"", result.watermark().etag());
   }
 
   @Test
-  void listSummariesIfNotModifiedReturnsRosterWhenHeaderMissing() {
+  void listSummariesReturnsRosterWhenHeaderMissing() {
     ApplicantEntity entity = new ApplicantEntity();
     entity.setId("a-1");
     when(rosterVersionService.current()).thenReturn(0L);
@@ -248,13 +255,13 @@ class DefaultApplicantApplicationServiceTest {
     when(repository.count()).thenReturn(0L);
     when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
 
-    var result = service.listSummariesIfNotModified(null);
+    var result = service.listSummaries(null);
 
-    assertTrue(result.isPresent());
+    assertTrue(result.summaries().isPresent());
   }
 
   @Test
-  void listSummariesIfNotModifiedReturnsRosterWhenHeaderBlank() {
+  void listSummariesReturnsRosterWhenHeaderBlank() {
     ApplicantEntity entity = new ApplicantEntity();
     entity.setId("a-1");
     when(rosterVersionService.current()).thenReturn(0L);
@@ -262,8 +269,8 @@ class DefaultApplicantApplicationServiceTest {
     when(repository.count()).thenReturn(0L);
     when(repository.findAll(any(Sort.class))).thenReturn(List.of(entity));
 
-    var result = service.listSummariesIfNotModified("   ");
+    var result = service.listSummaries("   ");
 
-    assertTrue(result.isPresent());
+    assertTrue(result.summaries().isPresent());
   }
 }

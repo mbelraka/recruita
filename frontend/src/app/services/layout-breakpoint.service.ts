@@ -3,12 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
-/** Viewport width tier for responsive layout (matches shared/_breakpoints.scss). */
-export type LayoutWidthTier = 'xs' | 'sm' | 'md' | 'lg';
+import { LAYOUT_WIDTH_TIER_MEDIA_QUERIES } from '../constants/layout-breakpoints.constants';
+import { LayoutWidthTier } from '../models/layout-width-tier.type';
 
-const BP_XS = '(max-width: 599.98px)';
-const BP_SM = '(max-width: 959.98px)';
-const BP_MD = '(max-width: 1279.98px)';
+const { xs: BP_XS, sm: BP_SM, md: BP_MD } = LAYOUT_WIDTH_TIER_MEDIA_QUERIES;
 
 @Injectable({ providedIn: 'root' })
 export class LayoutBreakpointService {

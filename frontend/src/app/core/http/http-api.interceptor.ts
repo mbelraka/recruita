@@ -14,13 +14,8 @@ import { HttpStatusCode } from '../../enums/http-status-code.enum';
 import { ApplicantApiErrorMessage } from '../../modules/applicants/enums/applicant-api-error-message.enum';
 import { ProfileApiErrorMessage } from '../../modules/main/enums/profile-api-error-message.enum';
 import { MatchErrorMessage } from '../../modules/match/enums/match-error-message.enum';
-import type { HttpApiErrorMessages } from '../../models/http-api-error-messages.model';
+import type { HttpApiPolicy } from '../../models/http-api-policy.model';
 import { toHttpApiServiceError } from '../../utilities/http-api-error.util';
-
-interface HttpApiPolicy {
-  readonly timeoutMs: number;
-  readonly messages: HttpApiErrorMessages;
-}
 
 @Injectable()
 export class HttpApiInterceptor implements HttpInterceptor {

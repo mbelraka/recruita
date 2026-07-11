@@ -9,6 +9,7 @@ import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.roster.RosterWatermark;
 import com.recruita.api.applicant.service.ApplicantApplicationService;
+import com.recruita.api.applicant.service.ApplicantSummaryListResult;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.time.Instant;
 import java.util.List;
@@ -43,28 +44,28 @@ class ApplicantControllerTest {
             new ApplicantSummaryDto(
                 "a-1", "Alex", null, null, null, null, null, null, null, List.of()));
     RosterWatermark watermark = new RosterWatermark(1L, "\"roster-v1-0-1\"", Instant.EPOCH, 1L);
-    when(applicantApplicationService.rosterWatermark()).thenReturn(watermark);
-    when(applicantApplicationService.listSummariesIfNotModified(null))
-        .thenReturn(Optional.of(summaries));
+    when(applicantApplicationService.listSummaries(null))
+        .thenReturn(new ApplicantSummaryListResult(watermark, Optional.of(summaries)));
 
     var response = controller.listApplicantSummaries(null);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(summaries, response.getBody());
-    verify(applicantApplicationService).listSummariesIfNotModified(null);
+    assertEquals(watermark.etag(), response.getHeaders().getETag());
+    verify(applicantApplicationService).listSummaries(null);
   }
 
   @Test
   void listApplicantSummariesReturnsNotModifiedWhenEtagMatches() {
     RosterWatermark watermark = new RosterWatermark(2L, "\"roster-v2-0-1\"", Instant.EPOCH, 1L);
-    when(applicantApplicationService.rosterWatermark()).thenReturn(watermark);
-    when(applicantApplicationService.listSummariesIfNotModified(watermark.etag()))
-        .thenReturn(Optional.empty());
+    when(applicantApplicationService.listSummaries(watermark.etag()))
+        .thenReturn(new ApplicantSummaryListResult(watermark, Optional.empty()));
 
     var response = controller.listApplicantSummaries(watermark.etag());
 
     assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
-    verify(applicantApplicationService).listSummariesIfNotModified(watermark.etag());
+    assertEquals(watermark.etag(), response.getHeaders().getETag());
+    verify(applicantApplicationService).listSummaries(watermark.etag());
   }
 
   @Test

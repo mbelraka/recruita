@@ -64,4 +64,14 @@ class MatchEvaluationResultCodecTest {
             .tryDecode(payload)
             .isEmpty());
   }
+
+  @Test
+  void rejectsUnknownCacheEntryType() {
+    String payload =
+        """
+        {"schemaVersion":"1","type":"legacy","payload":{}}
+        """;
+
+    assertTrue(codec.tryDecode(payload).isEmpty());
+  }
 }

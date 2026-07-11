@@ -28,6 +28,7 @@ class ActionParseApplicationServiceTest {
     var response = service.parse(new ParseActionCommandRequest("find devs", UiLanguage.EN));
 
     assertThat(response.valid()).isFalse();
+    assertThat(response.action()).isEmpty();
     assertThat(response.errors()).contains("Failed to parse LLM response as JSON");
   }
 
@@ -39,7 +40,7 @@ class ActionParseApplicationServiceTest {
     var response = service.parse(new ParseActionCommandRequest("find react devs", UiLanguage.DE));
 
     assertThat(response.valid()).isTrue();
-    assertThat(response.action()).isInstanceOf(FilterApplicantsActionDto.class);
-    assertThat(response.action().type()).isEqualTo(ActionType.FILTER_APPLICANTS);
+    assertThat(response.action()).containsInstanceOf(FilterApplicantsActionDto.class);
+    assertThat(response.action().orElseThrow().type()).isEqualTo(ActionType.FILTER_APPLICANTS);
   }
 }

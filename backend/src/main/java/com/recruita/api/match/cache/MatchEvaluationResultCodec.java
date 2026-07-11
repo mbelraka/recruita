@@ -45,14 +45,14 @@ public class MatchEvaluationResultCodec {
       }
       String type = root.path("type").asText();
       JsonNode body = root.path("payload");
-      return Optional.of(
-          switch (type) {
-            case TYPE_DETERMINISTIC ->
+      return switch (type) {
+        case TYPE_DETERMINISTIC ->
+            Optional.of(
                 new MatchEvaluationResult.Deterministic(
-                    objectMapper.treeToValue(body, MatchResponseDto.class));
-            case TYPE_GROQ -> new MatchEvaluationResult.Groq(body.deepCopy());
-            default -> throw new IllegalStateException("Unknown match cache entry type: " + type);
-          });
+                    objectMapper.treeToValue(body, MatchResponseDto.class)));
+        case TYPE_GROQ -> Optional.of(new MatchEvaluationResult.Groq(body.deepCopy()));
+        default -> Optional.empty();
+      };
     } catch (JsonProcessingException exception) {
       return Optional.empty();
     }

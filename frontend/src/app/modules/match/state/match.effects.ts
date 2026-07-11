@@ -28,9 +28,8 @@ import {
   selectAllApplicants,
   selectApplicantsReady,
 } from '../../applicants/state/applicants.selectors';
-import { Applicant } from '../../applicants/models/applicant.model';
-import { Languages } from '../../../enums/language.enum';
 import { MatchCandidatesService } from '../services/match-candidates.service';
+import { MatchEvaluationInputs } from '../models/match-evaluation-inputs.interface';
 import {
   evaluateCandidates,
   evaluateCandidatesFailure,
@@ -40,13 +39,6 @@ import {
   selectMatchJobDescription,
   selectTopCandidatesCount,
 } from './match.selectors';
-
-interface MatchEvaluationInputs {
-  readonly jobDescription: string;
-  readonly applicants: readonly Applicant[];
-  readonly topCandidatesCount: number;
-  readonly language: Languages;
-}
 
 /**
  * Flattening: switchMap cancels an in-flight evaluation; concatMap waits for applicants,

@@ -31,7 +31,7 @@ public class MatchResponseNormalizer {
 
   public MatchResponseDto normalize(JsonNode root) {
     JsonNode scoresNode = findScoresArray(root);
-    if (!scoresNode.isArray()) {
+    if (scoresNode == null || !scoresNode.isArray()) {
       return new MatchResponseDto(List.of());
     }
     List<MatchScoreDto> scores = new ArrayList<>();

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { Applicant } from 'src/app/modules/applicants/models/applicant.model';
-import { ApplicantSkillsVariant } from 'src/app/modules/applicants/components/applicant-skills/applicant-skills.component';
+import { ApplicantSkillsVariant } from '../../../modules/applicants/types/applicant-skills-variant.type';
 import { MATERIAL_SYMBOLS_OUTLINED_FONT_SET } from 'src/app/utilities/initializers/material-symbols-outlined-font.initializer';
 
 @Component({

@@ -5,7 +5,7 @@ import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-propert
 import { Applicant } from '../modules/applicants/models/applicant.model';
 import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
-import { LayoutWidthTier } from '../services/layout-breakpoint.service';
+import { LayoutWidthTier } from '../models/layout-width-tier.type';
 
 /** Canonical in-app route paths (shared by nav links and smart-action execution). */
 export const APP_ROUTES = {

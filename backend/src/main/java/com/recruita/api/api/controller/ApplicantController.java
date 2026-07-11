@@ -5,11 +5,11 @@ import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.roster.RosterWatermark;
 import com.recruita.api.applicant.service.ApplicantApplicationService;
+import com.recruita.api.applicant.service.ApplicantSummaryListResult;
 import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.generated.api.ApplicantsApi;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,14 +39,12 @@ public class ApplicantController implements ApplicantsApi {
 
   @Override
   public ResponseEntity<List<ApplicantSummaryDto>> listApplicantSummaries(String ifNoneMatch) {
-    RosterWatermark watermark = applicantApplicationService.rosterWatermark();
-    Optional<List<ApplicantSummaryDto>> body =
-        applicantApplicationService.listSummariesIfNotModified(ifNoneMatch);
-    HttpHeaders headers = rosterHeaders(watermark);
-    if (body.isEmpty()) {
+    ApplicantSummaryListResult result = applicantApplicationService.listSummaries(ifNoneMatch);
+    HttpHeaders headers = rosterHeaders(result.watermark());
+    if (result.summaries().isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_MODIFIED).headers(headers).build();
     }
-    return ResponseEntity.ok().headers(headers).body(body.get());
+    return ResponseEntity.ok().headers(headers).body(result.summaries().orElseThrow());
   }
 
   @Override

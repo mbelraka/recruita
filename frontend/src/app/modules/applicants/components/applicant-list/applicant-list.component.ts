@@ -13,11 +13,11 @@ import { APP_CONFIG } from '../../../../config/app.config';
 import { LayoutBreakpointService } from '../../../../services/layout-breakpoint.service';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
+import { SortDirection } from '../../enums/sort-direction.enum';
 import {
-  SortDirection,
   sortDirectionFromMaterial,
   toMaterialSortDirection,
-} from '../../enums/sort-direction.enum';
+} from '../../utilities/sort-direction.util';
 import { setSortBy } from '../../state/applicants.actions';
 import {
   selectFilterByCountry,

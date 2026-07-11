@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 
-export type ApplicantSkillsVariant = 'chip' | 'filter-chip' | 'inline-link';
+import { ApplicantSkillsVariant } from '../../types/applicant-skills-variant.type';
 
 @Component({
   selector: 'app-applicant-skills',
