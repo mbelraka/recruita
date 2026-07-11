@@ -102,6 +102,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicantDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
 
   /api/applicants/full:
     get:
@@ -132,6 +136,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicantDto'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
     put:
       tags: [Applicants]
       summary: Update applicant
@@ -151,6 +157,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicantDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
     delete:
       tags: [Applicants]
       summary: Delete applicant
@@ -160,6 +172,8 @@ paths:
       responses:
         '204':
           description: No Content
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
 
   /api/profiles:
     post:
@@ -179,6 +193,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
 
   /api/profiles/{id}:
     get:
@@ -194,6 +212,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
     put:
       tags: [Profiles]
       summary: Update profile
@@ -213,6 +233,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
 
   /api/match/cache/invalidate:
     post:
@@ -240,7 +266,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MatchWireResponse'
+                $ref: '#/components/schemas/MatchResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblem'
+        '500':
+          $ref: '#/components/responses/InternalErrorProblem'
 
   /api/match-job:
     post:
@@ -259,7 +291,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MatchWireResponse'
+                $ref: '#/components/schemas/MatchResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblem'
+        '500':
+          $ref: '#/components/responses/InternalErrorProblem'
 
   /api/action/parse:
     post:
@@ -279,6 +317,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ParseActionResponse'
+        '500':
+          $ref: '#/components/responses/InternalErrorProblem'
 
 components:
   parameters:
@@ -288,6 +328,38 @@ components:
       required: true
       schema:
         type: string
+
+  responses:
+    BadRequestProblem:
+      description: Invalid request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemDetail'
+    NotFoundProblem:
+      description: Resource or route not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemDetail'
+    ConflictProblem:
+      description: Resource conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemDetail'
+    TooManyRequestsProblem:
+      description: Rate limit exceeded
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemDetail'
+    InternalErrorProblem:
+      description: Server error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemDetail'
 
   schemas:
     HealthResponse:
@@ -495,26 +567,6 @@ components:
           items:
             $ref: '#/components/schemas/MatchScoreDto'
 
-    MatchWireResponse:
-      description: >-
-        Deterministic mode returns `scores`. Groq mode may return LLM-shaped
-        payloads with `scores`, `results`, or `candidates`.
-      type: object
-      properties:
-        scores:
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchScoreDto'
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchScoreDto'
-        candidates:
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchScoreDto'
-      additionalProperties: true
-
     ParseActionCommandRequest:
       type: object
       required: [command]
@@ -524,16 +576,303 @@ components:
         language:
           $ref: '#/components/schemas/UiLanguage'
 
+    ActionType:
+      type: string
+      enum:
+        - FILTER_APPLICANTS
+        - UPDATE_STATUS
+        - EXPORT_DATA
+        - CREATE_APPLICANT
+        - DELETE_APPLICANT
+        - GENERATE_REPORT
+        - MATCH_JOB
+        - BULK_UPDATE
+        - CLARIFY
+
+    FilterParamsDto:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+        minExperience:
+          type: number
+          format: double
+        maxExperience:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        country:
+          type: string
+        location:
+          type: string
+        searchTerm:
+          type: string
+
+    ClarifyParamsDto:
+      type: object
+      required: [questions]
+      properties:
+        questions:
+          type: array
+          items:
+            type: string
+
+    UpdateStatusParamsDto:
+      type: object
+      required: [applicantIdentifier, newStatus]
+      properties:
+        applicantIdentifier:
+          type: string
+        newStatus:
+          $ref: '#/components/schemas/ApplicationStatus'
+
+    ExportFormat:
+      type: string
+      enum: [csv, json, excel, pdf]
+
+    ExportParamsDto:
+      type: object
+      required: [format]
+      properties:
+        format:
+          $ref: '#/components/schemas/ExportFormat'
+        filters:
+          $ref: '#/components/schemas/FilterParamsDto'
+
+    CreateApplicantParamsDto:
+      type: object
+      required: [name, email, skills, yearsOfExperience, currentJobTitle]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        yearsOfExperience:
+          type: number
+          format: double
+        currentJobTitle:
+          type: string
+
+    DeleteApplicantParamsDto:
+      type: object
+      required: [applicantIdentifier]
+      properties:
+        applicantIdentifier:
+          type: string
+
+    ReportType:
+      type: string
+      enum: [pipeline_summary, skills_distribution, experience_analysis]
+
+    GenerateReportParamsDto:
+      type: object
+      required: [reportType]
+      properties:
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        filters:
+          $ref: '#/components/schemas/FilterParamsDto'
+
+    MatchJobParamsDto:
+      type: object
+      required: [jobDescription]
+      properties:
+        jobDescription:
+          type: string
+        limit:
+          type: integer
+          format: int32
+
+    BulkUpdateUpdatesDto:
+      type: object
+      properties:
+        applicationStatus:
+          $ref: '#/components/schemas/ApplicationStatus'
+        notes:
+          type: string
+
+    BulkUpdateParamsDto:
+      type: object
+      required: [filters, updates]
+      properties:
+        filters:
+          $ref: '#/components/schemas/FilterParamsDto'
+        updates:
+          $ref: '#/components/schemas/BulkUpdateUpdatesDto'
+
+    FilterApplicantsActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [FILTER_APPLICANTS]
+        params:
+          $ref: '#/components/schemas/FilterParamsDto'
+
+    UpdateStatusActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [UPDATE_STATUS]
+        params:
+          $ref: '#/components/schemas/UpdateStatusParamsDto'
+
+    ExportDataActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [EXPORT_DATA]
+        params:
+          $ref: '#/components/schemas/ExportParamsDto'
+
+    CreateApplicantActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [CREATE_APPLICANT]
+        params:
+          $ref: '#/components/schemas/CreateApplicantParamsDto'
+
+    DeleteApplicantActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [DELETE_APPLICANT]
+        params:
+          $ref: '#/components/schemas/DeleteApplicantParamsDto'
+
+    GenerateReportActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [GENERATE_REPORT]
+        params:
+          $ref: '#/components/schemas/GenerateReportParamsDto'
+
+    MatchJobActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [MATCH_JOB]
+        params:
+          $ref: '#/components/schemas/MatchJobParamsDto'
+
+    BulkUpdateActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [BULK_UPDATE]
+        params:
+          $ref: '#/components/schemas/BulkUpdateParamsDto'
+
+    ClarifyActionDto:
+      type: object
+      required: [type, params]
+      properties:
+        type:
+          type: string
+          enum: [CLARIFY]
+        params:
+          $ref: '#/components/schemas/ClarifyParamsDto'
+
+    ParsedActionDto:
+      oneOf:
+        - $ref: '#/components/schemas/FilterApplicantsActionDto'
+        - $ref: '#/components/schemas/UpdateStatusActionDto'
+        - $ref: '#/components/schemas/ExportDataActionDto'
+        - $ref: '#/components/schemas/CreateApplicantActionDto'
+        - $ref: '#/components/schemas/DeleteApplicantActionDto'
+        - $ref: '#/components/schemas/GenerateReportActionDto'
+        - $ref: '#/components/schemas/MatchJobActionDto'
+        - $ref: '#/components/schemas/BulkUpdateActionDto'
+        - $ref: '#/components/schemas/ClarifyActionDto'
+      discriminator:
+        propertyName: type
+        mapping:
+          FILTER_APPLICANTS: '#/components/schemas/FilterApplicantsActionDto'
+          UPDATE_STATUS: '#/components/schemas/UpdateStatusActionDto'
+          EXPORT_DATA: '#/components/schemas/ExportDataActionDto'
+          CREATE_APPLICANT: '#/components/schemas/CreateApplicantActionDto'
+          DELETE_APPLICANT: '#/components/schemas/DeleteApplicantActionDto'
+          GENERATE_REPORT: '#/components/schemas/GenerateReportActionDto'
+          MATCH_JOB: '#/components/schemas/MatchJobActionDto'
+          BULK_UPDATE: '#/components/schemas/BulkUpdateActionDto'
+          CLARIFY: '#/components/schemas/ClarifyActionDto'
+
     ParseActionResponse:
       type: object
-      required: [valid, action, errors]
+      required: [valid, errors]
       properties:
         valid:
           type: boolean
         action:
-          type: object
-          additionalProperties: true
+          $ref: '#/components/schemas/ParsedActionDto'
         errors:
           type: array
           items:
             type: string
+
+    ApiErrorCode:
+      type: string
+      enum:
+        - request-validation
+        - invalid-json-body
+        - match-validation
+        - applicant-not-found
+        - applicant-conflict
+        - profile-not-found
+        - profile-conflict
+        - route-not-found
+        - match-service-unavailable
+        - rate-limit-exceeded
+        - internal-error
+
+    ApiProblemDetail:
+      description: RFC 7807 problem response with Recruita semantic `code` and legacy `error` fields.
+      type: object
+      required: [type, title, status, detail, code, error]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://recruita.dev/problems/applicant-not-found
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        error:
+          type: string
+          description: Legacy duplicate of detail for existing clients.

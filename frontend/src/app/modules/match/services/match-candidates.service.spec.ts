@@ -3,7 +3,7 @@ import { createApplicant } from '../../applicants/utilities/applicant-domain.uti
 
 import { Languages } from '../../../enums/language.enum';
 import { MatchService } from '../../../generated/api-client/services/match.service';
-import type { MatchWireResponse } from '../../../generated/api/types';
+import type { MatchResponseDto } from '../../../generated/api/types';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
@@ -217,10 +217,10 @@ describe('MatchCandidatesService', () => {
     expect(result.find((r) => r.applicant.id === 'a2')?.score).toBe(72);
   });
 
-  it('should parse alternate response collection and candidateId keys', async () => {
+  it('should parse alternate score item field names within scores', async () => {
     matchApiSpy.match.and.returnValue(
       of({
-        results: [
+        scores: [
           {
             candidateId: 'llm-temp-1',
             totalScore: '91',
@@ -282,7 +282,7 @@ describe('MatchCandidatesService', () => {
             recommendation: 'Good fit',
           },
         ],
-      } as unknown as MatchWireResponse)
+      } as unknown as MatchResponseDto)
     );
 
     const result = await firstValueFrom(
@@ -334,7 +334,7 @@ describe('MatchCandidatesService', () => {
             recommendation: 'No usable score',
           },
         ],
-      } as unknown as MatchWireResponse)
+      } as unknown as MatchResponseDto)
     );
 
     const result = await firstValueFrom(

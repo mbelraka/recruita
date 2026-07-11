@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.recruita.api.api.dto.match.MatchCandidateDto;
 import com.recruita.api.api.dto.match.MatchRequestDto;
-import com.recruita.api.match.evaluation.MatchEvaluationResult;
+import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.match.groq.GroqChatClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +39,11 @@ class MatchApplicationServiceCacheTest {
             null,
             null);
 
-    matchApplicationService.evaluate(request);
-    MatchEvaluationResult.Groq second =
-        (MatchEvaluationResult.Groq) matchApplicationService.evaluate(request);
+    MatchResponseDto first = matchApplicationService.evaluate(request);
+    MatchResponseDto second = matchApplicationService.evaluate(request);
 
     verify(groqChatClient, times(1)).complete(any());
-    assertEquals(77, second.value().get("scores").get(0).get("matchScore").asInt());
+    assertEquals(77, first.scores().getFirst().matchScore());
+    assertEquals(77, second.scores().getFirst().matchScore());
   }
 }

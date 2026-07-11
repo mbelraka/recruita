@@ -1,11 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DataServiceError } from '@ngrx/data';
 
+import { ApiErrorCode } from '../enums/api-error-code.enum';
 import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-property-key.enum';
 import { HttpStatusCode } from '../enums/http-status-code.enum';
 import { HttpApiError } from '../models/http-api-error.model';
 import {
   asHttpApiError,
+  extractHttpApiErrorCode,
   extractHttpApiErrorMessage,
   hasHttpApiErrorStatus,
   isTransientHttpApiError,
@@ -89,6 +91,25 @@ describe('http-api-error.util', () => {
     expect(
       extractHttpApiErrorMessage(new Error('native'), messages.notAvailable)
     ).toBe('native');
+  });
+
+  it('extracts semantic error codes from problem payloads', () => {
+    expect(
+      extractHttpApiErrorCode(
+        new HttpErrorResponse({
+          status: HttpStatusCode.BadRequest,
+          error: {
+            [ApiProblemDetailPropertyKey.Code]: ApiErrorCode.MatchValidation,
+          },
+        })
+      )
+    ).toBe(ApiErrorCode.MatchValidation);
+    expect(
+      extractHttpApiErrorCode(
+        new HttpErrorResponse({ status: HttpStatusCode.BadRequest, error: {} })
+      )
+    ).toBeNull();
+    expect(extractHttpApiErrorCode(new Error('plain'))).toBeNull();
   });
 
   it('ignores blank structured error payloads', () => {

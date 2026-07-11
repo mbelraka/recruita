@@ -31,6 +31,8 @@ class GlobalApiExceptionHandlerTest {
     ProblemDetail detail = handler.handleNotFound();
     assertEquals(HttpStatus.NOT_FOUND.value(), detail.getStatus());
     assertEquals("Not found.", detail.getProperties().get("error"));
+    assertEquals("route-not-found", detail.getProperties().get("code"));
+    assertEquals("https://recruita.dev/problems/route-not-found", detail.getType().toString());
   }
 
   @Test
@@ -53,7 +55,9 @@ class GlobalApiExceptionHandlerTest {
     mockMvc
         .perform(postJson("/api/match", "{"))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.error").value("Request body must be valid JSON."));
+        .andExpect(jsonPath("$.error").value("Request body must be valid JSON."))
+        .andExpect(jsonPath("$.code").value("invalid-json-body"))
+        .andExpect(jsonPath("$.type").value("https://recruita.dev/problems/invalid-json-body"));
   }
 
   @Test
@@ -62,6 +66,7 @@ class GlobalApiExceptionHandlerTest {
         handler.handlePolicyValidation(
             new com.recruita.api.common.exception.MatchValidationException("bad input"));
     assertEquals("bad input", detail.getProperties().get("error"));
+    assertEquals("match-validation", detail.getProperties().get("code"));
   }
 
   @Test

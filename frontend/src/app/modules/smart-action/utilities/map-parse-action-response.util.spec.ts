@@ -19,7 +19,6 @@ describe('mapParseActionResponse', () => {
     expect(
       mapParseActionResponse({
         valid: false,
-        action: {},
         errors: ['bad'],
       })
     ).toBeNull();

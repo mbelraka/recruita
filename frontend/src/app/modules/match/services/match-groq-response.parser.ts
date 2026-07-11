@@ -16,10 +16,6 @@ import {
   firstDefinedTrimmedString,
   firstDefinedValue,
 } from '../utilities/first-defined-property.util';
-import {
-  asMatchScoreListCarrier,
-  readMatchScoreLists,
-} from '../utilities/match-api.mapper';
 
 @Injectable({ providedIn: 'root' })
 export class MatchGroqResponseParser {
@@ -28,7 +24,7 @@ export class MatchGroqResponseParser {
   }
 
   public parseScores(response: MatchApiResponse): ParsedMatchScoreItem[] {
-    return readMatchScoreLists(asMatchScoreListCarrier(response))
+    return (response.scores ?? [])
       .map((item, index) => this._toParsedScoreItem(item, index))
       .filter((item): item is ParsedMatchScoreItem => item !== null);
   }

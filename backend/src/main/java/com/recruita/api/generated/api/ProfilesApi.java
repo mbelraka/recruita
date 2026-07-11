@@ -5,6 +5,7 @@
  */
 package com.recruita.api.generated.api;
 
+import org.springframework.http.ProblemDetail;
 import com.recruita.api.api.dto.profile.ProfileDto;
 import com.recruita.api.api.dto.profile.SaveProfileRequestDto;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,13 @@ public interface ProfilesApi {
      *
      * @param saveProfileRequestDto  (required)
      * @return Created (status code 201)
+     *         or Invalid request (status code 400)
+     *         or Resource conflict (status code 409)
      */
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/api/profiles",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     
@@ -49,11 +52,12 @@ public interface ProfilesApi {
      *
      * @param id  (required)
      * @return OK (status code 200)
+     *         or Resource or route not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/api/profiles/{id}",
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     
     ResponseEntity<ProfileDto> getProfile(
@@ -67,11 +71,14 @@ public interface ProfilesApi {
      * @param id  (required)
      * @param saveProfileRequestDto  (required)
      * @return OK (status code 200)
+     *         or Invalid request (status code 400)
+     *         or Resource or route not found (status code 404)
+     *         or Resource conflict (status code 409)
      */
     @RequestMapping(
         method = RequestMethod.PUT,
         value = "/api/profiles/{id}",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     

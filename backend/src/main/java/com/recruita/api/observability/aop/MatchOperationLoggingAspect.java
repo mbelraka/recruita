@@ -1,11 +1,11 @@
 package com.recruita.api.observability.aop;
 
 import com.recruita.api.api.dto.match.MatchRequestDto;
+import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.common.exception.MatchServiceUnavailableException;
 import com.recruita.api.common.exception.MatchValidationException;
 import com.recruita.api.config.properties.OperationalProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
-import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,29 +20,26 @@ public class MatchOperationLoggingAspect {
   private static final Logger LOG = LoggerFactory.getLogger(MatchOperationLoggingAspect.class);
 
   private final OperationalProperties.ObservabilityProperties observability;
-  private final String matchResponseScoresField;
 
   public MatchOperationLoggingAspect(RecruitaProperties properties) {
     this.observability = properties.getOperational().getObservability();
-    this.matchResponseScoresField =
-        properties.getMatch().getGroq().getApiContract().getMatchResponseScoresField();
   }
 
   @Around(
       "execution(* com.recruita.api.match.service.MatchApplicationService.evaluate(..)) "
           + "&& args(request)")
-  public MatchEvaluationResult logMatchEvaluation(
-      ProceedingJoinPoint joinPoint, MatchRequestDto request) throws Throwable {
+  public MatchResponseDto logMatchEvaluation(ProceedingJoinPoint joinPoint, MatchRequestDto request)
+      throws Throwable {
     long started = System.currentTimeMillis();
     int candidateCount = request.candidates() == null ? 0 : request.candidates().size();
     boolean deterministic = request.isDeterministic();
     try {
-      MatchEvaluationResult result = (MatchEvaluationResult) joinPoint.proceed();
+      MatchResponseDto result = (MatchResponseDto) joinPoint.proceed();
       LOG.info(
           observability.getMatchEvaluateCompletedTemplate(),
           deterministic,
           candidateCount,
-          result.scoreCount(matchResponseScoresField),
+          result.scores().size(),
           System.currentTimeMillis() - started);
       return result;
     } catch (MatchValidationException | MatchServiceUnavailableException ex) {

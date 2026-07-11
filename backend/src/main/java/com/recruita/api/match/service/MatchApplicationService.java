@@ -1,11 +1,11 @@
 package com.recruita.api.match.service;
 
 import com.recruita.api.api.dto.match.MatchRequestDto;
-import com.recruita.api.match.evaluation.MatchEvaluationResult;
+import com.recruita.api.api.dto.match.MatchResponseDto;
 
 public interface MatchApplicationService {
 
-  MatchEvaluationResult evaluate(MatchRequestDto request);
+  MatchResponseDto evaluate(MatchRequestDto request);
 
   void invalidateMatchCache();
 }

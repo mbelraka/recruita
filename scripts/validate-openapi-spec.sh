@@ -46,7 +46,9 @@ const requiredSchemas = [
   'ProfileDto',
   'SaveProfileRequestDto',
   'MatchRequestDto',
-  'MatchWireResponse',
+  'MatchResponseDto',
+  'ApiProblemDetail',
+  'ParsedActionDto',
   'ParseActionResponse',
 ];
 const missingSchemas = requiredSchemas.filter((name) => !(name in schemas));

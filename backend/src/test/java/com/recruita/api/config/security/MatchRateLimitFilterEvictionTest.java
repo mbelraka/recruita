@@ -3,6 +3,7 @@ package com.recruita.api.config.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recruita.api.api.advice.ApiProblemDetailSupport;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.time.Clock;
 import java.time.Duration;
@@ -32,7 +33,8 @@ class MatchRateLimitFilterEvictionTest {
   private final RecruitaProperties properties = rateLimitedProperties();
   private final MutableClock clock = new MutableClock(WINDOW_START);
   private final MatchRateLimitFilter filter =
-      new MatchRateLimitFilter(properties, new ObjectMapper(), clock);
+      new MatchRateLimitFilter(
+          properties, new ApiProblemDetailSupport(properties), new ObjectMapper(), clock);
 
   @Test
   void admitsNewClientAfterStaleWindowsAreEvicted() throws Exception {

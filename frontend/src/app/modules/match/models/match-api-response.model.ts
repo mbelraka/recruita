@@ -1,4 +1,4 @@
-import type { MatchWireResponse } from '../../../generated/api/types';
+import type { MatchResponseDto } from '../../../generated/api/types';
 
-/** Match endpoint wire payload (deterministic or Groq-shaped). */
-export type MatchApiResponse = MatchWireResponse;
+/** Canonical match endpoint response (`scores[]`). */
+export type MatchApiResponse = MatchResponseDto;

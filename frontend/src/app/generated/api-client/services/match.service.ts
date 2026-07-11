@@ -16,7 +16,7 @@ import { match } from '../fn/match/match';
 import { Match$Params } from '../fn/match/match';
 import { matchLegacy } from '../fn/match/match-legacy';
 import { MatchLegacy$Params } from '../fn/match/match-legacy';
-import { MatchWireResponse } from '../models/match-wire-response';
+import { MatchResponseDto } from '../models/match-response-dto';
 
 
 /**
@@ -76,7 +76,7 @@ export class MatchService extends BaseService {
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  match$Response(params: Match$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchWireResponse>> {
+  match$Response(params: Match$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchResponseDto>> {
     const obs = match(this.http, this.rootUrl, params, context);
     return obs;
   }
@@ -91,10 +91,10 @@ export class MatchService extends BaseService {
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  match(params: Match$Params, context?: HttpContext): Observable<MatchWireResponse> {
+  match(params: Match$Params, context?: HttpContext): Observable<MatchResponseDto> {
     const resp = this.match$Response(params, context);
     return resp.pipe(
-      map((r: StrictHttpResponse<MatchWireResponse>): MatchWireResponse => r.body)
+      map((r: StrictHttpResponse<MatchResponseDto>): MatchResponseDto => r.body)
     );
   }
 
@@ -111,7 +111,7 @@ export class MatchService extends BaseService {
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  matchLegacy$Response(params: MatchLegacy$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchWireResponse>> {
+  matchLegacy$Response(params: MatchLegacy$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchResponseDto>> {
     const obs = matchLegacy(this.http, this.rootUrl, params, context);
     return obs;
   }
@@ -126,10 +126,10 @@ export class MatchService extends BaseService {
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  matchLegacy(params: MatchLegacy$Params, context?: HttpContext): Observable<MatchWireResponse> {
+  matchLegacy(params: MatchLegacy$Params, context?: HttpContext): Observable<MatchResponseDto> {
     const resp = this.matchLegacy$Response(params, context);
     return resp.pipe(
-      map((r: StrictHttpResponse<MatchWireResponse>): MatchWireResponse => r.body)
+      map((r: StrictHttpResponse<MatchResponseDto>): MatchResponseDto => r.body)
     );
   }
 

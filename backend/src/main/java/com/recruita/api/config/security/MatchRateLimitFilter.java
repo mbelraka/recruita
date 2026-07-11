@@ -1,6 +1,8 @@
 package com.recruita.api.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recruita.api.api.advice.ApiProblemDetailSupport;
+import com.recruita.api.common.problem.ApiProblemType;
 import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.config.properties.SecurityProperties;
 import jakarta.servlet.FilterChain;
@@ -26,23 +28,30 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
   private final SecurityProperties.HttpProperties http;
   private final String matchPath;
   private final String matchLegacyPath;
-  private final String errorPropertyKey;
+  private final ApiProblemDetailSupport problemDetailSupport;
   private final ObjectMapper objectMapper;
   private final Clock clock;
   private final Map<String, WindowCounter> counters = new ConcurrentHashMap<>();
 
   @Autowired
-  public MatchRateLimitFilter(RecruitaProperties properties, ObjectMapper objectMapper) {
-    this(properties, objectMapper, Clock.systemUTC());
+  public MatchRateLimitFilter(
+      RecruitaProperties properties,
+      ApiProblemDetailSupport problemDetailSupport,
+      ObjectMapper objectMapper) {
+    this(properties, problemDetailSupport, objectMapper, Clock.systemUTC());
   }
 
   /** Visible for tests: a fixed/offset {@link Clock} lets window expiry be exercised. */
-  MatchRateLimitFilter(RecruitaProperties properties, ObjectMapper objectMapper, Clock clock) {
+  MatchRateLimitFilter(
+      RecruitaProperties properties,
+      ApiProblemDetailSupport problemDetailSupport,
+      ObjectMapper objectMapper,
+      Clock clock) {
     this.rateLimit = properties.getSecurity().getRateLimit();
     this.http = properties.getSecurity().getHttp();
     this.matchPath = properties.getApi().getRoutes().getMatchPath();
     this.matchLegacyPath = properties.getApi().getRoutes().getMatchLegacyPath();
-    this.errorPropertyKey = properties.getApi().getProblemDetail().getErrorPropertyKey();
+    this.problemDetailSupport = problemDetailSupport;
     this.objectMapper = objectMapper;
     this.clock = clock;
   }
@@ -104,8 +113,9 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
   }
 
   private void rejectRateLimited(HttpServletResponse response, String message) throws IOException {
-    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, message);
-    problem.setProperty(errorPropertyKey, message);
+    ProblemDetail problem =
+        problemDetailSupport.create(
+            HttpStatus.TOO_MANY_REQUESTS, ApiProblemType.RATE_LIMIT_EXCEEDED, message);
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
     objectMapper.writeValue(response.getOutputStream(), problem);

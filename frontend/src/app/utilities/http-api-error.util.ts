@@ -3,6 +3,7 @@ import { DataServiceError } from '@ngrx/data';
 import { TimeoutError } from 'rxjs';
 
 import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-property-key.enum';
+import { ApiErrorCode } from '../enums/api-error-code.enum';
 import { HttpStatusCode } from '../enums/http-status-code.enum';
 import type { HttpApiErrorMessages } from '../models/http-api-error-messages.model';
 import { HttpApiError } from '../models/http-api-error.model';
@@ -80,9 +81,10 @@ export function extractHttpApiErrorMessage(
       return payload.trim();
     }
     if (payload && typeof payload === 'object') {
-      const errText = (
-        payload as Partial<Record<ApiProblemDetailPropertyKey, unknown>>
-      )[ApiProblemDetailPropertyKey.Error];
+      const problem = payload as Partial<
+        Record<ApiProblemDetailPropertyKey, unknown>
+      >;
+      const errText = problem[ApiProblemDetailPropertyKey.Error];
       if (typeof errText === 'string' && errText.trim()) {
         return errText.trim();
       }
@@ -92,6 +94,25 @@ export function extractHttpApiErrorMessage(
     return error.message.trim();
   }
   return null;
+}
+
+export function extractHttpApiErrorCode(error: unknown): ApiErrorCode | null {
+  if (!(error instanceof HttpErrorResponse)) {
+    return null;
+  }
+  const payload: unknown = error.error;
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+  const code = (
+    payload as Partial<Record<ApiProblemDetailPropertyKey, unknown>>
+  )[ApiProblemDetailPropertyKey.Code];
+  if (typeof code !== 'string') {
+    return null;
+  }
+  return (Object.values(ApiErrorCode) as string[]).includes(code)
+    ? (code as ApiErrorCode)
+    : null;
 }
 
 function isRxjsTimeoutError(error: unknown): boolean {

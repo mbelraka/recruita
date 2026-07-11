@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.recruita.api.action.model.ActionType;
+import com.recruita.api.action.model.FilterApplicantsActionDto;
 import com.recruita.api.action.model.ParseActionCommandRequest;
 import com.recruita.api.common.enums.UiLanguage;
 import com.recruita.api.match.groq.GroqChatClient;
@@ -37,6 +39,7 @@ class ActionParseApplicationServiceTest {
     var response = service.parse(new ParseActionCommandRequest("find react devs", UiLanguage.DE));
 
     assertThat(response.valid()).isTrue();
-    assertThat(response.action()).containsEntry("type", "FILTER_APPLICANTS");
+    assertThat(response.action()).isInstanceOf(FilterApplicantsActionDto.class);
+    assertThat(response.action().type()).isEqualTo(ActionType.FILTER_APPLICANTS);
   }
 }

@@ -60,6 +60,8 @@ spring:
         - /swagger-ui/**
     problem-detail:
       error-property-key: error
+      code-property-key: code
+      type-base-uri: https://recruita.dev/problems/
     validation:
       default-message: Request validation failed.
     routes:

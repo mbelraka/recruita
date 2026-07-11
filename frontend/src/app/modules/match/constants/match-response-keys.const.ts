@@ -1,8 +1,4 @@
-import type { MatchApiResponse } from '../models/match-api-response.model';
 import type { MatchScoreItem } from '../models/match-score-item.model';
-
-export const MATCH_API_SCORE_COLLECTION_KEYS: readonly (keyof MatchApiResponse)[] =
-  ['scores', 'results', 'candidates'];
 
 export const MATCH_SCORE_CORRELATION_ID_KEYS: readonly (keyof Pick<
   MatchScoreItem,

@@ -5,6 +5,7 @@
  */
 package com.recruita.api.generated.api;
 
+import org.springframework.http.ProblemDetail;
 import com.recruita.api.action.model.ParseActionCommandRequest;
 import com.recruita.api.action.model.ParseActionResponse;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,12 @@ public interface SmartActionApi {
      *
      * @param parseActionCommandRequest  (required)
      * @return OK (status code 200)
+     *         or Server error (status code 500)
      */
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/api/action/parse",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     

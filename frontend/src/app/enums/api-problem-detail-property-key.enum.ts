@@ -1,4 +1,5 @@
-/** ProblemDetail extension property names (`recruita.api.problem-detail.error-property-key`). */
+/** ProblemDetail extension property names (`recruita.api.problem-detail.*`). */
 export enum ApiProblemDetailPropertyKey {
   Error = 'error',
+  Code = 'code',
 }

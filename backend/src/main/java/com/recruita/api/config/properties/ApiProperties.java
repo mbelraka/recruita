@@ -62,6 +62,8 @@ public class ApiProperties {
 
   public static class ProblemDetailProperties {
     @NotBlank private String errorPropertyKey = "error";
+    @NotBlank private String codePropertyKey = "code";
+    @NotBlank private String typeBaseUri = "https://recruita.dev/problems/";
 
     public String getErrorPropertyKey() {
       return errorPropertyKey;
@@ -69,6 +71,22 @@ public class ApiProperties {
 
     public void setErrorPropertyKey(String errorPropertyKey) {
       this.errorPropertyKey = errorPropertyKey;
+    }
+
+    public String getCodePropertyKey() {
+      return codePropertyKey;
+    }
+
+    public void setCodePropertyKey(String codePropertyKey) {
+      this.codePropertyKey = codePropertyKey;
+    }
+
+    public String getTypeBaseUri() {
+      return typeBaseUri;
+    }
+
+    public void setTypeBaseUri(String typeBaseUri) {
+      this.typeBaseUri = typeBaseUri;
     }
   }
 

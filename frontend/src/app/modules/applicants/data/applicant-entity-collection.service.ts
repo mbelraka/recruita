@@ -69,9 +69,7 @@ export class ApplicantEntityCollectionService extends EntityCollectionServiceBas
       take(1),
       map((entities) => {
         const applicants = Object.values(entities);
-        return (
-          applicants.length > 0 && applicants.every(applicantHasNotesLoaded)
-        );
+        return applicants.every(applicantHasNotesLoaded);
       })
     );
   }

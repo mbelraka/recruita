@@ -8,13 +8,13 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { MatchRequestDto } from '../../models/match-request-dto';
-import { MatchWireResponse } from '../../models/match-wire-response';
+import { MatchResponseDto } from '../../models/match-response-dto';
 
 export interface MatchLegacy$Params {
       body: MatchRequestDto
 }
 
-export function matchLegacy(http: HttpClient, rootUrl: string, params: MatchLegacy$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchWireResponse>> {
+export function matchLegacy(http: HttpClient, rootUrl: string, params: MatchLegacy$Params, context?: HttpContext): Observable<StrictHttpResponse<MatchResponseDto>> {
   const rb = new RequestBuilder(rootUrl, matchLegacy.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
@@ -25,7 +25,7 @@ export function matchLegacy(http: HttpClient, rootUrl: string, params: MatchLega
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<MatchWireResponse>;
+      return r as StrictHttpResponse<MatchResponseDto>;
     })
   );
 }

@@ -69,4 +69,22 @@ describe('ApplicantEntityCollectionService', () => {
     expect(service.setLoading).toHaveBeenCalledWith(false);
     expect(result).toEqual(rosterResult);
   });
+
+  it('areNotesLoadedForRoster returns true when the roster is empty', async () => {
+    Object.defineProperty(service, 'entities$', { value: of([]) });
+
+    const notesLoaded = await firstValueFrom(service.areNotesLoadedForRoster());
+
+    expect(notesLoaded).toBe(true);
+  });
+
+  it('areNotesLoadedForRoster returns false when summary rows omit notes', async () => {
+    Object.defineProperty(service, 'entities$', {
+      value: of([createApplicant({ id: 'a-1', name: 'Alex', skills: [] })]),
+    });
+
+    const notesLoaded = await firstValueFrom(service.areNotesLoadedForRoster());
+
+    expect(notesLoaded).toBe(false);
+  });
 });

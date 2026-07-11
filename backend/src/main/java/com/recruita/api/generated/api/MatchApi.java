@@ -5,7 +5,9 @@
  */
 package com.recruita.api.generated.api;
 
+import org.springframework.http.ProblemDetail;
 import com.recruita.api.api.dto.match.MatchRequestDto;
+import com.recruita.api.api.dto.match.MatchResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,15 +47,18 @@ public interface MatchApi {
      *
      * @param matchRequestDto  (required)
      * @return OK (status code 200)
+     *         or Invalid request (status code 400)
+     *         or Rate limit exceeded (status code 429)
+     *         or Server error (status code 500)
      */
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/api/match",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     
-    ResponseEntity<com.recruita.api.match.evaluation.MatchEvaluationResult> match(
+    ResponseEntity<MatchResponseDto> match(
          @Valid @RequestBody MatchRequestDto matchRequestDto
     );
 
@@ -63,15 +68,18 @@ public interface MatchApi {
      *
      * @param matchRequestDto  (required)
      * @return OK (status code 200)
+     *         or Invalid request (status code 400)
+     *         or Rate limit exceeded (status code 429)
+     *         or Server error (status code 500)
      */
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/api/match-job",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     
-    ResponseEntity<com.recruita.api.match.evaluation.MatchEvaluationResult> matchLegacy(
+    ResponseEntity<MatchResponseDto> matchLegacy(
          @Valid @RequestBody MatchRequestDto matchRequestDto
     );
 

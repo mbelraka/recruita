@@ -5,6 +5,7 @@
  */
 package com.recruita.api.generated.api;
 
+import org.springframework.http.ProblemDetail;
 import com.recruita.api.api.dto.applicant.ApplicantDto;
 import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import java.time.OffsetDateTime;
@@ -33,11 +34,13 @@ public interface ApplicantsApi {
      *
      * @param saveApplicantRequestDto  (required)
      * @return Created (status code 201)
+     *         or Invalid request (status code 400)
+     *         or Resource conflict (status code 409)
      */
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/api/applicants",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     
@@ -51,10 +54,12 @@ public interface ApplicantsApi {
      *
      * @param id  (required)
      * @return No Content (status code 204)
+     *         or Resource or route not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = "/api/applicants/{id}"
+        value = "/api/applicants/{id}",
+        produces = { "application/problem+json" }
     )
     
     ResponseEntity<Void> deleteApplicant(
@@ -67,11 +72,12 @@ public interface ApplicantsApi {
      *
      * @param id  (required)
      * @return OK (status code 200)
+     *         or Resource or route not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/api/applicants/{id}",
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     
     ResponseEntity<ApplicantDto> getApplicant(
@@ -119,11 +125,14 @@ public interface ApplicantsApi {
      * @param id  (required)
      * @param saveApplicantRequestDto  (required)
      * @return OK (status code 200)
+     *         or Invalid request (status code 400)
+     *         or Resource or route not found (status code 404)
+     *         or Resource conflict (status code 409)
      */
     @RequestMapping(
         method = RequestMethod.PUT,
         value = "/api/applicants/{id}",
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     

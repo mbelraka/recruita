@@ -172,17 +172,39 @@
                 <importMapping>MatchCandidateDto=com.recruita.api.api.dto.match.MatchCandidateDto</importMapping>
                 <importMapping>MatchScoreDto=com.recruita.api.api.dto.match.MatchScoreDto</importMapping>
                 <importMapping>MatchResponseDto=com.recruita.api.api.dto.match.MatchResponseDto</importMapping>
-                <importMapping>MatchWireResponse=com.recruita.api.match.evaluation.MatchEvaluationResult</importMapping>
                 <importMapping>CandidateProfileDto=com.recruita.api.api.dto.match.MatchScoreDto.CandidateProfileDto</importMapping>
                 <importMapping>ParseActionCommandRequest=com.recruita.api.action.model.ParseActionCommandRequest</importMapping>
                 <importMapping>ParseActionResponse=com.recruita.api.action.model.ParseActionResponse</importMapping>
+                <importMapping>ParsedActionDto=com.recruita.api.action.model.ParsedActionDto</importMapping>
+                <importMapping>ActionType=com.recruita.api.action.model.ActionType</importMapping>
+                <importMapping>FilterParamsDto=com.recruita.api.action.model.FilterParamsDto</importMapping>
+                <importMapping>ClarifyParamsDto=com.recruita.api.action.model.ClarifyParamsDto</importMapping>
+                <importMapping>UpdateStatusParamsDto=com.recruita.api.action.model.UpdateStatusParamsDto</importMapping>
+                <importMapping>ExportParamsDto=com.recruita.api.action.model.ExportParamsDto</importMapping>
+                <importMapping>CreateApplicantParamsDto=com.recruita.api.action.model.CreateApplicantParamsDto</importMapping>
+                <importMapping>DeleteApplicantParamsDto=com.recruita.api.action.model.DeleteApplicantParamsDto</importMapping>
+                <importMapping>GenerateReportParamsDto=com.recruita.api.action.model.GenerateReportParamsDto</importMapping>
+                <importMapping>MatchJobParamsDto=com.recruita.api.action.model.MatchJobParamsDto</importMapping>
+                <importMapping>BulkUpdateUpdatesDto=com.recruita.api.action.model.BulkUpdateUpdatesDto</importMapping>
+                <importMapping>BulkUpdateParamsDto=com.recruita.api.action.model.BulkUpdateParamsDto</importMapping>
+                <importMapping>FilterApplicantsActionDto=com.recruita.api.action.model.FilterApplicantsActionDto</importMapping>
+                <importMapping>UpdateStatusActionDto=com.recruita.api.action.model.UpdateStatusActionDto</importMapping>
+                <importMapping>ExportDataActionDto=com.recruita.api.action.model.ExportDataActionDto</importMapping>
+                <importMapping>CreateApplicantActionDto=com.recruita.api.action.model.CreateApplicantActionDto</importMapping>
+                <importMapping>DeleteApplicantActionDto=com.recruita.api.action.model.DeleteApplicantActionDto</importMapping>
+                <importMapping>GenerateReportActionDto=com.recruita.api.action.model.GenerateReportActionDto</importMapping>
+                <importMapping>MatchJobActionDto=com.recruita.api.action.model.MatchJobActionDto</importMapping>
+                <importMapping>BulkUpdateActionDto=com.recruita.api.action.model.BulkUpdateActionDto</importMapping>
+                <importMapping>ClarifyActionDto=com.recruita.api.action.model.ClarifyActionDto</importMapping>
+                <importMapping>ApiProblemDetail=org.springframework.http.ProblemDetail</importMapping>
                 <importMapping>UiLanguage=com.recruita.api.common.enums.UiLanguage</importMapping>
               </importMappings>
               <typeMappings>
                 <typeMapping>ApplicationStatus=String</typeMapping>
+                <typeMapping>ReportType=String</typeMapping>
+                <typeMapping>ExportFormat=String</typeMapping>
                 <typeMapping>Date=LocalDate</typeMapping>
                 <typeMapping>DateTime=OffsetDateTime</typeMapping>
-                <typeMapping>MatchWireResponse=com.recruita.api.match.evaluation.MatchEvaluationResult</typeMapping>
               </typeMappings>
             </configuration>
           </execution>

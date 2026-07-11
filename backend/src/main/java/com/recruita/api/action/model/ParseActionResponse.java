@@ -1,12 +1,12 @@
 package com.recruita.api.action.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
-import java.util.Map;
 
-public record ParseActionResponse(boolean valid, Map<String, Object> action, List<String> errors) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ParseActionResponse(boolean valid, ParsedActionDto action, List<String> errors) {
 
   public ParseActionResponse {
-    action = Map.copyOf(action);
     errors = List.copyOf(errors);
   }
 

@@ -5,10 +5,9 @@ import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ActionType;
 import com.recruita.api.action.model.ActionValidationResult;
 import com.recruita.api.action.model.ParamsValidationResult;
+import com.recruita.api.action.model.ParsedActionFactory;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +23,7 @@ public class ActionValidator {
   private final GenerateReportParamsValidator generateReportParamsValidator;
   private final MatchJobParamsValidator matchJobParamsValidator;
   private final BulkUpdateParamsValidator bulkUpdateParamsValidator;
+  private final ParsedActionFactory parsedActionFactory;
 
   public ActionValidator(
       ClarifyParamsValidator clarifyParamsValidator,
@@ -34,7 +34,8 @@ public class ActionValidator {
       DeleteApplicantParamsValidator deleteApplicantParamsValidator,
       GenerateReportParamsValidator generateReportParamsValidator,
       MatchJobParamsValidator matchJobParamsValidator,
-      BulkUpdateParamsValidator bulkUpdateParamsValidator) {
+      BulkUpdateParamsValidator bulkUpdateParamsValidator,
+      ParsedActionFactory parsedActionFactory) {
     this.clarifyParamsValidator = clarifyParamsValidator;
     this.filterParamsValidator = filterParamsValidator;
     this.updateStatusParamsValidator = updateStatusParamsValidator;
@@ -44,6 +45,7 @@ public class ActionValidator {
     this.generateReportParamsValidator = generateReportParamsValidator;
     this.matchJobParamsValidator = matchJobParamsValidator;
     this.bulkUpdateParamsValidator = bulkUpdateParamsValidator;
+    this.parsedActionFactory = parsedActionFactory;
   }
 
   public ActionValidationResult validate(JsonNode root) {
@@ -72,7 +74,8 @@ public class ActionValidator {
       return ActionValidationResult.invalid(paramsResult.errors());
     }
 
-    return ActionValidationResult.valid(wrapAction(actionType, paramsResult.value().orElseThrow()));
+    return ActionValidationResult.valid(
+        parsedActionFactory.from(actionType, paramsResult.value().orElseThrow()));
   }
 
   private ParamsValidationResult validateParams(ActionType actionType, JsonNode params) {
@@ -99,12 +102,5 @@ public class ActionValidator {
 
   private static String joinedActionTypes() {
     return Arrays.stream(ActionType.values()).map(Enum::name).collect(Collectors.joining(", "));
-  }
-
-  private static Map<String, Object> wrapAction(ActionType type, Map<String, Object> params) {
-    Map<String, Object> action = new LinkedHashMap<>();
-    action.put(ActionParamKey.TYPE, type.name());
-    action.put(ActionParamKey.PARAMS, params);
-    return action;
   }
 }

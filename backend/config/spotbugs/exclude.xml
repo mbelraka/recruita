@@ -32,6 +32,7 @@
       <Package name="com.recruita.api.action.prompt"/>
       <Package name="com.recruita.api.action.validation"/>
       <Package name="com.recruita.api.action.parse"/>
+      <Package name="com.recruita.api.action.model"/>
     </Or>
   </Match>
 </FindBugsFilter>

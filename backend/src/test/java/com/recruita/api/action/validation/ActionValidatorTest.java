@@ -204,7 +204,7 @@ class ActionValidatorTest {
   private void assertValid(String json) throws Exception {
     ActionValidationResult result = actionValidator.validate(objectMapper.readTree(json));
     assertThat(result.valid()).isTrue();
-    assertThat(result.action()).containsKey("type");
-    assertThat(result.action()).containsKey("params");
+    assertThat(result.action()).isNotNull();
+    assertThat(result.action().type()).isNotNull();
   }
 }

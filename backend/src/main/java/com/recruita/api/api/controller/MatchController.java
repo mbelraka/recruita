@@ -1,8 +1,8 @@
 package com.recruita.api.api.controller;
 
 import com.recruita.api.api.dto.match.MatchRequestDto;
+import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.generated.api.MatchApi;
-import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import com.recruita.api.match.service.MatchApplicationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +30,12 @@ public class MatchController implements MatchApi {
   }
 
   @Override
-  public ResponseEntity<MatchEvaluationResult> match(MatchRequestDto request) {
+  public ResponseEntity<MatchResponseDto> match(MatchRequestDto request) {
     return ResponseEntity.ok(matchApplicationService.evaluate(request));
   }
 
   @Override
-  public ResponseEntity<MatchEvaluationResult> matchLegacy(MatchRequestDto request) {
+  public ResponseEntity<MatchResponseDto> matchLegacy(MatchRequestDto request) {
     return match(request);
   }
 }
