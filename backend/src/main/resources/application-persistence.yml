@@ -25,6 +25,10 @@ spring:
 recruita:
   persistence:
     enabled: true
+  applicant:
+    roster:
+      redis-version-key: 'recruita:roster:version'
+      version-response-header: X-Recruita-Roster-Version
   match:
     cache:
       store: redis

@@ -6,23 +6,13 @@ export enum SortDirection {
 /** Angular Material `MatSort` direction (empty when inactive). */
 export type MaterialSortDirection = '' | SortDirection;
 
-/** Raw direction emitted by Angular Material `MatSort`. */
-export type MaterialSortDirectionInput = 'asc' | 'desc' | '';
+/** Raw direction emitted by Angular Material `MatSort` (enum values or empty). */
+export type MaterialSortDirectionInput = `${SortDirection}` | '';
 
 export function sortDirectionFromMaterial(
   direction: MaterialSortDirectionInput
 ): SortDirection | undefined {
-  switch (direction) {
-    case 'asc': {
-      return SortDirection.Asc;
-    }
-    case 'desc': {
-      return SortDirection.Desc;
-    }
-    default: {
-      return undefined;
-    }
-  }
+  return direction === '' ? undefined : (direction as SortDirection);
 }
 
 export function toMaterialSortDirection(

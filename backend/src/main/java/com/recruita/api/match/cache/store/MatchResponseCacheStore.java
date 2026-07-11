@@ -8,4 +8,6 @@ public interface MatchResponseCacheStore {
   Optional<MatchEvaluationResult> get(String cacheKey);
 
   void put(String cacheKey, MatchEvaluationResult value);
+
+  void invalidateAll();
 }

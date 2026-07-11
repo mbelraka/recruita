@@ -12,6 +12,7 @@ import {
   searchLocationSuggestionsSuccess,
   searchLocationSuggestionsFailure,
   clearLocationSuggestions,
+  applicantsRosterLoaded,
 } from './applicants.actions';
 
 const initialApplicantUiState: ApplicantUiState = {
@@ -24,6 +25,8 @@ const initialApplicantUiState: ApplicantUiState = {
   viewType: ViewTypes.GRID,
   locationSuggestions: [],
   newApplicantFabExpanded: false,
+  rosterEtag: null,
+  rosterVersion: null,
   suppressNewApplicantFabPointerExpandUntil: 0,
 };
 
@@ -71,5 +74,11 @@ export const applicantsReducer = createReducer(
   on(setNewApplicantFabExpanded, (state, { expanded }) => ({
     ...state,
     newApplicantFabExpanded: expanded,
+  })),
+
+  on(applicantsRosterLoaded, (state, { etag, rosterVersion, notModified }) => ({
+    ...state,
+    rosterEtag: etag ?? state.rosterEtag,
+    rosterVersion: rosterVersion ?? (notModified ? state.rosterVersion : null),
   }))
 );

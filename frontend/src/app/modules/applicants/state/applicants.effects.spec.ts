@@ -33,6 +33,7 @@ import {
   updateApplicantFailure,
 } from './applicants.actions';
 import { ApplicantsEffects } from './applicants.effects';
+import { MatchCacheSyncService } from '../../match/services/match-cache-sync.service';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 
 describe('ApplicantsEffects', () => {
@@ -51,6 +52,7 @@ describe('ApplicantsEffects', () => {
     };
   };
   let mockEditDialog: jasmine.SpyObj<ApplicantEditDialogService>;
+  let matchCacheSync: jasmine.SpyObj<MatchCacheSyncService>;
 
   const sample = createApplicant({
     id: 'a-1',
@@ -59,6 +61,13 @@ describe('ApplicantsEffects', () => {
     phone: '+1',
     skills: ['Angular'],
   });
+
+  const rosterResult = {
+    applicants: [sample],
+    notModified: false,
+    etag: '"roster-1"',
+    rosterVersion: 1,
+  };
 
   beforeEach(() => {
     actions$ = new ReplaySubject(1);
@@ -82,6 +91,11 @@ describe('ApplicantsEffects', () => {
       'ApplicantEditDialogService',
       ['openCreateOrEdit']
     );
+    matchCacheSync = jasmine.createSpyObj<MatchCacheSyncService>(
+      'MatchCacheSyncService',
+      ['invalidateBackendMatchCache']
+    );
+    matchCacheSync.invalidateBackendMatchCache.and.returnValue(of(undefined));
 
     TestBed.configureTestingModule({
       providers: [
@@ -91,6 +105,7 @@ describe('ApplicantsEffects', () => {
         provideMockStore(),
         { provide: Router, useValue: mockRouter },
         { provide: ApplicantEditDialogService, useValue: mockEditDialog },
+        { provide: MatchCacheSyncService, useValue: matchCacheSync },
         {
           provide: CitySearchService,
           useValue: jasmine.createSpyObj<CitySearchService>(
@@ -105,11 +120,18 @@ describe('ApplicantsEffects', () => {
   });
 
   it('loads applicants through NgRx Data', async () => {
-    collection.loadRoster.and.returnValue(of([sample]));
+    collection.loadRoster.and.returnValue(of(rosterResult));
     actions$.next(loadApplicants());
 
     const action = await firstValueFrom(effects.loadApplicants$);
-    expect(action).toEqual(applicantsRosterLoaded());
+    expect(collection.loadRoster).toHaveBeenCalledWith(null);
+    expect(action).toEqual(
+      applicantsRosterLoaded({
+        etag: rosterResult.etag,
+        rosterVersion: rosterResult.rosterVersion,
+        notModified: false,
+      })
+    );
   });
 
   it('dispatches loadApplicantsFailure when the API fails', async () => {
@@ -207,6 +229,7 @@ describe('ApplicantsEffects', () => {
     const action = await firstValueFrom(
       effects.invalidateMatchOnApplicantChange$
     );
+    expect(matchCacheSync.invalidateBackendMatchCache).toHaveBeenCalled();
     expect(action).toEqual(invalidateMatchResults());
   });
 });

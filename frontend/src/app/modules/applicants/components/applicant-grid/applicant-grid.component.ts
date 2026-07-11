@@ -25,9 +25,12 @@ import {
   selectSortDirection,
   selectSortedApplicants,
 } from '../../state/applicants.selectors';
-import { patchApplicantFilters } from '../../state/applicants.actions';
 import { confirmDeleteApplicant } from '../../utilities/confirm-delete.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
+import {
+  dispatchApplicantSkillFilterToggle,
+  enterStaggerDelayMs,
+} from '../../utilities/applicant-view.util';
 
 @Component({
   selector: 'app-applicant-grid',
@@ -123,8 +126,9 @@ export class ApplicantGridComponent implements AfterViewInit {
       GRID_CARD_ENTER_STAGGER_CAP_INDEX,
       GRID_CARD_ENTER_STAGGER_STEP_MS,
     } = APP_CONFIG.APPLICANTS;
-    return (
-      Math.min(index, GRID_CARD_ENTER_STAGGER_CAP_INDEX) *
+    return enterStaggerDelayMs(
+      index,
+      GRID_CARD_ENTER_STAGGER_CAP_INDEX,
       GRID_CARD_ENTER_STAGGER_STEP_MS
     );
   }
@@ -135,11 +139,10 @@ export class ApplicantGridComponent implements AfterViewInit {
    * @param skill - The skill name clicked by the user.
    */
   public filterBySkill(skill: string): void {
-    const current = this.activeSkillFilter();
-    this._store.dispatch(
-      patchApplicantFilters({
-        partial: { skill: current === skill ? null : skill },
-      })
+    dispatchApplicantSkillFilterToggle(
+      this._store as Store<FullState>,
+      this.activeSkillFilter(),
+      skill
     );
   }
 

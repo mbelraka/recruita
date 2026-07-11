@@ -33,6 +33,8 @@ describe('Applicants Reducer', () => {
       viewType: ViewTypes.GRID,
       locationSuggestions: [],
       newApplicantFabExpanded: false,
+      rosterEtag: null,
+      rosterVersion: null,
       suppressNewApplicantFabPointerExpandUntil: 0,
     };
   });

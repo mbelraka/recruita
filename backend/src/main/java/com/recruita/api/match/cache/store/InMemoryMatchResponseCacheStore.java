@@ -48,6 +48,11 @@ public class InMemoryMatchResponseCacheStore implements MatchResponseCacheStore 
     cache.put(cacheKey, copy(value));
   }
 
+  @Override
+  public void invalidateAll() {
+    cache.invalidateAll();
+  }
+
   private static MatchEvaluationResult copy(MatchEvaluationResult result) {
     return switch (result) {
       case MatchEvaluationResult.Deterministic deterministic -> deterministic;

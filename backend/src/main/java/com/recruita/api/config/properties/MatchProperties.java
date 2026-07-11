@@ -62,6 +62,7 @@ public class MatchProperties {
     @Positive private long maxEntries = 1_000;
 
     @NotBlank private String keyPrefix = "recruita:match:";
+    @NotBlank private String schemaVersion = "1";
     @Valid @NotNull private MatchCacheKeyProperties keyFields = new MatchCacheKeyProperties();
     @NotBlank private String nullCanonicalLiteral = "null";
 
@@ -103,6 +104,14 @@ public class MatchProperties {
 
     public void setKeyPrefix(String keyPrefix) {
       this.keyPrefix = keyPrefix;
+    }
+
+    public String getSchemaVersion() {
+      return schemaVersion;
+    }
+
+    public void setSchemaVersion(String schemaVersion) {
+      this.schemaVersion = schemaVersion;
     }
 
     public MatchCacheKeyProperties getKeyFields() {

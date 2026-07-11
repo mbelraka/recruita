@@ -13,13 +13,19 @@ describe('ApplicantEntityCollectionService', () => {
   const roster = [
     createApplicant({ id: 'a-1', name: 'Alex', skills: ['Angular'] }),
   ];
+  const rosterResult = {
+    applicants: roster,
+    notModified: false,
+    etag: '"roster-1"',
+    rosterVersion: 1,
+  };
 
   beforeEach(() => {
     data = jasmine.createSpyObj<ApplicantDataService>('ApplicantDataService', [
-      'getAll',
+      'loadRosterSync',
       'getAllFull',
     ]);
-    data.getAll.and.returnValue(of(roster));
+    data.loadRosterSync.and.returnValue(of(rosterResult));
 
     TestBed.configureTestingModule({
       providers: [
@@ -33,7 +39,9 @@ describe('ApplicantEntityCollectionService', () => {
                 selectEntities: () => [],
                 collection$: of({ entities: {}, ids: [] }),
               },
-              selectors$: {},
+              selectors$: {
+                entityMap$: of({}),
+              },
               guard: {},
               selectId: (entity: { id: string }) => entity.id,
               toUpdate: (entity: unknown) => entity,
@@ -48,16 +56,17 @@ describe('ApplicantEntityCollectionService', () => {
   });
 
   it('loadRoster fetches via ApplicantDataService and replaces the cache', async () => {
+    Object.defineProperty(service, 'entities$', { value: of([]) });
     spyOn(service, 'addAllToCache');
     spyOn(service, 'setLoaded');
     spyOn(service, 'setLoading');
 
     const result = await firstValueFrom(service.loadRoster());
 
-    expect(data.getAll).toHaveBeenCalled();
+    expect(data.loadRosterSync).toHaveBeenCalledWith(null);
     expect(service.addAllToCache).toHaveBeenCalledWith(roster);
     expect(service.setLoaded).toHaveBeenCalledWith(true);
     expect(service.setLoading).toHaveBeenCalledWith(false);
-    expect(result).toEqual(roster);
+    expect(result).toEqual(rosterResult);
   });
 });

@@ -33,7 +33,10 @@ import {
   applicantSortUiColumnFromStoreKey,
 } from '../../utilities/applicant-sort-column.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
-import { patchApplicantFilters } from '../../state/applicants.actions';
+import {
+  dispatchApplicantSkillFilterToggle,
+  enterStaggerDelayMs,
+} from '../../utilities/applicant-view.util';
 
 @Component({
   selector: 'app-applicant-list',
@@ -112,8 +115,9 @@ export class ApplicantListComponent {
   public rowEnterDelayMs(index: number): number {
     const { LIST_ROW_ENTER_STAGGER_CAP_INDEX, LIST_ROW_ENTER_STAGGER_STEP_MS } =
       APP_CONFIG.APPLICANTS;
-    return (
-      Math.min(index, LIST_ROW_ENTER_STAGGER_CAP_INDEX) *
+    return enterStaggerDelayMs(
+      index,
+      LIST_ROW_ENTER_STAGGER_CAP_INDEX,
       LIST_ROW_ENTER_STAGGER_STEP_MS
     );
   }
@@ -138,11 +142,10 @@ export class ApplicantListComponent {
   }
 
   public filterBySkill(skill: string): void {
-    const current = this.activeSkillFilter();
-    this._store.dispatch(
-      patchApplicantFilters({
-        partial: { skill: current === skill ? null : skill },
-      })
+    dispatchApplicantSkillFilterToggle(
+      this._store,
+      this.activeSkillFilter(),
+      skill
     );
   }
 

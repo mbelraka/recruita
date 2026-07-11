@@ -1,0 +1,16 @@
+{
+  "threshold": 2.5,
+  "minLines": 10,
+  "minTokens": 50,
+  "mode": "strict",
+  "path": ["src"],
+  "ignore": [
+    "**/generated/**",
+    "**/*.spec.ts",
+    "**/polyfills.ts",
+    "**/assets/i18n/**",
+    "**/styles/overrides/**"
+  ],
+  "reporters": ["console"],
+  "output": "./coverage/jscpd"
+}

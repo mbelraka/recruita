@@ -46,15 +46,17 @@
     "test:backend": "sh scripts/run-mvn.sh test -q",
     "verify:backend": "sh scripts/run-mvn.sh verify -q",
     "export:openapi": "sh scripts/export-openapi-spec.sh",
-    "codegen:api": "sh scripts/codegen-openapi-frontend.sh",
-    "codegen:api:check": "sh scripts/codegen-openapi-check.sh",
+    "codegen:api": "sh scripts/codegen-openapi-frontend.sh && sh scripts/codegen-openapi-backend.sh",
+    "codegen:api:backend": "sh scripts/codegen-openapi-backend.sh",
+    "codegen:api:backend:check": "sh scripts/codegen-openapi-backend-check.sh",
+    "codegen:api:check": "sh scripts/codegen-openapi-check.sh && sh scripts/codegen-openapi-backend-check.sh",
     "validate:openapi:contract": "sh scripts/validate-openapi-spec.sh",
     "validate:openapi:drift": "sh scripts/validate-openapi-drift.sh",
     "validate:openapi:backend": "npm run validate:openapi:drift",
     "precommit:frontend": "npm run validate:ci:frontend",
     "precommit:backend": "npm run validate:ci:backend",
     "validate:ci:frontend": "npm run codegen:api:check && npm run quality -w @recruita/frontend && npm run test:ci -w @recruita/frontend && npm run doctor:full -w @recruita/frontend && npm run security:audit -w @recruita/frontend && npm run letify -w @recruita/frontend && npm run build:prod -w @recruita/frontend",
-    "validate:ci:backend": "npm run quality:backend && npm run verify:backend && npm run validate:openapi:contract",
+    "validate:ci:backend": "npm run codegen:api:backend:check && npm run quality:backend && npm run verify:backend && npm run validate:openapi:contract",
     "validate:ci": "npm run validate:ci:frontend && npm run validate:ci:backend",
     "validate": "npm run validate:ci",
     "lockfile:check": "npm install --package-lock-only --ignore-scripts --loglevel=error && git diff --exit-code package-lock.json",
@@ -83,7 +85,7 @@
   },
   "lint-staged": {
     "frontend/src/**/!(*generated*)/*.{ts,html}": [
-      "bash -c 'cd frontend && eslint --fix --max-warnings=0 \"$@\"' _",
+      "bash -c 'cd frontend && a=(); for f in \"$@\"; do case \"$f\" in */generated/*) ;; *) a+=(\"$f\");; esac; done; [ ${#a[@]} -eq 0 ] || eslint --fix --max-warnings=0 \"${a[@]}\"' _",
       "prettier --write"
     ],
     "frontend/src/app/generated/**/*.{ts,html}": [

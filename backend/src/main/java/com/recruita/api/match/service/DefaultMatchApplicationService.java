@@ -48,4 +48,9 @@ public class DefaultMatchApplicationService implements MatchApplicationService {
     responseCache.put(request, normalized, result);
     return result;
   }
+
+  @Override
+  public void invalidateMatchCache() {
+    responseCache.invalidateAll();
+  }
 }

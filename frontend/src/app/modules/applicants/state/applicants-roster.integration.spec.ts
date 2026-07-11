@@ -19,15 +19,19 @@ import { provideStore, Store } from '@ngrx/store';
 import { filter, firstValueFrom, take } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
 import { recruitaEntityMetadata } from '../../../core/entity-data/entity-metadata';
 import { recruitaEntityHttpResourceUrls } from '../../../core/entity-data/recruita-entity-http-resource-urls';
 import { RecruitaHttpUrlGenerator } from '../../../core/entity-data/recruita-http-url-generator.service';
 import { registerRecruitaEntityDataServices } from '../../../core/entity-data/register-recruita-entity-data-services.initializer';
+import { ApiConfiguration } from '../../../generated/api-client/api-configuration';
+import { ApplicantsService } from '../../../generated/api-client/services/applicants.service';
 import { appReducer } from '../../../state/app.reducer';
-import { ApplicantDataService } from '../data/applicant-data.service';
 import { ProfileDataService } from '../../main/data/profile-data.service';
+import { ApplicantDataService } from '../data/applicant-data.service';
 import { loadApplicants } from './applicants.actions';
 import { ApplicantsEffects } from './applicants.effects';
+import { applicantsReducer } from './applicants.reducer';
 import { selectAllApplicants } from './applicants.selectors';
 
 describe('Applicants roster (NgRx Data integration)', () => {
@@ -40,9 +44,14 @@ describe('Applicants roster (NgRx Data integration)', () => {
         EntityDataModule.forRoot({ entityMetadata: recruitaEntityMetadata }),
       ],
       providers: [
-        provideStore({ app: appReducer }),
+        provideStore({
+          app: appReducer,
+          [StateFeatures.Applicants]: applicantsReducer,
+        }),
         provideEffects(ApplicantsEffects),
         ApplicantDataService,
+        ApplicantsService,
+        { provide: ApiConfiguration, useValue: { rootUrl: '' } },
         ProfileDataService,
         {
           provide: DefaultDataServiceConfig,
@@ -74,14 +83,22 @@ describe('Applicants roster (NgRx Data integration)', () => {
 
     const req = httpMock.expectOne(APP_CONFIG.APPLICANTS.API.BASE_PATH);
     expect(req.request.method).toBe('GET');
-    req.flush([
+    req.flush(
+      [
+        {
+          id: 'a-1',
+          name: 'Alex',
+          email: 'alex@example.com',
+          skills: ['Angular'],
+        },
+      ],
       {
-        id: 'a-1',
-        name: 'Alex',
-        email: 'alex@example.com',
-        skills: ['Angular'],
-      },
-    ]);
+        headers: {
+          ETag: '"roster-1"',
+          [APP_CONFIG.APPLICANTS.API.ROSTER_VERSION_RESPONSE_HEADER]: '1',
+        },
+      }
+    );
 
     const applicants = await firstValueFrom(
       store.select(selectAllApplicants).pipe(

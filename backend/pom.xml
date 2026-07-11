@@ -40,6 +40,8 @@
     <!-- Spring Boot 3.4.x requires springdoc 2.7+ (2.6.x targets Boot 3.3). -->
     <springdoc.version>2.8.17</springdoc.version>
     <openapi-generator.version>7.12.0</openapi-generator.version>
+    <!-- Skip OpenAPI Generator on normal builds; run via npm run codegen:api:backend when openapi.yaml changes. -->
+    <openapi.codegen.skip>true</openapi.codegen.skip>
     <jacoco.coverage.minimum>0.80</jacoco.coverage.minimum>
     <jacoco.package.coverage.minimum>0.70</jacoco.package.coverage.minimum>
     <jacoco.class.branch.minimum>0.70</jacoco.class.branch.minimum>
@@ -135,6 +137,7 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
+              <skip>${openapi.codegen.skip}</skip>
               <inputSpec>${project.basedir}/openapi/openapi.yaml</inputSpec>
               <generatorName>spring</generatorName>
               <apiPackage>com.recruita.api.generated.api</apiPackage>
@@ -181,24 +184,6 @@
                 <typeMapping>DateTime=OffsetDateTime</typeMapping>
                 <typeMapping>MatchWireResponse=com.recruita.api.match.evaluation.MatchEvaluationResult</typeMapping>
               </typeMappings>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-openapi-generated-sources</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
-              </sources>
             </configuration>
           </execution>
         </executions>
@@ -406,6 +391,7 @@
             <exclude>com/recruita/api/config/validation/**</exclude>
             <exclude>com/recruita/api/persistence/**</exclude>
             <exclude>com/recruita/api/match/cache/store/**</exclude>
+            <exclude>com/recruita/api/applicant/roster/RedisRosterVersionService.class</exclude>
             <exclude>com/recruita/api/**/mapper/*MapperImpl.class</exclude>
           </excludes>
         </configuration>

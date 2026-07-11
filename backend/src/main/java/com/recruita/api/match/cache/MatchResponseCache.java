@@ -1,6 +1,6 @@
 package com.recruita.api.match.cache;
 
-import com.recruita.api.config.properties.MatchCacheKeyProperties;
+import com.recruita.api.applicant.roster.RosterVersionService;
 import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.match.cache.store.MatchResponseCacheStore;
 import com.recruita.api.match.domain.MatchCandidate;
@@ -17,17 +17,23 @@ public class MatchResponseCache {
 
   private final MatchResponseCacheStore store;
   private final StableJsonCanonicalizer canonicalizer;
-  private final MatchCacheKeyProperties keyFields;
+  private final RosterVersionService rosterVersionService;
+  private final com.recruita.api.config.properties.MatchCacheKeyProperties keyFields;
+  private final String schemaVersion;
   private final boolean enabled;
 
   public MatchResponseCache(
       RecruitaProperties properties,
       StableJsonCanonicalizer canonicalizer,
-      MatchResponseCacheStore store) {
-    this.enabled = properties.getMatch().getCache().isEnabled();
+      MatchResponseCacheStore store,
+      RosterVersionService rosterVersionService) {
+    var cache = properties.getMatch().getCache();
+    this.enabled = cache.isEnabled();
     this.canonicalizer = canonicalizer;
-    this.keyFields = properties.getMatch().getCache().getKeyFields();
+    this.keyFields = cache.getKeyFields();
+    this.schemaVersion = cache.getSchemaVersion();
     this.store = store;
+    this.rosterVersionService = rosterVersionService;
   }
 
   public Optional<MatchEvaluationResult> get(
@@ -48,8 +54,17 @@ public class MatchResponseCache {
     store.put(cacheKey(request, normalizedCandidates), response);
   }
 
+  public void invalidateAll() {
+    if (!enabled) {
+      return;
+    }
+    store.invalidateAll();
+  }
+
   private String cacheKey(MatchRequest request, List<MatchCandidate> normalizedCandidates) {
     Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put(keyFields.getSchemaVersion(), schemaVersion);
+    payload.put(keyFields.getRosterVersion(), rosterVersionService.current());
     payload.put(keyFields.getJobDescription(), request.jobDescription());
     payload.put(keyFields.getCandidates(), normalizedCandidates);
     payload.put(keyFields.getModel(), request.model());
@@ -57,6 +72,6 @@ public class MatchResponseCache {
     payload.put(keyFields.getTopP(), request.topP());
     payload.put(keyFields.getSeed(), request.seed());
     payload.put(keyFields.getDeterministic(), request.deterministic());
-    return canonicalizer.canonicalize(payload);
+    return MatchCacheKeyHasher.sha256Hex(canonicalizer.canonicalize(payload));
   }
 }

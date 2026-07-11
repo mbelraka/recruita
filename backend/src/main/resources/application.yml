@@ -31,8 +31,10 @@ spring:
   web:
     resources:
       add-mappings: false
-
-recruita:
+  data:
+    redis:
+      repositories:
+        enabled: false
   runtime:
     production-mode-name: production
     env-truthy-values:
@@ -156,6 +158,10 @@ recruita:
       milliseconds-per-second: 1000
   persistence:
     enabled: false
+  applicant:
+    roster:
+      redis-version-key: 'recruita:roster:version'
+      version-response-header: X-Recruita-Roster-Version
   seed:
     applicants-demo: false
     admin-profile: false
@@ -166,8 +172,11 @@ recruita:
       ttl-seconds: 3600
       max-entries: 1000
       key-prefix: 'recruita:match:'
+      schema-version: '1'
       null-canonical-literal: 'null'
       key-fields:
+        schema-version: schemaVersion
+        roster-version: rosterVersion
         job-description: jobDescription
         candidates: candidates
         model: model

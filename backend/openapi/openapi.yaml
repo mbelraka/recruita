@@ -44,15 +44,47 @@ paths:
       tags: [Applicants]
       summary: List applicant summaries
       operationId: listApplicantSummaries
+      parameters:
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: OK
+          headers:
+            ETag:
+              schema:
+                type: string
+            X-Recruita-Roster-Version:
+              schema:
+                type: integer
+                format: int64
+            X-Recruita-Roster-Updated-At:
+              schema:
+                type: string
+                format: date-time
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/ApplicantSummaryDto'
+        '304':
+          description: Not Modified
+          headers:
+            ETag:
+              schema:
+                type: string
+            X-Recruita-Roster-Version:
+              schema:
+                type: integer
+                format: int64
+            X-Recruita-Roster-Updated-At:
+              schema:
+                type: string
+                format: date-time
     post:
       tags: [Applicants]
       summary: Create applicant
@@ -181,6 +213,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
+
+  /api/match/cache/invalidate:
+    post:
+      tags: [Match]
+      summary: Invalidate cached match evaluation results
+      operationId: invalidateMatchCache
+      responses:
+        '204':
+          description: Cache invalidated
 
   /api/match:
     post:

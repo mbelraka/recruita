@@ -24,6 +24,12 @@ public class MatchController implements MatchApi {
   }
 
   @Override
+  public ResponseEntity<Void> invalidateMatchCache() {
+    matchApplicationService.invalidateMatchCache();
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
   public ResponseEntity<MatchEvaluationResult> match(MatchRequestDto request) {
     return ResponseEntity.ok(matchApplicationService.evaluate(request));
   }

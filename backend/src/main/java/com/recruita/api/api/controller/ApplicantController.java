@@ -3,11 +3,15 @@ package com.recruita.api.api.controller;
 import com.recruita.api.api.dto.applicant.ApplicantDto;
 import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
+import com.recruita.api.applicant.roster.RosterWatermark;
 import com.recruita.api.applicant.service.ApplicantApplicationService;
+import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.generated.api.ApplicantsApi;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,14 +27,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApplicantController implements ApplicantsApi {
 
   private final ApplicantApplicationService applicantApplicationService;
+  private final String rosterVersionHeader;
+  private final String rosterUpdatedAtHeader;
 
-  public ApplicantController(ApplicantApplicationService applicantApplicationService) {
+  public ApplicantController(
+      ApplicantApplicationService applicantApplicationService, RecruitaProperties properties) {
     this.applicantApplicationService = applicantApplicationService;
+    this.rosterVersionHeader = properties.getApplicant().getRoster().getVersionResponseHeader();
+    this.rosterUpdatedAtHeader = "X-Recruita-Roster-Updated-At";
   }
 
   @Override
-  public ResponseEntity<List<ApplicantSummaryDto>> listApplicantSummaries() {
-    return ResponseEntity.ok(applicantApplicationService.listSummaries());
+  public ResponseEntity<List<ApplicantSummaryDto>> listApplicantSummaries(String ifNoneMatch) {
+    RosterWatermark watermark = applicantApplicationService.rosterWatermark();
+    Optional<List<ApplicantSummaryDto>> body =
+        applicantApplicationService.listSummariesIfNotModified(ifNoneMatch);
+    HttpHeaders headers = rosterHeaders(watermark);
+    if (body.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).headers(headers).build();
+    }
+    return ResponseEntity.ok().headers(headers).body(body.get());
   }
 
   @Override
@@ -58,5 +74,13 @@ public class ApplicantController implements ApplicantsApi {
   public ResponseEntity<Void> deleteApplicant(String id) {
     applicantApplicationService.delete(id);
     return ResponseEntity.noContent().build();
+  }
+
+  private HttpHeaders rosterHeaders(RosterWatermark watermark) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setETag(watermark.etag());
+    headers.add(rosterVersionHeader, Long.toString(watermark.version()));
+    headers.add(rosterUpdatedAtHeader, watermark.lastModified().toString());
+    return headers;
   }
 }

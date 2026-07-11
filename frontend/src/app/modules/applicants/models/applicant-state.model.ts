@@ -35,6 +35,12 @@ export interface ApplicantUiState {
   /** Whether the new-applicant FAB label is visible. */
   newApplicantFabExpanded: boolean;
 
+  /** Last roster ETag from `GET /api/applicants` (conditional reload). */
+  rosterEtag: string | null;
+
+  /** Last roster generation from `X-Recruita-Roster-Version`. */
+  rosterVersion: number | null;
+
   /**
    * `performance.now()` threshold until pointer-enter is ignored on the FAB shell
    * (avoids spurious expand after the dialog overlay closes).

@@ -2,10 +2,12 @@ package com.recruita.api.match.cache;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
+import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class MatchEvaluationResultCodecTest {
 
   private final MatchEvaluationResultCodec codec =
-      new MatchEvaluationResultCodec(new ObjectMapper());
+      new MatchEvaluationResultCodec(new RecruitaProperties(), new ObjectMapper());
 
   @Test
   void roundTripsDeterministicResults() {
@@ -47,5 +49,19 @@ class MatchEvaluationResultCodecTest {
 
     assertInstanceOf(MatchEvaluationResult.Groq.class, decoded);
     assertEquals(1, ((MatchEvaluationResult.Groq) decoded).value().path("scores").asInt());
+  }
+
+  @Test
+  void rejectsMismatchedSchemaVersion() {
+    RecruitaProperties properties = new RecruitaProperties();
+    properties.getMatch().getCache().setSchemaVersion("2");
+    String payload =
+        codec.encode(
+            new MatchEvaluationResult.Groq(new ObjectMapper().createObjectNode().put("ok", true)));
+
+    assertTrue(
+        new MatchEvaluationResultCodec(properties, new ObjectMapper())
+            .tryDecode(payload)
+            .isEmpty());
   }
 }

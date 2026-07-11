@@ -38,7 +38,7 @@ describe('ExportEffects', () => {
     ]);
     applicants = jasmine.createSpyObj<ApplicantEntityCollectionService>(
       'ApplicantEntityCollectionService',
-      ['loadFull']
+      ['loadFull', 'areNotesLoadedForRoster']
     );
 
     exportService.exportAsCSV.and.resolveTo();
@@ -46,6 +46,7 @@ describe('ExportEffects', () => {
     exportService.exportAsExcel.and.resolveTo();
     exportService.exportAsPDF.and.resolveTo();
     applicants.loadFull.and.returnValue(of(fullApplicants));
+    applicants.areNotesLoadedForRoster.and.returnValue(of(false));
 
     TestBed.configureTestingModule({
       providers: [
@@ -67,6 +68,17 @@ describe('ExportEffects', () => {
     expect(action).toEqual(exportSuccess());
     expect(applicants.loadFull).toHaveBeenCalled();
     expect(exportService.exportAsCSV).toHaveBeenCalled();
+  });
+
+  it('skips the full roster refresh when notes are already cached', async () => {
+    applicants.areNotesLoadedForRoster.and.returnValue(of(true));
+    actions$.next(exportApplicants({ format: ExportFormats.JSON }));
+
+    const action = await firstValueFrom(effects.exportApplicants$);
+
+    expect(action).toEqual(exportSuccess());
+    expect(applicants.loadFull).not.toHaveBeenCalled();
+    expect(exportService.exportAsJSON).toHaveBeenCalled();
   });
 
   it('dispatches exportFailure when the refresh fails', async () => {

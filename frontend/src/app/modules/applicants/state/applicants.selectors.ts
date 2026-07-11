@@ -26,6 +26,8 @@ const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
   viewType: ViewTypes.GRID,
   locationSuggestions: [],
   newApplicantFabExpanded: false,
+  rosterEtag: null,
+  rosterVersion: null,
   suppressNewApplicantFabPointerExpandUntil: 0,
 };
 
@@ -64,6 +66,16 @@ export const selectViewType = createSelector(
 export const selectGlobalFilter = createSelector(
   selectApplicantUiStateSafe,
   (state): string => state.filter
+);
+
+export const selectRosterEtag = createSelector(
+  selectApplicantUiStateSafe,
+  (state): string | null => state.rosterEtag
+);
+
+export const selectRosterVersion = createSelector(
+  selectApplicantUiStateSafe,
+  (state): number | null => state.rosterVersion
 );
 
 export const selectFilterBySkill = createSelector(

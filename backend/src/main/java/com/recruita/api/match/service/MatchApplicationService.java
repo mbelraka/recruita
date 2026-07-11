@@ -6,4 +6,6 @@ import com.recruita.api.match.evaluation.MatchEvaluationResult;
 public interface MatchApplicationService {
 
   MatchEvaluationResult evaluate(MatchRequestDto request);
+
+  void invalidateMatchCache();
 }

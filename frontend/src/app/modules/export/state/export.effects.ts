@@ -2,7 +2,16 @@ import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
-import { catchError, concatMap, exhaustMap, from, Observable } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  exhaustMap,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
 
 import { NOTIFICATION_MESSAGE_KEYS } from '../../../constants/notification-message-keys';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
@@ -22,7 +31,7 @@ import { ExportFormats } from '../enums/export-formats.enum';
 
 /**
  * Flattening: exhaustMap ignores duplicate export clicks; concatMap refreshes full
- * applicant data from the API before generating the file.
+ * applicant data from the API before generating the file when notes are not cached.
  */
 @Injectable()
 export class ExportEffects {
@@ -30,19 +39,27 @@ export class ExportEffects {
     this._actions$.pipe(
       ofType(exportApplicants),
       exhaustMap(({ format }) =>
-        this._applicants.loadFull().pipe(
-          concatMap(() =>
-            from(this._triggerExport(format)).pipe(
+        this._applicants.areNotesLoadedForRoster().pipe(
+          switchMap((notesLoaded) => {
+            const refresh$ = notesLoaded
+              ? of(undefined)
+              : this._applicants.loadFull().pipe(map(() => undefined));
+
+            return refresh$.pipe(
               concatMap(() =>
-                concatWithNotification(exportSuccess(), {
-                  type: AppNotificationType.Success,
-                  messageKey: NOTIFICATION_MESSAGE_KEYS.exportSuccess,
-                })
+                from(this._triggerExport(format)).pipe(
+                  concatMap(() =>
+                    concatWithNotification(exportSuccess(), {
+                      type: AppNotificationType.Success,
+                      messageKey: NOTIFICATION_MESSAGE_KEYS.exportSuccess,
+                    })
+                  ),
+                  catchError((error: unknown) => this._exportFailure$(error))
+                )
               ),
               catchError((error: unknown) => this._exportFailure$(error))
-            )
-          ),
-          catchError((error: unknown) => this._exportFailure$(error))
+            );
+          })
         )
       )
     )

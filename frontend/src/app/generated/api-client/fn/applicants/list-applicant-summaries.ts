@@ -10,11 +10,13 @@ import { RequestBuilder } from '../../request-builder';
 import { ApplicantSummaryDto } from '../../models/applicant-summary-dto';
 
 export interface ListApplicantSummaries$Params {
+  'If-None-Match'?: string;
 }
 
 export function listApplicantSummaries(http: HttpClient, rootUrl: string, params?: ListApplicantSummaries$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<ApplicantSummaryDto>>> {
   const rb = new RequestBuilder(rootUrl, listApplicantSummaries.PATH, 'get');
   if (params) {
+    rb.header('If-None-Match', params['If-None-Match'], {});
   }
 
   return http.request(

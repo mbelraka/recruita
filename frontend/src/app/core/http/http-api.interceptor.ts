@@ -1,4 +1,5 @@
 import {
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
@@ -9,6 +10,7 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError, timeout } from 'rxjs';
 
 import { APP_CONFIG } from '../../config/app.config';
+import { HttpStatusCode } from '../../enums/http-status-code.enum';
 import { ApplicantApiErrorMessage } from '../../modules/applicants/enums/applicant-api-error-message.enum';
 import { ProfileApiErrorMessage } from '../../modules/main/enums/profile-api-error-message.enum';
 import { MatchErrorMessage } from '../../modules/match/enums/match-error-message.enum';
@@ -33,9 +35,16 @@ export class HttpApiInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       timeout({ first: policy.timeoutMs }),
-      catchError((error: unknown) =>
-        throwError(() => toHttpApiServiceError(error, policy.messages))
-      )
+      catchError((error: unknown) => {
+        const notModifiedStatus: number = HttpStatusCode.NotModified;
+        if (
+          error instanceof HttpErrorResponse &&
+          error.status === notModifiedStatus
+        ) {
+          return throwError(() => error);
+        }
+        return throwError(() => toHttpApiServiceError(error, policy.messages));
+      })
     );
   }
 }

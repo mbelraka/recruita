@@ -70,6 +70,8 @@ describe('Applicants Selectors', () => {
     viewType: ViewTypes.GRID,
     locationSuggestions: ['USA', 'UK', 'France'],
     newApplicantFabExpanded: false,
+    rosterEtag: null,
+    rosterVersion: null,
     suppressNewApplicantFabPointerExpandUntil: 0,
   };
 

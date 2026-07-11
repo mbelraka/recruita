@@ -13,7 +13,10 @@ import { HttpUrlGenerator } from '@ngrx/data';
 import { firstValueFrom } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { HttpStatusCode } from '../../../enums/http-status-code.enum';
 import { HttpApiInterceptor } from '../../../core/http/http-api.interceptor';
+import { ApiConfiguration } from '../../../generated/api-client/api-configuration';
+import { ApplicantsService } from '../../../generated/api-client/services/applicants.service';
 import { ApplicantApiErrorMessage } from '../enums/applicant-api-error-message.enum';
 import { ApplicantDataService } from './applicant-data.service';
 
@@ -33,6 +36,8 @@ describe('ApplicantDataService', () => {
     TestBed.configureTestingModule({
       providers: [
         ApplicantDataService,
+        ApplicantsService,
+        { provide: ApiConfiguration, useValue: { rootUrl: '' } },
         { provide: HttpUrlGenerator, useValue: applicantHttpUrlGenerator },
         provideHttpClient(withInterceptorsFromDi()),
         {
@@ -71,6 +76,27 @@ describe('ApplicantDataService', () => {
     expect(applicants[0]!.name).toBe('Alex');
     expect(applicants[0]!.availableFrom).toEqual(new Date('2026-06-01'));
     expect(applicants[0]!.notes).toBeUndefined();
+  });
+
+  it('returns a not-modified roster result for HTTP 304', async () => {
+    const promise = firstValueFrom(service.loadRosterSync('"roster-1"'));
+
+    const req = httpMock.expectOne(basePath);
+    expect(req.request.headers.get('If-None-Match')).toBe('"roster-1"');
+    req.flush(null, {
+      status: HttpStatusCode.NotModified,
+      statusText: 'Not Modified',
+      headers: {
+        ETag: '"roster-1"',
+        [APP_CONFIG.APPLICANTS.API.ROSTER_VERSION_RESPONSE_HEADER]: '3',
+      },
+    });
+
+    const result = await promise;
+    expect(result.notModified).toBeTrue();
+    expect(result.applicants).toBeNull();
+    expect(result.etag).toBe('"roster-1"');
+    expect(result.rosterVersion).toBe(3);
   });
 
   it('lists full applicants with notes for export refresh', async () => {

@@ -12,6 +12,8 @@ public class MatchCacheKeyProperties {
   @NotBlank private String topP = "topP";
   @NotBlank private String seed = "seed";
   @NotBlank private String deterministic = "deterministic";
+  @NotBlank private String rosterVersion = "rosterVersion";
+  @NotBlank private String schemaVersion = "schemaVersion";
 
   public String getJobDescription() {
     return jobDescription;
@@ -67,5 +69,21 @@ public class MatchCacheKeyProperties {
 
   public void setDeterministic(String deterministic) {
     this.deterministic = deterministic;
+  }
+
+  public String getRosterVersion() {
+    return rosterVersion;
+  }
+
+  public void setRosterVersion(String rosterVersion) {
+    this.rosterVersion = rosterVersion;
+  }
+
+  public String getSchemaVersion() {
+    return schemaVersion;
+  }
+
+  public void setSchemaVersion(String schemaVersion) {
+    this.schemaVersion = schemaVersion;
   }
 }

@@ -7,8 +7,12 @@ import static org.mockito.Mockito.when;
 import com.recruita.api.api.dto.applicant.ApplicantDto;
 import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
+import com.recruita.api.applicant.roster.RosterWatermark;
 import com.recruita.api.applicant.service.ApplicantApplicationService;
+import com.recruita.api.config.properties.RecruitaProperties;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +33,7 @@ class ApplicantControllerTest {
 
   @BeforeEach
   void setUp() {
-    controller = new ApplicantController(applicantApplicationService);
+    controller = new ApplicantController(applicantApplicationService, new RecruitaProperties());
   }
 
   @Test
@@ -38,12 +42,29 @@ class ApplicantControllerTest {
         List.of(
             new ApplicantSummaryDto(
                 "a-1", "Alex", null, null, null, null, null, null, null, List.of()));
-    when(applicantApplicationService.listSummaries()).thenReturn(summaries);
+    RosterWatermark watermark = new RosterWatermark(1L, "\"roster-v1-0-1\"", Instant.EPOCH, 1L);
+    when(applicantApplicationService.rosterWatermark()).thenReturn(watermark);
+    when(applicantApplicationService.listSummariesIfNotModified(null))
+        .thenReturn(Optional.of(summaries));
 
-    List<ApplicantSummaryDto> result = controller.listApplicantSummaries().getBody();
+    var response = controller.listApplicantSummaries(null);
 
-    assertEquals(summaries, result);
-    verify(applicantApplicationService).listSummaries();
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(summaries, response.getBody());
+    verify(applicantApplicationService).listSummariesIfNotModified(null);
+  }
+
+  @Test
+  void listApplicantSummariesReturnsNotModifiedWhenEtagMatches() {
+    RosterWatermark watermark = new RosterWatermark(2L, "\"roster-v2-0-1\"", Instant.EPOCH, 1L);
+    when(applicantApplicationService.rosterWatermark()).thenReturn(watermark);
+    when(applicantApplicationService.listSummariesIfNotModified(watermark.etag()))
+        .thenReturn(Optional.empty());
+
+    var response = controller.listApplicantSummaries(watermark.etag());
+
+    assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
+    verify(applicantApplicationService).listSummariesIfNotModified(watermark.etag());
   }
 
   @Test

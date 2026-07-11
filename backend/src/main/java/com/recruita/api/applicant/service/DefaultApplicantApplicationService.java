@@ -5,11 +5,14 @@ import com.recruita.api.api.dto.applicant.ApplicantSummaryDto;
 import com.recruita.api.api.dto.applicant.SaveApplicantRequestDto;
 import com.recruita.api.applicant.mapper.ApplicantMapper;
 import com.recruita.api.applicant.message.ApplicantApiErrorMessage;
+import com.recruita.api.applicant.roster.RosterMutationCoordinator;
+import com.recruita.api.applicant.roster.RosterWatermark;
 import com.recruita.api.common.exception.ApplicantConflictException;
 import com.recruita.api.common.exception.ApplicantNotFoundException;
 import com.recruita.api.persistence.entity.ApplicantEntity;
 import com.recruita.api.persistence.repository.ApplicantRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,11 +26,34 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
 
   private final ApplicantRepository repository;
   private final ApplicantMapper mapper;
+  private final RosterWatermarkService rosterWatermarkService;
+  private final RosterMutationCoordinator rosterMutationCoordinator;
 
   public DefaultApplicantApplicationService(
-      ApplicantRepository repository, ApplicantMapper mapper) {
+      ApplicantRepository repository,
+      ApplicantMapper mapper,
+      RosterWatermarkService rosterWatermarkService,
+      RosterMutationCoordinator rosterMutationCoordinator) {
     this.repository = repository;
     this.mapper = mapper;
+    this.rosterWatermarkService = rosterWatermarkService;
+    this.rosterMutationCoordinator = rosterMutationCoordinator;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public RosterWatermark rosterWatermark() {
+    return rosterWatermarkService.current();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<List<ApplicantSummaryDto>> listSummariesIfNotModified(String ifNoneMatch) {
+    RosterWatermark watermark = rosterWatermarkService.current();
+    if (matchesIfNoneMatch(ifNoneMatch, watermark.etag())) {
+      return Optional.empty();
+    }
+    return Optional.of(mapper.toSummaryDtoList(repository.findAll(LIST_SORT)));
   }
 
   @Override
@@ -60,7 +86,9 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
       throw new ApplicantConflictException(ApplicantApiErrorMessage.ALREADY_EXISTS.message());
     }
     ApplicantEntity entity = mapper.toNewEntity(request);
-    return mapper.toDto(repository.save(entity));
+    ApplicantDto created = mapper.toDto(repository.save(entity));
+    rosterMutationCoordinator.onRosterMutation();
+    return created;
   }
 
   @Override
@@ -75,7 +103,9 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
             .orElseThrow(
                 () -> new ApplicantNotFoundException(ApplicantApiErrorMessage.NOT_FOUND.message()));
     mapper.applyRequest(entity, request);
-    return mapper.toDto(repository.save(entity));
+    ApplicantDto updated = mapper.toDto(repository.save(entity));
+    rosterMutationCoordinator.onRosterMutation();
+    return updated;
   }
 
   @Override
@@ -85,5 +115,19 @@ public class DefaultApplicantApplicationService implements ApplicantApplicationS
       throw new ApplicantNotFoundException(ApplicantApiErrorMessage.NOT_FOUND.message());
     }
     repository.deleteById(id);
+    rosterMutationCoordinator.onRosterMutation();
+  }
+
+  private static boolean matchesIfNoneMatch(String ifNoneMatch, String etag) {
+    if (ifNoneMatch == null || ifNoneMatch.isBlank()) {
+      return false;
+    }
+    String trimmed = ifNoneMatch.trim();
+    for (String candidate : trimmed.split(",")) {
+      if (etag.equals(candidate.trim())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

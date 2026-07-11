@@ -13,7 +13,12 @@ export const loadApplicantsFailure = createAction(
   props<{ error: string }>()
 );
 export const applicantsRosterLoaded = createAction(
-  '[Applicants] Roster Loaded'
+  '[Applicants] Roster Loaded',
+  props<{
+    etag: string | null;
+    rosterVersion: number | null;
+    notModified: boolean;
+  }>()
 );
 
 export const addApplicant = createAction(

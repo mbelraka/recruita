@@ -35,12 +35,20 @@ public class RedisMatchResponseCacheStore implements MatchResponseCacheStore {
     if (payload == null || payload.isBlank()) {
       return Optional.empty();
     }
-    return Optional.of(codec.decode(payload));
+    return codec.tryDecode(payload);
   }
 
   @Override
   public void put(String cacheKey, MatchEvaluationResult value) {
     redisTemplate.opsForValue().set(redisKey(cacheKey), codec.encode(value), ttl);
+  }
+
+  @Override
+  public void invalidateAll() {
+    var keys = redisTemplate.keys(keyPrefix + "*");
+    if (keys != null && !keys.isEmpty()) {
+      redisTemplate.delete(keys);
+    }
   }
 
   private String redisKey(String cacheKey) {

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom, mapResponse } from '@ngrx/operators';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import {
   catchError,
   concatMap,
   exhaustMap,
   filter,
+  from,
   map,
   of,
   switchMap,
@@ -25,8 +26,10 @@ import {
   concatWithErrorNotification,
   concatWithNotification,
 } from '../../../utilities/notification.utils';
+import { MatchCacheSyncService } from '../../match/services/match-cache-sync.service';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
+import { ApplicantRosterLoadResult } from '../models/applicant-roster-load-result.model';
 import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
 import {
@@ -59,6 +62,8 @@ import {
   selectFilterBySkill,
   selectFilterByStatus,
   selectGlobalFilter,
+  selectRosterEtag,
+  selectRosterVersion,
 } from './applicants.selectors';
 
 /**
@@ -73,7 +78,8 @@ export class ApplicantsEffects {
     private readonly _router: Router,
     private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _citySearchService: CitySearchService,
-    private readonly _editDialog: ApplicantEditDialogService
+    private readonly _editDialog: ApplicantEditDialogService,
+    private readonly _matchCacheSync: MatchCacheSyncService
   ) {}
 
   routerApplicantFiltersSync$ = createEffect(() =>
@@ -131,9 +137,15 @@ export class ApplicantsEffects {
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadApplicants),
-      switchMap(() =>
-        this._applicants.loadRoster().pipe(
-          map(() => applicantsRosterLoaded()),
+      concatLatestFrom(() => [
+        this._store.select(selectRosterEtag),
+        this._store.select(selectRosterVersion),
+      ]),
+      switchMap(([, rosterEtag, previousRosterVersion]) =>
+        this._applicants.loadRoster(rosterEtag).pipe(
+          switchMap((result) =>
+            from(this._rosterLoadActions(result, previousRosterVersion))
+          ),
           catchError((error: unknown) =>
             of(loadApplicantsFailure({ error: getErrorMessage(error) }))
           )
@@ -247,7 +259,36 @@ export class ApplicantsEffects {
         updateApplicantSuccess,
         deleteApplicantSuccess
       ),
-      map(() => invalidateMatchResults())
+      switchMap(() =>
+        this._matchCacheSync.invalidateBackendMatchCache().pipe(
+          map(() => invalidateMatchResults()),
+          catchError(() => of(invalidateMatchResults()))
+        )
+      )
     )
   );
+
+  private _rosterLoadActions(
+    result: ApplicantRosterLoadResult,
+    previousRosterVersion: number | null
+  ): Action[] {
+    const actions: Action[] = [
+      applicantsRosterLoaded({
+        etag: result.etag,
+        rosterVersion: result.rosterVersion,
+        notModified: result.notModified,
+      }),
+    ];
+
+    if (
+      !result.notModified &&
+      result.rosterVersion != null &&
+      previousRosterVersion != null &&
+      result.rosterVersion !== previousRosterVersion
+    ) {
+      actions.push(invalidateMatchResults());
+    }
+
+    return actions;
+  }
 }
