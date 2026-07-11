@@ -6,6 +6,4 @@ import com.recruita.api.api.dto.match.MatchResponseDto;
 public interface MatchApplicationService {
 
   MatchResponseDto evaluate(MatchRequestDto request);
-
-  void invalidateMatchCache();
 }

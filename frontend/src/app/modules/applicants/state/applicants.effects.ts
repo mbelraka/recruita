@@ -26,7 +26,6 @@ import {
   concatWithErrorNotification,
   concatWithNotification,
 } from '../../../utilities/notification.utils';
-import { MatchCacheSyncService } from '../../match/services/match-cache-sync.service';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantRosterLoadResult } from '../models/applicant-roster-load-result.model';
@@ -78,8 +77,7 @@ export class ApplicantsEffects {
     private readonly _router: Router,
     private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _citySearchService: CitySearchService,
-    private readonly _editDialog: ApplicantEditDialogService,
-    private readonly _matchCacheSync: MatchCacheSyncService
+    private readonly _editDialog: ApplicantEditDialogService
   ) {}
 
   routerApplicantFiltersSync$ = createEffect(() =>
@@ -259,12 +257,7 @@ export class ApplicantsEffects {
         updateApplicantSuccess,
         deleteApplicantSuccess
       ),
-      switchMap(() =>
-        this._matchCacheSync.invalidateBackendMatchCache().pipe(
-          map(() => invalidateMatchResults()),
-          catchError(() => of(invalidateMatchResults()))
-        )
-      )
+      map(() => invalidateMatchResults())
     )
   );
 

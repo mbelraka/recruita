@@ -400,9 +400,6 @@ export const APP_CONFIG = {
     REQUEST_TIMEOUT_MS: 30_000,
     /** Extra headroom for NgRx effect `timeout` above the HTTP client deadline (ms). */
     EFFECT_TIMEOUT_GRACE_MS: 1000,
-    API: {
-      CACHE_INVALIDATE_PATH: '/api/match/cache/invalidate',
-    } as const,
     /** User-facing copy: `MatchErrorMessage`. */
     SCORE: {
       MIN: 0,

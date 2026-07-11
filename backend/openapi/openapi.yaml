@@ -240,15 +240,6 @@ paths:
         '409':
           $ref: '#/components/responses/ConflictProblem'
 
-  /api/match/cache/invalidate:
-    post:
-      tags: [Match]
-      summary: Invalidate cached match evaluation results
-      operationId: invalidateMatchCache
-      responses:
-        '204':
-          description: Cache invalidated
-
   /api/match:
     post:
       tags: [Match]

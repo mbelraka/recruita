@@ -94,7 +94,6 @@ public class ApiProperties {
     private String healthPath = "/api/health";
     private String matchPath = "/api/match";
     private String matchLegacyPath = "/api/match-job";
-    private String matchCacheInvalidatePath = "/api/match/cache/invalidate";
     private String applicantsPath = "/api/applicants";
     private String profilesPath = "/api/profiles";
     private String actionParsePath = "/api/action/parse";
@@ -121,14 +120,6 @@ public class ApiProperties {
 
     public void setMatchLegacyPath(String matchLegacyPath) {
       this.matchLegacyPath = matchLegacyPath;
-    }
-
-    public String getMatchCacheInvalidatePath() {
-      return matchCacheInvalidatePath;
-    }
-
-    public void setMatchCacheInvalidatePath(String matchCacheInvalidatePath) {
-      this.matchCacheInvalidatePath = matchCacheInvalidatePath;
     }
 
     public String getApplicantsPath() {
@@ -172,7 +163,6 @@ public class ApiProperties {
         healthPath,
         matchPath,
         matchLegacyPath,
-        matchCacheInvalidatePath,
         applicantsPath,
         applicantsPath + "/**",
         profilesPath,

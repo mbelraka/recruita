@@ -30,6 +30,11 @@ class SecurityFilterChainIntegrationTest {
   }
 
   @Test
+  void deniesRemovedMatchCacheInvalidateRoute() throws Exception {
+    mockMvc.perform(post("/api/match/cache/invalidate")).andExpect(status().isForbidden());
+  }
+
+  @Test
   void allowsPublicHealthRoute() throws Exception {
     mockMvc.perform(get("/api/health")).andExpect(status().isOk());
   }

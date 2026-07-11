@@ -28,21 +28,6 @@ import jakarta.annotation.Generated;
 public interface MatchApi {
 
     /**
-     * POST /api/match/cache/invalidate : Invalidate cached match evaluation results
-     *
-     * @return Cache invalidated (status code 204)
-     */
-    @RequestMapping(
-        method = RequestMethod.POST,
-        value = "/api/match/cache/invalidate"
-    )
-    
-    ResponseEntity<Void> invalidateMatchCache(
-        
-    );
-
-
-    /**
      * POST /api/match : Evaluate match scores
      *
      * @param matchRequestDto  (required)

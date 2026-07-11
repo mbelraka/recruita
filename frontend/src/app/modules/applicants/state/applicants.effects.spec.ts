@@ -33,7 +33,6 @@ import {
   updateApplicantFailure,
 } from './applicants.actions';
 import { ApplicantsEffects } from './applicants.effects';
-import { MatchCacheSyncService } from '../../match/services/match-cache-sync.service';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 
 describe('ApplicantsEffects', () => {
@@ -52,7 +51,6 @@ describe('ApplicantsEffects', () => {
     };
   };
   let mockEditDialog: jasmine.SpyObj<ApplicantEditDialogService>;
-  let matchCacheSync: jasmine.SpyObj<MatchCacheSyncService>;
 
   const sample = createApplicant({
     id: 'a-1',
@@ -91,11 +89,6 @@ describe('ApplicantsEffects', () => {
       'ApplicantEditDialogService',
       ['openCreateOrEdit']
     );
-    matchCacheSync = jasmine.createSpyObj<MatchCacheSyncService>(
-      'MatchCacheSyncService',
-      ['invalidateBackendMatchCache']
-    );
-    matchCacheSync.invalidateBackendMatchCache.and.returnValue(of(undefined));
 
     TestBed.configureTestingModule({
       providers: [
@@ -105,7 +98,6 @@ describe('ApplicantsEffects', () => {
         provideMockStore(),
         { provide: Router, useValue: mockRouter },
         { provide: ApplicantEditDialogService, useValue: mockEditDialog },
-        { provide: MatchCacheSyncService, useValue: matchCacheSync },
         {
           provide: CitySearchService,
           useValue: jasmine.createSpyObj<CitySearchService>(
@@ -229,7 +221,6 @@ describe('ApplicantsEffects', () => {
     const action = await firstValueFrom(
       effects.invalidateMatchOnApplicantChange$
     );
-    expect(matchCacheSync.invalidateBackendMatchCache).toHaveBeenCalled();
     expect(action).toEqual(invalidateMatchResults());
   });
 });

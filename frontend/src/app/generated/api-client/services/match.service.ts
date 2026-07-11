@@ -10,8 +10,6 @@ import { BaseService } from '../base-service';
 import { ApiConfiguration } from '../api-configuration';
 import { StrictHttpResponse } from '../strict-http-response';
 
-import { invalidateMatchCache } from '../fn/match/invalidate-match-cache';
-import { InvalidateMatchCache$Params } from '../fn/match/invalidate-match-cache';
 import { match } from '../fn/match/match';
 import { Match$Params } from '../fn/match/match';
 import { matchLegacy } from '../fn/match/match-legacy';
@@ -26,41 +24,6 @@ import { MatchResponseDto } from '../models/match-response-dto';
 export class MatchService extends BaseService {
   constructor(config: ApiConfiguration, http: HttpClient) {
     super(config, http);
-  }
-
-  /** Path part for operation `invalidateMatchCache()` */
-  static readonly InvalidateMatchCachePath = '/api/match/cache/invalidate';
-
-  /**
-   * Invalidate cached match evaluation results.
-   *
-   *
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `invalidateMatchCache()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  invalidateMatchCache$Response(params?: InvalidateMatchCache$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
-    const obs = invalidateMatchCache(this.http, this.rootUrl, params, context);
-    return obs;
-  }
-
-  /**
-   * Invalidate cached match evaluation results.
-   *
-   *
-   *
-   * This method provides access only to the response body.
-   * To access the full response (for headers, for example), `invalidateMatchCache$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  invalidateMatchCache(params?: InvalidateMatchCache$Params, context?: HttpContext): Observable<void> {
-    const resp = this.invalidateMatchCache$Response(params, context);
-    return resp.pipe(
-      map((r: StrictHttpResponse<void>): void => r.body)
-    );
   }
 
   /** Path part for operation `match()` */

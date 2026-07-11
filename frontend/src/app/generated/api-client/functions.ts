@@ -21,8 +21,6 @@ export type { GetProfile$Params as GetProfile$Params } from './fn/profiles/get-p
 export { getProfile as getProfile } from './fn/profiles/get-profile';
 export type { UpdateProfile$Params as UpdateProfile$Params } from './fn/profiles/update-profile';
 export { updateProfile as updateProfile } from './fn/profiles/update-profile';
-export type { InvalidateMatchCache$Params as InvalidateMatchCache$Params } from './fn/match/invalidate-match-cache';
-export { invalidateMatchCache as invalidateMatchCache } from './fn/match/invalidate-match-cache';
 export type { Match$Params as Match$Params } from './fn/match/match';
 export { match as match } from './fn/match/match';
 export type { MatchLegacy$Params as MatchLegacy$Params } from './fn/match/match-legacy';
