@@ -22,6 +22,8 @@ export class LocaleLocationPipe implements PipeTransform {
     US: 'US',
     UK: 'GB',
     Germany: 'DE',
+    Austria: 'AT',
+    Switzerland: 'CH',
     Canada: 'CA',
     Italy: 'IT',
     Singapore: 'SG',

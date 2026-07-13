@@ -9,3 +9,4 @@ recruita:
   match:
     groq:
       require-api-key-at-startup: false
+      api-key: ${GROQ_API_KEY:seed-unused}

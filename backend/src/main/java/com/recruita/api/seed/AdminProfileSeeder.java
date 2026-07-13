@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Profile("seed")
@@ -38,7 +37,6 @@ public class AdminProfileSeeder implements CommandLineRunner {
   }
 
   @Override
-  @Transactional
   public void run(String... args) throws IOException {
     SaveProfileRequestDto profile = loadAdminProfile();
     String adminId = properties.getProfileApi().getAdminId();

@@ -58,4 +58,10 @@ describe('LocaleLocationPipe', () => {
     const raw = 'Somewhere, Mars Colony';
     expect(pipe.transform(raw)).toBe(raw);
   });
+
+  it('should localize Austria and Switzerland in German', () => {
+    langSubject.next(Languages.German);
+    expect(pipe.transform('Vienna, Austria')).toContain('Österreich');
+    expect(pipe.transform('Zurich, Switzerland')).toContain('Schweiz');
+  });
 });
