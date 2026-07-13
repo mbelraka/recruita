@@ -2,10 +2,13 @@
 spring:
   config:
     import:
-      - optional:file:.env
+      - optional:file:backend/.env[.properties]
       - optional:classpath:application-profile-api.yml
 
 recruita:
   runtime:
     production-mode: ${NODE_ENV:development}
     suppress-error-detail: false
+  match:
+    groq:
+      api-key: ${GROQ_API_KEY:}
