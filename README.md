@@ -2,9 +2,9 @@
 
 **Talent without boundaries** — a full-stack recruitment workspace for managing applicant pipelines, ranking candidates with consent-gated AI matching, exporting hiring data in multiple formats, and giving users explicit control over privacy and third-party processing.
 
-Recruita is built as a **production-minded monorepo**: lazy-loaded Angular feature modules, a Spring Boot API with strict validation and high test coverage, centralized configuration, WCAG-oriented accessibility foundations, and quality gates that mirror CI on every commit. The UI is **fully responsive** (phone through desktop) and ships in **six languages**.
+Recruita is a **production-minded monorepo**: lazy-loaded Angular feature modules, a Spring Boot API with strict validation and high test coverage, centralized configuration, WCAG-oriented accessibility foundations, and quality gates that mirror CI on every commit. The UI is **fully responsive** (phone through desktop) and ships in **six languages**.
 
-> **Monorepo:** npm workspace **`frontend/`** (`@recruita/frontend`, Angular 20) + Maven **`backend/`** (Spring Boot 3, Java 21). The match API is **Spring only** — there is no Node/Express server. Root `package.json` orchestrates dev, CI, and Husky.
+> **Monorepo:** npm workspace **`frontend/`** (`@recruita/frontend`, Angular 20) + Maven **`backend/`** (Spring Boot 3, Java 21). The match API is **Spring only** — there is no Node/Express server. Root `package.json` orchestrates dev, CI, and Husky. **This README is the canonical documentation** for the project.
 
 ---
 
@@ -16,18 +16,19 @@ Recruita is built as a **production-minded monorepo**: lazy-loaded Angular featu
 4. [Application tour](#application-tour)
 5. [Typical workflows](#typical-workflows)
 6. [Applicant data model](#applicant-data-model)
-7. [Security and data privacy](#security-and-data-privacy)
-8. [Architecture](#architecture)
+7. [Architecture](#architecture)
+8. [Security & privacy](#security--privacy)
 9. [Tech stack](#tech-stack)
 10. [Project structure](#project-structure)
 11. [Getting started](#getting-started)
 12. [npm scripts](#npm-scripts)
-13. [Testing and CI](#testing-and-ci)
-14. [Configuration reference](#configuration-reference)
-15. [Internationalization](#internationalization)
-16. [Responsive design](#responsive-design)
-17. [Accessibility (WCAG foundation)](#accessibility-wcag-foundation)
-18. [Related documentation](#related-documentation)
+13. [Testing & CI](#testing--ci)
+14. [Contributing](#contributing)
+15. [Automation & agents](#automation--agents)
+16. [Configuration reference](#configuration-reference)
+17. [Internationalization](#internationalization)
+18. [Responsive design](#responsive-design)
+19. [Accessibility (WCAG foundation)](#accessibility-wcag-foundation)
 
 ---
 
@@ -41,9 +42,9 @@ Recruita is a **browser-based hiring operations tool** that helps recruiters and
 - **Export** roster data as CSV, JSON, Excel, or PDF for reporting, backups, or handoff to other systems.
 - **Stay in control of privacy** through a versioned consent model that gates optional third-party features (translation, geocoding, AI matching).
 
-The product is intentionally **modular**: each major area (applicants, match, export, privacy) is a lazy-loaded Angular module with its own NgRx slice, while shared shell concerns (navigation, language, notifications, consent gate) live in the root container.
+Each major area (applicants, match, export, privacy) is a lazy-loaded Angular module with its own NgRx slice; shared shell concerns (navigation, language, notifications, consent gate) live in the root container.
 
-**Persistence:** With the `persistence` Spring profile (enabled by default in `npm run dev`), applicant rosters and session profiles are stored in **PostgreSQL** and accessed via REST. Match result caching uses **Redis**. Language preference and in-flight UI state remain session-oriented in the browser.
+**Persistence:** With the `persistence` Spring profile (enabled by default in `npm run dev`), applicant rosters and session profiles are stored in **PostgreSQL** via REST. Match result caching uses **Redis**. Language preference and in-flight UI state remain session-oriented in the browser.
 
 ---
 
@@ -54,9 +55,9 @@ The product is intentionally **modular**: each major area (applicants, match, ex
 | **Recruiters / talent teams** | Maintain a searchable applicant roster, track pipeline status, and shortlist against open roles. |
 | **Hiring managers** | Review ranked candidates with localized reasoning snippets tied to a job description. |
 | **Engineering teams** | Reference implementation for privacy-by-default SPA + API design, NgRx Data entity caching, and OWASP-aligned match proxy patterns. |
-| **Operators** | Deploy a static Angular bundle behind HTTPS with a separately configured Spring API (see [SECURITY.md](./SECURITY.md)). |
+| **Operators** | Deploy a static Angular bundle behind HTTPS with a separately configured Spring API (see [Security & privacy](#security--privacy)). |
 
-Recruita is **not** a full ATS replacement out of the box: it focuses on roster management, AI-assisted ranking, export, and transparent consent — without prescribing a particular identity provider or multi-tenant model. `AuthInterceptor` and XSRF configuration are ready for you to wire to your IdP.
+Recruita is **not** a full ATS replacement: it focuses on roster management, AI-assisted ranking, export, and transparent consent — without prescribing a particular identity provider or multi-tenant model. `AuthInterceptor` and XSRF configuration are ready for you to wire to your IdP.
 
 ---
 
@@ -82,79 +83,48 @@ Recruita is **not** a full ATS replacement out of the box: it focuses on roster 
 
 ### Landing (`/main`)
 
-The home hub introduces Recruita with a headline, primary CTA into applicants, and a hero visual. On narrow screens the layout **stacks vertically** with scaled typography. Entry route: first item in `APP_CONFIG.NAV_LINKS`.
+Home hub with headline, primary CTA into applicants, and hero visual. On narrow screens the layout **stacks vertically** with scaled typography.
 
 ### Applicants (`/applicants`)
 
-The core workspace for roster management.
-
 | UI area | Behavior |
 |---------|----------|
-| **Filter header** | Search (name, email, skills, role, etc.), status dropdown, country dropdown, optional grid sort field, skill filter chip, grid/list toggle. On tablet and below, filters expand to **full width**. |
+| **Filter header** | Search, status/country dropdowns, optional grid sort, skill filter chip, grid/list toggle. Full width on tablet and below. |
 | **Grid view** | Card grid with pagination; column count adapts to container width. |
-| **List view** | Sortable Material table; **columns reduce automatically** on smaller viewports (down to name, status, and job title on phones). |
+| **List view** | Sortable Material table; columns reduce on smaller viewports (down to name, status, job title on phones). |
 | **FAB** | Extended floating action button to add a new applicant. |
-| **Edit flow** | Row/card click or FAB opens the new/edit dialog; detail fetch loads full notes before edit. |
+| **Edit flow** | Row/card click or FAB opens new/edit dialog; detail fetch loads full notes before edit. |
 
-**Application statuses** (persisted on each applicant): `received`, `screening`, `interview_scheduled`, `shortlisted`, `offer_extended`, `rejected`, `withdrawn` — rendered as localized chips.
+**Application statuses:** `received`, `screening`, `interview_scheduled`, `shortlisted`, `offer_extended`, `rejected`, `withdrawn` — localized chips.
 
-**Search note:** Notes are included in global search only after an applicant’s detail has been loaded into the entity cache (e.g. after opening the edit dialog), because the summary roster API omits notes for performance.
+**Search note:** Notes appear in global search only after an applicant’s detail has been loaded into the entity cache (summary roster API omits notes for performance).
 
 ### Match (`/match`)
 
-Score applicants against a free-text **job description**.
-
-1. User enters or pastes a job description (consent for AI matching must be granted).
-2. The client builds an **anonymized** candidate payload (`match-candidate-privacy.util.ts`): one-time correlation UUIDs per applicant, plus skills, years of experience, and job title only.
-3. Spring validates, strips again, and calls **Groq** (or a deterministic fallback path without external calls).
-4. Results show ranked cards with scores and localized reasoning.
-
-On viewports ≤960px the job panel and results **stack** in a single column.
+1. User enters a job description (AI matching consent required).
+2. Client builds an **anonymized** payload (`match-candidate-privacy.util.ts`): one-time correlation UUIDs per applicant, plus skills, years of experience, and job title only.
+3. Spring validates, strips again, and calls **Groq** (or a deterministic fallback without external calls).
+4. Results show ranked cards with scores and localized reasoning. Job panel and results **stack** at ≤960px.
 
 ### Export (`/export`)
 
-Four export cards (JSON, CSV, PDF, Excel). Each triggers client-side file generation from applicants currently in the NgRx Data entity cache. The grid layout is **1 → 2 → 4 columns** across breakpoints (phone → tablet → desktop).
+Four export cards (JSON, CSV, PDF, Excel) — client-side generation from the NgRx Data entity cache. Grid: **1 → 2 → 4 columns** across breakpoints.
 
 ### Privacy (`/privacy`)
 
-Standalone page inside the root shell:
-
-- Explains what is stored and what optional features transmit externally.
-- Lets users reopen consent choices.
-- **Download my data** — JSON snapshot of loaded applicants.
-- **Reset session** — reloads the app and clears in-memory consent/UI state (does not delete server-stored applicants).
-
-On first visit (or when consent is incomplete/outdated), a **non-dismissible** dialog gates the app until choices are recorded.
+Policy, consent toggles, session JSON download, and session reset (clears in-memory consent/UI state; does not delete server-stored applicants). A **non-dismissible** dialog gates the app until consent is recorded or updated.
 
 ---
 
 ## Typical workflows
 
-### Onboard a new applicant
+**Onboard a new applicant:** Applicants → FAB → fill fields → optional location autocomplete (geocoding consent) → save → `ApplicantDataService` POSTs to `/api/applicants`.
 
-1. Open **Applicants** → tap the **New applicant** FAB.
-2. Fill required fields (name, email, etc.), add skills (chip input), set status and availability.
-3. Optionally use **location autocomplete** (requires geocoding consent).
-4. Save — NgRx dispatches create; `ApplicantDataService` POSTs to `/api/applicants`; entity cache updates.
+**Shortlist for a role:** Match → paste job description → Evaluate → review ranked cards → filter by skill from list/grid links.
 
-### Shortlist for a role
+**Export for HRIS:** Export → choose format → localized file downloads.
 
-1. Open **Match**.
-2. Paste the job description → **Evaluate**.
-3. Review ranked cards; open top candidates from the applicants module if needed.
-4. Filter applicants by skill from list/grid skill links.
-
-### Hand off data to HRIS or reporting
-
-1. Open **Export**.
-2. Choose format (e.g. Excel).
-3. File downloads with localized column headers where applicable.
-
-### Review or change privacy choices
-
-1. Footer link → **Privacy**, or wait for the consent dialog on outdated consent version.
-2. Toggle optional features or accept necessary-only processing.
-3. Profile entity cache syncs consent flags; match/geocoding/translation services respect them immediately.
+**Change privacy choices:** Footer → Privacy (or consent dialog on outdated version) → toggle features → profile entity cache syncs flags immediately.
 
 ---
 
@@ -181,79 +151,14 @@ interface Applicant {
 | `id` | Server-generated or client UUID on create; stable primary key in PostgreSQL. |
 | `skills` | String array; filterable via chip UI; exported with `; ` delimiter in CSV. |
 | `notes` | Full text on detail fetch; not on summary list API. |
-| `availableFrom` | Date; localized in list/grid via `LocaleDatePipe`. |
+| `availableFrom` | Date; localized via `LocaleDatePipe`. |
 | `currentJobTitle` | May use optional remote translation (MyMemory) when translation consent is on. |
-
----
-
-## Security and data privacy
-
-Recruita is designed around **privacy by default**, **consent-gated optional processing**, and **defense in depth** on the match API. Controls are mapped to [OWASP Top 10 (2021)](https://owasp.org/Top10/) themes and typical [OWASP ASVS](https://github.com/OWASP/ASVS) expectations. This is engineering documentation, not a certification or legal opinion.
-
-**Full control matrix and deployment checklist:** [SECURITY.md](./SECURITY.md).
-
-### Data privacy principles
-
-| Principle | How Recruita applies it |
-|-----------|-------------------------|
-| **Session preferences** | Language and consent apply for the current browser tab. Applicant rosters use PostgreSQL when the persistence profile is active. |
-| **Opt-in optional processing** | Translation, geocoding, and AI matching are **off until the user consents**. Store selectors and effects read profile consent flags before calling external APIs. |
-| **Data minimization (AI)** | Match requests send only ephemeral correlation ids, skills, years of experience, and job title — never name, email, phone, location, notes, or application status. The server strips again before scoring or Groq. |
-| **Transparency** | `/privacy` explains what is stored locally and what each optional feature transmits. Consent can be reopened anytime. |
-| **Portability** | Users can download a JSON snapshot of applicants loaded in the current session. |
-| **Right to erasure (session)** | “Reset session” reloads the app and clears in-memory consent and UI state. Server-stored applicants are not deleted. |
-| **Versioned consent** | Consent records include `PRIVACY_CONSENT_VERSION`; stale consent re-triggers the gate dialog. |
-
-### Consent model
-
-| Optional feature | When enabled | External dependency |
-|------------------|--------------|---------------------|
-| **Remote translation** | Dynamic text (e.g. job titles) may call MyMemory | `api.mymemory.translated.net` |
-| **Geocoding** | Location field autocomplete | Open-Meteo geocoding API |
-| **AI matching** | Job description + anonymized candidates sent to match API | Spring API → Groq |
-
-Implementation: `PrivacyConsentDialogService`, profile entity cache via `ProfileEntityCollectionService.syncProfileInCache()`, privacy actions handled in `MainEffects`.
-
-### Match API data flow
-
-```
-Browser (Recruita)          Spring API (backend/)           Groq API
-     │                              │                            │
-     │  anonymized candidates       │  validate + strip again      │
-     │  + job description           │  deterministic score path    │
-     ├─────────────────────────────►│───────────────────────────►│
-     │  (no credentials)            │  (credentials server-only)   │
-```
-
-- Client: `match-candidate-privacy.util.ts` replaces applicant ids with **one-time correlation UUIDs** per request.
-- Server: Spring match layer enforces allowlists, size limits, and field stripping before any model call.
-- **Never** commit `backend/.env` or put match-provider secrets in the Angular bundle.
-
-### OWASP-aligned controls (summary)
-
-| Theme | Highlights |
-|-------|------------|
-| **A01 Access control** | Match credentials server-side only; production `CORS_ORIGIN` must list real SPA origins (no `*`). |
-| **A03 Injection** | Match body capped at 512 KB; allowlisted keys; JSON-only LLM output parsing. |
-| **A04 Insecure design** | Rate limiting; consent gates; generic production errors. |
-| **A05 Misconfiguration** | Spring Security deny-by-default; CSP, nosniff, COOP/CORP, optional HSTS. |
-| **A06 Vulnerable components** | Lockfiles + `npm run security:audit`; OWASP Dependency-Check weekly on backend. |
-
-Browser hardening in `frontend/src/index.html`: Trusted Types, CSP fragments, strict referrer policy, Permissions-Policy disabling camera/mic/geolocation by default.
-
-### Production deployment checklist
-
-1. Spring **prod** profile — generic error messages to clients.
-2. `CORS_ORIGIN` — comma-separated **https://** SPA origin(s).
-3. **TLS** at ingress; `ENABLE_HSTS=1` when always HTTPS.
-4. `TRUST_PROXY=1` behind a load balancer for accurate rate limits.
-5. Rotate `GROQ_API_KEY` if exposure is suspected (`backend/.env.example`).
 
 ---
 
 ## Architecture
 
-### High-level system diagram
+### System diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -271,45 +176,38 @@ Browser hardening in `frontend/src/index.html`: Trusted Types, CSP fragments, st
 │  │ Applicants   │  │ Profiles     │  │ Match + Groq client    │ │
 │  │ REST + JPA   │  │ REST + JPA   │  │ validation, rate limit   │ │
 │  └──────┬───────┘  └──────┬───────┘  └───────────┬────────────┘ │
-│         │                 │                       │              │
 │         ▼                 ▼                       ▼              │
 │     PostgreSQL        PostgreSQL              Redis (cache)    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Frontend structure
+### Frontend
 
 | Layer | Location | Role |
 |-------|----------|------|
-| **Shell** | `containers/root/` | `RootComponent` — tab nav (desktop) / menu (mobile), language select, footer, privacy gate, `router-outlet`. |
+| **Shell** | `containers/root/` | Tab nav (desktop) / menu (mobile), language select, footer, privacy gate. |
 | **Features** | `modules/{main,applicants,match,export,smart-action}/` | Lazy-loaded routes, components, effects, selectors. |
-| **Shared** | `shared/` | Grid cards, pipes (`LocaleDate`, `LocaleLocation`, …), Material barrel. |
-| **Config** | `config/app.config.ts` | Single source for nav, dialogs, match, export, languages, notifications. |
-| **Entity data** | `core/entity-data/` | `@ngrx/data` registration, `HttpUrlGenerator`, entity metadata. |
-| **Styles** | `styles/`, `src/manrope-fonts.scss` | Design tokens, label/focus mixins, breakpoints, Material overrides; self-hosted Manrope. |
+| **Shared** | `shared/` | Grid cards, pipes, Material barrel. |
+| **Config** | `config/app.config.ts` | Nav, dialogs, match, export, languages, notifications. |
+| **Entity data** | `core/entity-data/` | `@ngrx/data` registration, `HttpUrlGenerator`, metadata. |
+| **Styles** | `styles/`, `src/manrope-fonts.scss` | Design tokens, label/focus mixins, breakpoints, Material overrides. |
 | **Bootstrap** | `app.module.ts`, `app.providers.ts` | HTTP interceptors, locale factories, `provideAppInitializer` (i18n, icons, NgRx Data). |
 
-**Design principles:** SOLID-oriented modules, atomic composition (chips, cards → feature containers), `APP_CONFIG` instead of scattered magic strings, **store-first NgRx** (components and pipes dispatch actions and select state; effects and `@ngrx/data` services own HTTP and side effects), HTTP interceptors for auth/XSRF.
+**Design principles:** `APP_CONFIG` over magic strings; **store-first NgRx** (components dispatch actions and select state; effects and `@ngrx/data` own HTTP and side effects); HTTP interceptors for auth/XSRF.
 
 ### State management
 
-Recruita uses **NgRx** with a split between **entity cache** (server-backed domain data) and **feature UI slices** (filters, sort, view mode).
-
-| Store area | Key / slice | Responsibility |
-|------------|-------------|----------------|
-| `entityCache` | `@ngrx/data` | **Applicants** and **Profile** entities via `ApplicantEntityCollectionService` / `ProfileEntityCollectionService` and `*DataService` HTTP adapters. |
+| Store area | Slice | Responsibility |
+|------------|-------|----------------|
+| `entityCache` | `@ngrx/data` | Applicants and Profile via entity collection services and `*DataService` adapters. |
 | `app` | root | Language, notifications, global UI flags. |
-| `applicants` | feature | Filters, sort, pagination, view type (grid/list) — not duplicate roster rows. |
+| `applicants` | feature | Filters, sort, pagination, view type — not duplicate roster rows. |
 | `match` | feature | Job description, scores, loading/error. |
 | `export` | feature | Selected format and export job state. |
 
-**Data flow (applicants):**
+**Applicants flow:** `loadApplicants` → GET `/api/applicants` → entity cache → selectors for grid, list, export, match.
 
-1. `loadApplicants` effect → `ApplicantEntityCollectionService.loadRoster()` → GET `/api/applicants` → `addAllToCache` + `setLoaded(true)`.
-2. Create/update/delete → effects → data service → API → entity cache upsert/remove.
-3. Selectors in `entity-cache.selectors.ts` project cached entities for grid, list, export, and match.
-
-**Profile & privacy:** `loadProfile` loads the admin profile into the entity cache; consent and privacy actions dispatch through the store — `MainEffects` syncs outcomes via `ProfileEntityCollectionService` so selectors and the consent gate read consistent flags.
+**Profile & privacy:** Consent and privacy actions dispatch through the store; `MainEffects` syncs via `ProfileEntityCollectionService`.
 
 ### Spring backend
 
@@ -318,11 +216,16 @@ Recruita uses **NgRx** with a split between **entity cache** (server-backed doma
 | **Entry** | `com.recruita.api.RecruitaApiApplication` |
 | **Profiles** | `dev`, `prod`, `test`, `persistence`, `seed` |
 | **Config** | `application.yml` + `@ConfigurationProperties` (no magic strings in Java) |
-| **Persistence** | Flyway migrations; JPA repositories; MapStruct DTO mappers |
-| **Match** | Sealed evaluation results, request policy validation, Groq integration, Redis cache when persistence is on |
-| **QA** | Spotless, Checkstyle, SpotBugs + FindSecBugs, ArchUnit, JaCoCo ≥ 80% branch coverage on `verify` |
+| **Persistence** | Flyway (`db/migration/`); JPA; MapStruct DTO mappers |
+| **Match** | Request policy validation, Groq integration, Redis cache with persistence |
+| **QA** | Spotless, Checkstyle, SpotBugs + FindSecBugs, ArchUnit, JaCoCo ≥ 80% on `verify` |
 
-### REST API (persistence profile)
+| Profile | Behavior |
+|---------|----------|
+| `dev` (default) | In-memory match cache; no database |
+| `persistence` | Flyway on PostgreSQL; match cache in Redis |
+
+### REST API
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -342,16 +245,76 @@ Without `persistence`, applicant/profile routes return **404**; match and health
 
 ### OpenAPI / Swagger
 
-Interactive API documentation is generated with **springdoc-openapi** 2.8.x (OpenAPI 3; requires 2.7+ on Spring Boot 3.4).
-
 | URL (dev) | Purpose |
 |-----------|---------|
-| http://localhost:3001/swagger-ui.html | Swagger UI — browse and try endpoints |
-| http://localhost:3001/v3/api-docs | Machine-readable OpenAPI JSON |
+| http://localhost:3001/swagger-ui.html | Swagger UI |
+| http://localhost:3001/v3/api-docs | OpenAPI JSON |
 
-Configuration: `recruita.api.openapi` in `application.yml` (metadata + security permit paths), `OpenApiDocumentFactory` (builds the spec), and thin `OpenApiConfig`. Controllers use `@Tag` / `@Operation`; match DTOs include `@Schema` for anonymized payloads. `springdoc.*` paths must stay aligned with `recruita.api.openapi.permitted-paths`.
+**Production:** Swagger UI and `/v3/api-docs` disabled. **CI:** `npm run validate:openapi:backend` after `validate:ci:backend`.
 
-**Production:** `application-prod.yml` disables both Swagger UI and `/v3/api-docs`. **CI** runs `npm run validate:openapi:backend` to curl the spec against a live dev server after `validate:ci:backend`.
+---
+
+## Security & privacy
+
+Engineering documentation mapped to [OWASP Top 10 (2021)](https://owasp.org/Top10/) and typical [ASVS](https://github.com/OWASP/ASVS) expectations — not a certification or legal opinion.
+
+### Privacy principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| **Session preferences** | Language and consent per browser tab; rosters in PostgreSQL with persistence. |
+| **Opt-in optional processing** | Translation, geocoding, and AI matching off until consented; store selectors/effects gate external calls. |
+| **Data minimization (AI)** | Match sends only correlation ids, skills, years of experience, job title — server strips again before Groq. |
+| **Transparency** | `/privacy` explains storage and external transmissions; consent reopenable anytime. |
+| **Portability** | JSON snapshot of loaded applicants. |
+| **Session erasure** | Reset session clears in-memory consent/UI state (not server applicants). |
+| **Versioned consent** | `PRIVACY_CONSENT_VERSION`; stale consent re-triggers gate dialog. |
+
+### Consent model
+
+| Feature | External dependency |
+|---------|---------------------|
+| Remote translation | `api.mymemory.translated.net` |
+| Geocoding | Open-Meteo geocoding API |
+| AI matching | Spring API → Groq |
+
+### Match API data flow
+
+```
+Browser → Spring (validate + strip) → Groq
+         (no credentials)           (server-only API key)
+```
+
+Client: `match-candidate-privacy.util.ts` uses **one-time correlation UUIDs**. **Never** commit `backend/.env` or put secrets in the Angular bundle.
+
+### OWASP-aligned controls
+
+| Area | What we do |
+|------|------------|
+| **A01 Broken access** | `GROQ_API_KEY` server-side only; `CORS_ORIGIN` must list real SPA origins in production (no `*`). |
+| **A02 Cryptographic failures** | TLS at ingress; `ENABLE_HSTS=1` when always HTTPS. |
+| **A03 Injection** | JSON body capped at **512 KB**; `/api/match` allowlisted keys; candidates reduced to `id`, `skills`, `yearsOfExperience`, `currentJobTitle`; LLM output parsed as JSON only. |
+| **A04 Insecure design** | Rate limiting; consent gates; deterministic scoring fallback; generic production errors. |
+| **A05 Misconfiguration** | Security headers (CSP, nosniff, COOP/CORP, referrer, Permissions-Policy, optional HSTS); production refuses `CORS_ORIGIN=*`; `TRUST_PROXY=1` for real client IPs. |
+| **A06 Vulnerable components** | Lockfiles; `npm run security:audit`; weekly OWASP Dependency-Check (CVSS ≥ 8 fails); SpotBugs on every `verify`. |
+| **A07 Identification / auth** | Angular auth patterns + your IdP; tokens per your security policy. |
+| **A08 Integrity** | Lockfile present; bundled assets via Angular build. |
+| **A09 Logging** | Production masks internal errors; stable JSON for malformed requests. |
+| **A10 SSRF** | Outbound calls limited to configured Groq client; no user-controlled server fetch URLs in match API. |
+
+### Browser hardening
+
+`frontend/src/index.html`: Trusted Types, CSP fragments (`base-uri`, `frame-ancestors`, `object-src`), strict referrer, Permissions-Policy. For stricter CSP (`script-src` nonces), set headers on the hosting reverse proxy.
+
+### Production deployment checklist
+
+1. Spring **prod** profile — generic client error messages.
+2. `CORS_ORIGIN` — comma-separated **https://** SPA origin(s).
+3. **TLS** at ingress; `ENABLE_HSTS=1` when always HTTPS.
+4. `TRUST_PROXY=1` behind a load balancer.
+5. Rotate `GROQ_API_KEY` if exposed (`backend/.env.example`).
+
+Report suspected vulnerabilities through your organization’s usual channel.
 
 ---
 
@@ -359,13 +322,13 @@ Configuration: `recruita.api.openapi` in `application.yml` (metadata + security 
 
 | Layer | Technologies |
 |-------|----------------|
-| **Frontend** | Angular 20, Angular Material, Tailwind CSS, RxJS, NgRx (Store, Effects, Entity, **Data**) |
+| **Frontend** | Angular 20, Angular Material, Tailwind CSS, RxJS, NgRx (Store, Effects, Entity, Data) |
 | **i18n** | `@ngx-translate` with HTTP-loaded JSON bundles |
 | **Backend** | Spring Boot 3 (Java 21), JPA, Flyway, Groq match API |
 | **Data stores** | PostgreSQL (applicants, profiles), Redis (match cache) |
 | **Export** | ExcelJS, pdf-lib, file-saver (client-side) |
 | **Backend QA** | Spotless, Checkstyle, SpotBugs, ArchUnit, JaCoCo |
-| **Frontend QA** | ESLint (incl. template accessibility), Prettier, Karma, Playwright, axe (`a11y:e2e`), angular-doctor, ngx-security-audit, letify |
+| **Frontend QA** | ESLint (incl. template accessibility), Prettier, Karma, Playwright, axe, angular-doctor, ngx-security-audit, letify |
 | **Tooling** | Husky, lint-staged, patch-package |
 | **Runtime** | Node **22** (`.nvmrc`), npm **10.9.2**; Java **21** (`backend/.java-version`) |
 
@@ -374,34 +337,21 @@ Configuration: `recruita.api.openapi` in `application.yml` (metadata + security 
 ## Project structure
 
 ```
-recruita/                          # Monorepo root
+recruita/
 ├── frontend/                      # @recruita/frontend — Angular 20 SPA
-│   ├── src/app/
-│   │   ├── app.module.ts          # Thin module; providers in app.providers.ts
-│   │   ├── app.providers.ts       # HTTP, locale, app initializers
-│   │   ├── config/                # APP_CONFIG
-│   │   ├── containers/root/       # Shell, routing, privacy page
-│   │   ├── core/                  # HTTP providers, entity-data setup
-│   │   ├── modules/               # main, applicants, match, export, smart-action
-│   │   ├── services/              # Localization, route focus, layout, …
-│   │   ├── shared/                # Pipes, cards, Material barrel
-│   │   ├── styles/                # Tokens, breakpoints, theme, overrides
-│   │   └── utilities/initializers/ # Localization, Material Symbols, NgRx Data
-│   ├── src/manrope-fonts.scss     # Self-hosted Manrope @font-face bundles
+│   ├── src/app/                   # app.module, app.providers, modules, styles, …
+│   ├── src/manrope-fonts.scss     # Self-hosted Manrope @font-face
 │   ├── src/assets/i18n/           # en, de, fr, it, rm, es
-│   ├── e2e/                       # Playwright specs (incl. accessibility.spec.ts)
-│   └── proxy.conf.json            # Dev: /api → http://localhost:3001
+│   ├── e2e/                       # Playwright (incl. accessibility.spec.ts)
+│   └── proxy.conf.json            # Dev: /api → :3001
 ├── backend/                       # Spring Boot 3 (not an npm workspace)
-│   ├── src/main/java|resources/
+│   ├── src/main/java|resources/   # application.yml, db/migration/, seed/
 │   ├── src/test/java/
 │   ├── config/                    # Checkstyle, SpotBugs
 │   └── .env.example → .env        # Secrets (gitignored)
 ├── scripts/                       # run-dev.sh, seed-applicants.sh, pre-commit
 ├── docker-compose.yml             # recruita-postgres, recruita-redis
 ├── package.json                   # Orchestration scripts
-├── CONTRIBUTING.md
-├── AGENTS.md
-├── SECURITY.md
 └── .github/workflows/             # ci.yml, backend-security-audit.yml
 ```
 
@@ -409,14 +359,12 @@ recruita/                          # Monorepo root
 
 ## Getting started
 
-See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for monorepo conventions, pre-commit behavior, and PR expectations.
-
 ### Prerequisites
 
-- Node.js **22** (see `.nvmrc`)
-- npm **10.9.2** (`corepack enable && corepack prepare npm@10.9.2 --activate`)
-- Java **21+** (see `backend/.java-version`)
+- Node.js **22** (`.nvmrc`), npm **10.9.2** (`corepack enable && corepack prepare npm@10.9.2 --activate`)
+- Java **21+** (`backend/.java-version`)
 - **Docker** (for `npm run dev` — PostgreSQL + Redis)
+- Copy `backend/.env.example` → `backend/.env` (never commit `.env`)
 
 ### Install
 
@@ -426,7 +374,9 @@ corepack prepare npm@10.9.2 --activate
 npm ci
 ```
 
-Use the pinned npm version; other versions can rewrite `package-lock.json` and fail CI `lockfile:check`.
+After changing `package.json` dependencies: `npm install` then `npm run lockfile:check`. Commit `package-lock.json` in the same change.
+
+**Cursor `devdir` warning:** npm 10.9+ warns on `npm_config_devdir` injected by Cursor. Mitigations: `.cursor/sandbox.json`, `scripts/bin` on `PATH` (`.vscode/settings.json`), optional `.envrc` with direnv. Pre-commit and CI source `scripts/clean-npm-env.sh`.
 
 ### Configure the match API
 
@@ -434,7 +384,7 @@ Use the pinned npm version; other versions can rewrite `package-lock.json` and f
 cp backend/.env.example backend/.env
 ```
 
-Set at least **`GROQ_API_KEY`** and **`PORT=3001`**. See `.env.example` for `CORS_ORIGIN`, `TRUST_PROXY`, rate limits, and HSTS.
+Set **`GROQ_API_KEY`** and **`PORT=3001`**. See `.env.example` for `CORS_ORIGIN`, `TRUST_PROXY`, rate limits, and HSTS.
 
 ### Run locally
 
@@ -442,24 +392,27 @@ Set at least **`GROQ_API_KEY`** and **`PORT=3001`**. See `.env.example` for `COR
 npm run dev              # Docker + Angular :4200 + Spring :3001 (dev,persistence)
 npm run seed:applicants  # Optional: 39 demo applicants (13 countries) + admin profile
 npm start                # Frontend only (proxies /api → :3001)
-npm run start:backend    # Spring only (no DB unless you enable persistence)
+npm run start:backend    # Spring only
 ```
 
 | URL | Service |
 |-----|---------|
 | http://localhost:4200/ | Angular dev server |
-| http://localhost:3001/ | Spring API |
+| http://localhost:3001/ | Spring API (+ Swagger UI in dev) |
 
-**Docker:** Compose project **`recruita`** — containers `recruita-postgres`, `recruita-redis`. If you previously used a folder-named project, run `docker compose -p applicant-project down` once before `npm run infra:up`.
+**Docker:** Compose project **`recruita`** (`recruita-postgres`, `recruita-redis`). Use `npm run infra:up` / `infra:down`.
+
+**Backend only with DB:** `npm run infra:up` then `SPRING_PROFILES_ACTIVE=dev,persistence npm run start:backend`.
+
+**Demo seed:** `npm run seed:applicants` runs a one-shot Spring job (`persistence,seed`) upserting from `backend/src/main/resources/seed/applicants-demo.json` and `seed/profile-admin.json`. Idempotent — existing ids are skipped. The SPA uses profile id **`admin`** (`APP_CONFIG.PROFILE.DEFAULT_ID`); keep aligned with `recruita.profile-api.admin-id` in `application.yml`.
 
 ### Production build
 
 ```bash
-npm run build:prod
-# Output: frontend/dist/recruita/
+npm run build:prod   # → frontend/dist/recruita/
 ```
 
-Serve the static bundle behind HTTPS with the Spring API configured per [SECURITY.md](./SECURITY.md).
+Serve the static bundle behind HTTPS with the Spring API configured per [Security & privacy](#security--privacy).
 
 ---
 
@@ -467,52 +420,105 @@ Serve the static bundle behind HTTPS with the Spring API configured per [SECURIT
 
 | Script | Purpose |
 |--------|---------|
-| **Dev** | |
 | `npm run dev` | Docker + Angular + Spring with persistence |
 | `npm start` | Angular only |
-| `npm run start:backend` | Spring only (default `dev` profile) |
+| `npm run start:backend` | Spring only |
 | `npm run infra:up` / `infra:down` | PostgreSQL + Redis |
-| `npm run seed:applicants` | Idempotent demo seed (39 applicants, 13 countries, admin profile) |
-| **Quality (fast)** | |
+| `npm run seed:applicants` | Demo seed (39 applicants, 13 countries, admin profile) |
 | `npm run quality` | Frontend + backend format check & lint |
 | `npm run quality:backend` | Spotless + Checkstyle |
-| **CI / pre-commit** | |
-| `npm run validate` / `validate:ci` | Full pipeline (both stacks) |
-| `npm run validate:ci:frontend` | Tests, doctor, security, prod build |
+| `npm run validate` / `validate:ci` | Full CI pipeline (both stacks) |
+| `npm run validate:ci:frontend` | Tests, doctor, security, letify, prod build |
 | `npm run validate:ci:backend` | Maven verify (JaCoCo ≥ 80%) |
-| **Other** | |
+| `npm run verify:backend` | `./mvnw verify` from repo root |
 | `npm run lockfile:check` | Lockfile matches `package.json` |
 | `npm run security:audit` | Frontend ngx-security-audit |
 | `npm run e2e` | Playwright (`npm run e2e:install` first) |
 | `npm run a11y:e2e -w @recruita/frontend` | axe-core WCAG checks on main routes |
-| `npm run validate:openapi:backend` | Verify `/v3/api-docs` on a running dev API |
-
-Pre-commit: **lint-staged** → **lockfile:check** (when lockfile staged) → scoped **precommit:frontend** / **precommit:backend**. Do not use `git commit --no-verify`.
+| `npm run validate:openapi:backend` | Verify `/v3/api-docs` on running dev API |
 
 ---
 
-## Testing and CI
+## Testing & CI
 
 | Layer | Command | What runs |
 |-------|---------|-----------|
 | Frontend unit | `npm test` | Jasmine + Karma |
 | Frontend CI | `npm run validate:ci:frontend` | Quality, tests, doctor, security, letify, prod build |
 | Backend | `npm run verify:backend` | Tests, SpotBugs, JaCoCo, ArchUnit |
-| Full stack | `npm run validate` | Frontend + backend CI gates |
+| Full stack | `npm run validate` | Both CI gates |
 | E2E | `npm run e2e` | Playwright — not in default CI yet |
-| A11y E2E | `npm run a11y:e2e -w @recruita/frontend` | axe-core on `/main`, `/applicants`, `/match`, `/export`, `/smart-action`, `/privacy` — local/optional gate |
+| A11y E2E | `npm run a11y:e2e -w @recruita/frontend` | axe on `/main`, `/applicants`, `/match`, `/export`, `/smart-action`, `/privacy` |
 
-**GitHub Actions** (`.github/workflows/ci.yml`): path-filtered jobs for frontend, backend, and lockfile; both stacks always run on push to `main` / `master`. Weekly OWASP Dependency-Check: `backend-security-audit.yml`.
+**GitHub Actions:** path-filtered jobs on PR; both stacks on push to `main`/`master`. Node **22** + npm **10.9.2** via `.github/actions/setup-node-toolchain`. Weekly OWASP Dependency-Check: `backend-security-audit.yml`.
+
+---
+
+## Contributing
+
+| Scope | Fast (format + lint) | Full CI gate |
+|-------|----------------------|--------------|
+| Frontend | `npm run quality -w @recruita/frontend` | `npm run validate:ci:frontend` |
+| Backend | `npm run quality:backend` | `npm run validate:ci:backend` |
+| Both | `npm run quality` | `npm run validate:ci` |
+
+Run `npm run validate` before opening a PR.
+
+### Pre-commit
+
+Husky runs `scripts/pre-commit.sh`:
+
+1. **lint-staged** — auto-fix staged files
+2. **lockfile:check** — when `package.json` / lockfile staged
+3. **precommit:frontend** — when `frontend/**` staged
+4. **precommit:backend** — when `backend/**` staged
+
+Do not use `git commit --no-verify` unless documented.
+
+### Pull requests
+
+- CI runs scoped jobs by changed paths; pushes to `main`/`master` run both stacks.
+- Keep `package-lock.json` in sync after dependency changes.
+- Follow [Security & privacy](#security--privacy) for deployment and secrets.
+
+---
+
+## Automation & agents
+
+Prefer in Cursor/agent shells (avoids `devdir` warnings):
+
+```bash
+sh scripts/npm-run.sh run dev
+sh scripts/npm-run.sh run validate:ci
+sh scripts/npm-run.sh run quality
+```
+
+Plain `npm run …` also works; lifecycle scripts use `scripts/bin/npm` via `.npmrc` `script-shell`.
+
+### Conventions
+
+- No magic strings in Java — `application.yml` + `@ConfigurationProperties`.
+- No Node backend — do not reintroduce `backend/package.json` or Express.
+- **Store-first NgRx:** UI dispatches actions and selects state; effects and `@ngrx/data` own HTTP and side effects.
+- After `package.json` dependency changes: `npm install` and commit `package-lock.json`.
+
+### Do not commit
+
+`backend/.env`, API keys, `backend/target/`, `node_modules/`, `frontend/dist/`
+
+### Commit messages
+
+Do not add `Co-authored-by: Cursor` or other IDE attribution trailers (Husky strips them if injected).
 
 ---
 
 ## Configuration reference
 
-**`frontend/src/app/config/app.config.ts`** — navigation, dialogs, applicant UI (pagination, sort options), match endpoint/model/timeouts, export formats and filenames, supported languages, snackbar timing, privacy consent version.
-
-**`frontend/src/environments/`** — `environment.ts`, `environment.prod.ts` for build-time flags.
-
-**`backend/src/main/resources/application.yml`** — API routes, persistence toggle, Groq settings, rate limits (overridden by `backend/.env` in dev/prod).
+| Location | Contents |
+|----------|----------|
+| `frontend/src/app/config/app.config.ts` | Nav, dialogs, match, export, languages, snackbar, privacy version |
+| `frontend/src/environments/` | Build-time flags |
+| `backend/src/main/resources/application.yml` | API routes, persistence, Groq, rate limits (overridden by `backend/.env`) |
 
 ---
 
@@ -520,30 +526,19 @@ Pre-commit: **lint-staged** → **lockfile:check** (when lockfile staged) → sc
 
 Bundles: `frontend/src/assets/i18n/{en,de,fr,it,rm,es}.json`
 
-Includes dedicated namespaces for `privacy.*`, `notifications.*`, `applicationStatus.*`, and per-feature copy. Language is stored in the NgRx `app` slice; `LocalizationService` (started via `provideAppInitializer`) applies ngx-translate, `document.documentElement.lang`, Material date locale, and the page title. Shared pipes format dates, numbers, and location strings per active locale.
-
-Optional **remote translation** (MyMemory) for dynamic strings such as job titles — only when translation consent is enabled.
+Language stored in NgRx `app` slice; `LocalizationService` (via `provideAppInitializer`) applies ngx-translate, `document.documentElement.lang`, Material date locale, and page title. Optional MyMemory translation for dynamic strings when translation consent is on.
 
 ---
 
 ## Responsive design
 
-Recruita targets **phone, tablet, and desktop** with a shared breakpoint scale:
-
 | Token | Width | Typical use |
 |-------|-------|-------------|
 | `sm` | 600px | Single-column export; tighter applicant padding |
-| `md` | 960px | Stacked match layout; mobile nav menu; full-width filters; full-screen dialogs |
-| `lg` | 1280px | Four-column export grid; full applicant list columns |
+| `md` | 960px | Stacked match; mobile nav; full-width filters |
+| `lg` | 1280px | Four-column export; full list columns |
 
-**Implementation:**
-
-- SCSS mixins: `frontend/src/app/styles/shared/_breakpoints.scss`
-- TypeScript: `LayoutBreakpointService` (`BreakpointObserver`) for dynamic column sets
-- Root shell: hamburger `mat-menu` replaces tab bar below `md`
-- `prefers-reduced-motion` respected on landing and list animations
-
-Resize the browser or use DevTools device mode to verify layouts at http://localhost:4200/.
+SCSS: `_breakpoints.scss`. TypeScript: `LayoutBreakpointService`. `prefers-reduced-motion` on landing and list animations.
 
 ---
 
@@ -551,24 +546,15 @@ Resize the browser or use DevTools device mode to verify layouts at http://local
 
 | Area | Implementation |
 |------|----------------|
-| **Landmarks & skip link** | `#main-content` landmark; skip link in root shell; route changes move focus via `RouteFocusService` in `AppEffects` |
-| **Headings** | Page titles use semantic `h1`/`h2` with shared typography mixins (`_labels.scss`) |
-| **Lint** | `@angular-eslint/template` accessibility rules in `frontend/.eslintrc.json` |
-| **E2E** | `frontend/e2e/accessibility.spec.ts` — axe-core (`wcag2a` / `wcag2aa` / `wcag21*`) on primary routes |
-| **Typography** | Manrope UI font via `@fontsource/manrope` (`src/manrope-fonts.scss` in `angular.json`); Material Symbols Outlined for icons |
+| **Landmarks & skip link** | `#main-content`; skip link; `RouteFocusService` in `AppEffects` on navigation |
+| **Headings** | Semantic `h1`/`h2` with `_labels.scss` mixins |
+| **Lint** | `@angular-eslint/template` accessibility rules |
+| **E2E** | `e2e/accessibility.spec.ts` — axe-core on primary routes |
+| **Typography** | Manrope via `src/manrope-fonts.scss`; Material Symbols Outlined for icons |
 
-Run `npm run a11y:e2e -w @recruita/frontend` with the dev app reachable (default base URL in Playwright config).
-
----
-
-## Related documentation
-
-| Document | Contents |
-|----------|----------|
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Install, dev commands, pre-commit, PR expectations |
-| [AGENTS.md](./AGENTS.md) | Automation/agent guide for this monorepo |
-| [SECURITY.md](./SECURITY.md) | Full security control matrix and deployment checklist |
-| [backend/README.md](./backend/README.md) | Spring profiles, API tables, Maven commands |
+```bash
+npm run a11y:e2e -w @recruita/frontend
+```
 
 ---
 
