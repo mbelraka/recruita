@@ -8,7 +8,11 @@
     "matchCandidates": "Cumparegliaziun da candidats",
     "export": "Exportar",
     "smartAction": "Smart Action",
-    "openMenu": "Avrir il menu da navigaziun"
+    "openMenu": "Avrir il menu da navigaziun",
+    "primary": "Navigaziun principala"
+  },
+  "accessibility": {
+    "skipToContent": "Siglir al cuntegn principal"
   },
   "smartAction": {
     "title": "Smart Action",
@@ -130,6 +134,7 @@
     }
   },
   "applicants": {
+    "pageTitle": "Candidats",
     "searchLabel": "Tschertgar candidats",
     "searchPlaceholder": "Num, e-mail, qualificaziuns, rolla…",
     "searchScopeHint": "Notas pon vegnir tschertgadas suenter avrir in candidat.",
@@ -204,6 +209,7 @@
   "newApplicant": {
     "title": "Nov candidat",
     "editTitle": "Guardar / modifitgar candidat",
+    "close": "Serrar",
     "name": "Num",
     "email": "Adressa e-mail",
     "emailRequired": "E-mail obligatoric",

@@ -1,0 +1,8 @@
+/// Keyboard focus ring — pair with global `*:focus:not(:focus-visible)` in `styles.scss`.
+@mixin focus-ring(
+  $color: var(--app-color-primary),
+  $offset: var(--app-focus-ring-offset)
+) {
+  outline: var(--app-focus-ring-width) solid $color;
+  outline-offset: $offset;
+}

@@ -1,4 +1,1 @@
-// Self-hosted Manrope for body/UI text — `@fontsource/manrope` only (no Google Fonts / CDN for this family).
-// Importing via the package path keeps Karma, `ng serve`, and builds on one webpack `url(...)` rewrite path.
-@import '@fontsource/manrope/latin.css';
-@import '@fontsource/manrope/latin-ext.css';
+// Manrope @font-face is bundled via `src/manrope-fonts.scss` in `angular.json`.

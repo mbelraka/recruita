@@ -32,7 +32,7 @@
               "src/manifest.webmanifest"
             ],
             "styles": [
-              "src/app/styles/shared/_fonts.scss",
+              "src/manrope-fonts.scss",
               "../node_modules/@mdi/font/css/materialdesignicons.min.css",
               "src/tailwind.css",
               "src/styles.scss"
@@ -147,7 +147,7 @@
             "codeCoverageExclude": ["src/app/generated/**"],
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
-              "src/app/styles/shared/_fonts.scss",
+              "src/manrope-fonts.scss",
               "../node_modules/@mdi/font/css/materialdesignicons.min.css",
               "src/tailwind.css",
               "src/styles.scss"

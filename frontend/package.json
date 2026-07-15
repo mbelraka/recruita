@@ -26,6 +26,7 @@
     "e2e:ui": "playwright test --ui",
     "e2e:headed": "playwright test --headed",
     "e2e:install": "playwright install chromium",
+    "a11y:e2e": "playwright test e2e/accessibility.spec.ts",
     "clean": "rimraf dist/"
   },
   "dependencies": {
@@ -65,6 +66,7 @@
     "@angular/cli": "^20.3.18",
     "@angular/compiler-cli": "^20.3.18",
     "@angular/localize": "^20.3.18",
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/config-array": "^0.19.1",
     "@eslint/object-schema": "^2.1.5",
     "@jsverse/letify": "^1.0.0",

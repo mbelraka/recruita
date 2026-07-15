@@ -8,7 +8,11 @@
     "matchCandidates": "Coincidencia de candidatos",
     "export": "Exportar",
     "smartAction": "Smart Action",
-    "openMenu": "Abrir menú de navegación"
+    "openMenu": "Abrir menú de navegación",
+    "primary": "Navegación principal"
+  },
+  "accessibility": {
+    "skipToContent": "Ir al contenido principal"
   },
   "smartAction": {
     "title": "Smart Action",
@@ -130,6 +134,7 @@
     }
   },
   "applicants": {
+    "pageTitle": "Candidatos",
     "searchLabel": "Buscar candidatos",
     "searchPlaceholder": "Nombre, correo, habilidades, puesto…",
     "searchScopeHint": "Las notas se pueden buscar después de abrir un candidato.",
@@ -204,6 +209,7 @@
   "newApplicant": {
     "title": "Nuevo candidato",
     "editTitle": "Ver / editar candidato",
+    "close": "Cerrar",
     "name": "Nombre",
     "email": "Correo electronico",
     "emailRequired": "El correo es obligatorio",

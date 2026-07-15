@@ -8,7 +8,12 @@
       (isEditMode ? 'newApplicant.editTitle' : 'newApplicant.title') | translate
     }}</span>
     <div class="new-applicant__close-wrap">
-      <button mat-icon-button type="button" (click)="dismiss()">
+      <button
+        mat-icon-button
+        type="button"
+        (click)="dismiss()"
+        [attr.aria-label]="'newApplicant.close' | translate"
+      >
         <mat-icon class="new-applicant__close-icon" aria-hidden="true"
           >close</mat-icon
         >

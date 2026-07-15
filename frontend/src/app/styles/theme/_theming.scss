@@ -22,11 +22,11 @@ html {
   --app-snackbar-error-container: #{map.get($_mat-system, error-container)};
   /** Snackbar error variant: icon + accent border (Material “warn” / error tone). */
   --app-snackbar-warn: #{map.get($_mat-system, error)};
-  --app-snackbar-error-surface: #fff;
+  --app-snackbar-error-surface: var(--app-color-surface-elevated);
   /** Info snackbar (custom brand panel). */
   --app-snackbar-info-surface: #23323a;
   --app-snackbar-info-accent: #516169;
-  --app-snackbar-info-on-surface: #fff;
+  --app-snackbar-info-on-surface: var(--app-color-on-primary);
   /* Success: solid secondary surface, white copy, light “success” icon, primary accent border. */
   --app-snackbar-success-surface: #{map.get($_mat-system, secondary)};
   --app-snackbar-success-icon: #{map.get($_mat-system, secondary-container)};
@@ -45,5 +45,7 @@ html {
   @include mat.all-component-themes($light-theme);
 
   // After theme: popup uses this token on `.mat-datepicker-content` (overrides load earlier and lose).
-  --mat-datepicker-calendar-container-background-color: #fff;
+  --mat-datepicker-calendar-container-background-color: var(
+    --app-color-surface-elevated
+  );
 }

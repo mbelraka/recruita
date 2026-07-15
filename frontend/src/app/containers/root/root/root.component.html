@@ -1,6 +1,10 @@
 <div class="root-container flex min-h-0 flex-1 justify-center">
   <div class="root-content flex min-h-0 flex-1 flex-col">
-    <div
+    <a class="skip-link" href="#main-content">{{
+      'accessibility.skipToContent' | translate
+    }}</a>
+
+    <header
       animate.enter="fade-shell-enter"
       animate.leave="fade-shell-leave"
       class="header flex flex-row items-center justify-between"
@@ -14,13 +18,14 @@
           <span class="logo"></span>
         </a>
 
-        <div class="nav-container header-nav--desktop">
+        <div class="header-nav--desktop nav-container">
           <nav
             mat-tab-nav-bar
             class="main-nav"
             [tabPanel]="tabPanel"
             disablePagination
             color="accent"
+            [attr.aria-label]="'nav.primary' | translate"
           >
             @for (link of navLinks; track link.link) {
               <a
@@ -46,7 +51,7 @@
             [matMenuTriggerFor]="navMenu"
             [attr.aria-label]="'nav.openMenu' | translate"
           >
-            <mat-icon>menu</mat-icon>
+            <mat-icon aria-hidden="true">menu</mat-icon>
           </button>
           <mat-menu #navMenu="matMenu" class="header-nav-menu">
             @for (link of navLinks; track link.link) {
@@ -69,10 +74,10 @@
         class="select form-field--palette-secondary language-select-form-field"
         subscriptSizing="dynamic"
       >
+        <mat-label>{{ 'language.label' | translate }}</mat-label>
         <mat-icon matPrefix aria-hidden="true">language</mat-icon>
         <mat-select
           panelClass="select-panel--palette-secondary"
-          [attr.aria-label]="'language.label' | translate"
           [value]="selectedLanguage"
           (selectionChange)="onLanguageChange($event.value)"
         >
@@ -83,11 +88,11 @@
           }
         </mat-select>
       </mat-form-field>
-    </div>
+    </header>
 
-    <div class="full-container min-h-0 flex-1">
+    <main id="main-content" class="full-container min-h-0 flex-1" tabindex="-1">
       <router-outlet></router-outlet>
-    </div>
+    </main>
     <footer
       animate.enter="fade-shell-enter"
       animate.leave="fade-shell-leave"

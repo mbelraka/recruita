@@ -1,3 +1,5 @@
+@use '../../../../styles/shared/focus' as focus;
+
 :host {
   display: block;
   max-width: 100%;
@@ -9,8 +11,8 @@
   flex-wrap: wrap;
   align-content: flex-start;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--app-space-xs);
+  margin-top: var(--app-space-xs);
 }
 
 .applicant-skills__filter-button {
@@ -42,7 +44,6 @@
   cursor: pointer;
 
   &:focus-visible {
-    outline: 2px solid var(--app-color-secondary);
-    outline-offset: 2px;
+    @include focus.focus-ring(var(--app-color-secondary));
   }
 }

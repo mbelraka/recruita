@@ -26,6 +26,7 @@ Optional DB/Redis: `npm run dev` starts Docker (Compose project **recruita**) an
 
 - No magic strings in Java — use `application.yml` + `@ConfigurationProperties`.
 - No Node backend; do not reintroduce `backend/package.json` or Express.
+- **Frontend NgRx:** components, pipes, and other UI classes dispatch actions and select state from the store. They do not call data/HTTP services directly — effects (and `@ngrx/data` entity services) own side effects and service calls.
 - After `package.json` dependency changes: `npm install` and commit `package-lock.json`.
 - Cursor injects `npm_config_devdir` for sandbox npm/node-gyp caches. Use `sh scripts/npm-run.sh run …` in agent shells, or `./scripts/bin/npm` / integrated terminals with `scripts/bin` on `PATH` (see `.vscode/settings.json`). Pre-commit and CI use the shim; npm lifecycle scripts run via `.npmrc` `script-shell` (`scripts/npm-script-shell.sh`).
 

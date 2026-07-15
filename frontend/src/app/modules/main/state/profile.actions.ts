@@ -39,3 +39,15 @@ export const profileUpdated = createAction(
   ProfileActionTypes.ProfileUpdated,
   props<{ profile: Profile }>()
 );
+
+export const openPrivacyConsentEditor = createAction(
+  ProfileActionTypes.OpenPrivacyConsentEditor
+);
+
+export const exportPrivacySessionData = createAction(
+  ProfileActionTypes.ExportPrivacySessionData
+);
+
+export const erasePrivacySessionData = createAction(
+  ProfileActionTypes.ErasePrivacySessionData
+);

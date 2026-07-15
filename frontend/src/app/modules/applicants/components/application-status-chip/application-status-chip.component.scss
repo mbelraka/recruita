@@ -4,26 +4,38 @@
 :host {
   @include application-status-chip-box;
   border-radius: 0;
-  background: color-mix(in srgb, var(--app-color-border-subtle) 55%, #fff);
+  background: color-mix(
+    in srgb,
+    var(--app-color-border-subtle) 55%,
+    var(--app-color-surface-elevated)
+  );
   color: var(--app-color-text-body);
   font-size: 0.625rem;
-  font-weight: 600;
+  font-weight: var(--app-font-weight-semibold);
   letter-spacing: 0.02em;
 }
 
 :host.application-status-chip--received {
-  background: color-mix(in srgb, $border-subtle 42%, #fff);
+  background: color-mix(
+    in srgb,
+    $border-subtle 42%,
+    var(--app-color-surface-elevated)
+  );
 }
 
 :host.application-status-chip--screening {
-  background: color-mix(in srgb, $green-2 14%, #fff);
+  background: color-mix(
+    in srgb,
+    $green-2 14%,
+    var(--app-color-surface-elevated)
+  );
 }
 
 :host.application-status-chip--interview_scheduled {
   background: color-mix(
     in srgb,
     color-mix(in srgb, $green-2 48%, $green-1) 52%,
-    #fff
+    var(--app-color-surface-elevated)
   );
 }
 
@@ -31,16 +43,24 @@
   background: color-mix(
     in srgb,
     color-mix(in srgb, $green-1 86%, $green-2 14%) 66%,
-    #fff
+    var(--app-color-surface-elevated)
   );
 }
 
 :host.application-status-chip--offer_extended {
-  background: color-mix(in srgb, $button-primary-fill 32%, #fff);
+  background: color-mix(
+    in srgb,
+    $button-primary-fill 32%,
+    var(--app-color-surface-elevated)
+  );
 }
 
 :host.application-status-chip--rejected {
-  background: color-mix(in srgb, $warn-color 22%, #fff);
+  background: color-mix(
+    in srgb,
+    $warn-color 22%,
+    var(--app-color-surface-elevated)
+  );
 }
 
 :host.application-status-chip--withdrawn {

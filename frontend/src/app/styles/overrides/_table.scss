@@ -1,40 +1,40 @@
 .mat-mdc-table {
   width: 100%;
-  margin-top: 16px;
-  background-color: #fff !important;
+  margin-top: var(--app-space-sm);
+  background-color: var(--app-color-surface-elevated) !important;
   border: 1px solid var(--app-color-border-subtle) !important;
   border-collapse: collapse;
   --mat-table-row-item-outline-width: 0;
 }
 .mat-mdc-header-row,
 .mat-mdc-row {
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
 }
 .mat-mdc-header-cell,
 .mat-mdc-cell {
-  background-color: #fff !important;
-  font-size: 0.75rem;
+  background-color: var(--app-color-surface-elevated) !important;
+  font-size: var(--app-font-size-footnote);
 }
 
 // Horizontal padding: outer edges only on first/last column; 8px both sides between.
 .mat-mdc-table .mat-mdc-header-cell:first-of-type:not(:last-of-type),
 .mat-mdc-table .mat-mdc-cell:first-of-type:not(:last-of-type) {
-  padding: 0 8px 0 16px;
+  padding: 0 var(--app-space-xs) 0 var(--app-space-sm);
 }
 
 .mat-mdc-table .mat-mdc-header-cell:last-of-type:not(:first-of-type),
 .mat-mdc-table .mat-mdc-cell:last-of-type:not(:first-of-type) {
-  padding: 0 16px 0 8px;
+  padding: 0 var(--app-space-sm) 0 var(--app-space-xs);
 }
 
 .mat-mdc-table .mat-mdc-header-cell:not(:first-of-type):not(:last-of-type),
 .mat-mdc-table .mat-mdc-cell:not(:first-of-type):not(:last-of-type) {
-  padding: 0 8px;
+  padding: 0 var(--app-space-xs);
 }
 
 .mat-mdc-table .mat-mdc-header-cell:only-of-type,
 .mat-mdc-table .mat-mdc-cell:only-of-type {
-  padding: 0 16px;
+  padding: 0 var(--app-space-sm);
 }
 .mat-mdc-table tbody .mat-mdc-row:not(:last-child) .mat-mdc-cell,
 .mat-mdc-table > tr.mat-mdc-row:not(:last-child) .mat-mdc-cell {
@@ -61,7 +61,7 @@
 .table-cell--sticky-start.mat-mdc-header-cell {
   left: 0;
   z-index: 4;
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
   box-shadow: 2px 0 6px -4px rgba(14 29 37 / 0.18);
 }
 
@@ -69,6 +69,6 @@
   position: sticky;
   left: 0;
   z-index: 1;
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
   box-shadow: 2px 0 6px -4px rgba(14 29 37 / 0.12);
 }

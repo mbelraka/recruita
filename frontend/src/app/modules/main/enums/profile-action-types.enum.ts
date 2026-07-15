@@ -7,4 +7,7 @@ export enum ProfileActionTypes {
   PersistPrivacyConsentOutcomeFailure = '[Profile] Persist Privacy Consent Outcome Failure',
   ClearProfileState = '[Profile] Clear Profile State',
   ProfileUpdated = '[Profile] Profile Updated',
+  OpenPrivacyConsentEditor = '[Profile] Open Privacy Consent Editor',
+  ExportPrivacySessionData = '[Profile] Export Privacy Session Data',
+  ErasePrivacySessionData = '[Profile] Erase Privacy Session Data',
 }

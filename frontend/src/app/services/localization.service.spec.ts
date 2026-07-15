@@ -56,6 +56,7 @@ describe('LocalizationService', () => {
 
     expect(mockTranslate.use).toHaveBeenCalledWith(Languages.German);
     expect(mockDateAdapter.setLocale).toHaveBeenCalledWith('de-DE');
+    expect(document.documentElement.lang).toBe('de-DE');
     expect(document.title).toBe('Recruita - Talente ohne Grenzen');
   }));
 

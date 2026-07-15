@@ -64,7 +64,7 @@
 // Outline selects use e.g. `select-panel--palette-secondary` instead — overlay is portaled.
 .cdk-overlay-container .select-panel--filled-white.mat-mdc-select-panel {
   border-radius: 0 !important;
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
 }
 
 // Modifier: pass as mat-select panelClass with a form-field--palette-secondary field (overlay is portaled).

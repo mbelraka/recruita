@@ -1,6 +1,5 @@
 import { afterNextRender, Component, inject, Injector } from '@angular/core';
 
-import { LocalizationService } from './services/localization.service';
 import { appendSnackBarMotionStyleElement } from './utilities/snack-bar-motion';
 
 @Component({
@@ -12,7 +11,6 @@ export class AppComponent {
   private readonly _injector = inject(Injector);
 
   public constructor() {
-    inject(LocalizationService);
     afterNextRender(
       () => {
         appendSnackBarMotionStyleElement();

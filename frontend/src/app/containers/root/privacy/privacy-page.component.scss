@@ -1,8 +1,9 @@
 @use '../../../styles/shared/breakpoints' as bp;
+@use '../../../styles/shared/labels' as labels;
 
 .privacy-page {
   max-width: 52rem;
-  padding-bottom: var(--app-space-xl, 1.5rem);
+  padding-bottom: var(--app-space-md);
 
   @include bp.bp-down(sm) {
     padding-inline: var(--app-space-xs);
@@ -10,24 +11,24 @@
 }
 
 .privacy-page__title {
+  @include labels.page-title;
   margin: 0.75rem 0 0;
-  font-size: 1.5rem;
+  font-weight: var(--app-font-weight-bold);
 }
 
 .privacy-page__legal {
-  margin: 0.5rem 0 0;
-  font-size: 0.8125rem;
+  margin: var(--app-space-xs) 0 0;
+  font-size: var(--app-font-size-caption);
   opacity: 0.85;
 }
 
 .privacy-page__section h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
+  @include labels.section-title;
 }
 
 .privacy-page__section p {
   margin: 0 0 0.75rem;
-  line-height: 1.5;
+  line-height: var(--app-line-height-base);
 }
 
 .privacy-page__bullets {
@@ -43,12 +44,12 @@
 .privacy-page__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--app-space-xs);
+  margin-top: var(--app-space-sm);
 }
 
 .privacy-page__hint {
   margin: 0.75rem 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--app-font-size-caption);
   opacity: 0.88;
 }

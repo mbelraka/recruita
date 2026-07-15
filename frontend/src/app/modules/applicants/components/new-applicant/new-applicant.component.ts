@@ -10,7 +10,7 @@ import { APP_CONFIG } from '../../../../config/app.config';
 import { Languages } from '../../../../enums/language.enum';
 import { FullState } from '../../../../models/full-state.model';
 import { selectAppLanguage } from '../../../../state/app.selectors';
-import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
+import { selectOptionalGeocoding } from '../../../main/state/main.selectors';
 import { NEW_APPLICANT_DIALOG_UPDATE_FLAG } from '../../constants/new-applicant-dialog.constants';
 import { ApplicationStatus } from '../../enums/application-status.enum';
 import { NewApplicantDialogData } from '../../models/new-applicant-dialog-data.model';
@@ -87,13 +87,16 @@ export class NewApplicantComponent {
     selectLocationSuggestions
   );
 
+  private readonly _optionalGeocoding = this._store.selectSignal(
+    selectOptionalGeocoding
+  );
+
   public constructor(
     private readonly _dialogRef: MatDialogRef<
       NewApplicantComponent,
       NewApplicantDialogCloseResult | undefined
     >,
     private readonly _store: Store<FullState>,
-    private readonly _privacy: PrivacyConsentService,
     @Optional()
     @Inject(MAT_DIALOG_DATA)
     dialogData: NewApplicantDialogData | null
@@ -209,6 +212,6 @@ export class NewApplicantComponent {
   }
 
   protected allowsLocationGeocode(): boolean {
-    return this._privacy.optionalGeocoding();
+    return this._optionalGeocoding();
   }
 }

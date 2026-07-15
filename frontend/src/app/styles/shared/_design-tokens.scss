@@ -4,9 +4,7 @@
 // ---------------------------------------------------------------------------
 // Typography — keep in sync with Figma text styles and theme/_theme.scss
 // ($_theme-typography brand-family / plain-family).
-// Manrope (static woff2): npm package `@fontsource/manrope`, imported from
-// `shared/_fonts.scss` (global styles in angular.json). No variable-font /
-// `woff2-variations`; keep `optimization.fonts: false` to avoid flaky inlining.
+// Manrope (static woff2): `@fontsource/manrope` via `src/manrope-fonts.scss` in angular.json.
 // ---------------------------------------------------------------------------
 :root {
   --app-font-family: 'Manrope', sans-serif;
@@ -44,13 +42,27 @@
   --app-space-inline-sm: 16px;
   --app-space-inline-md: 32px;
 
+  --app-font-size-page-title: 1.5rem;
+  --app-font-size-subtitle: 1.25rem;
+  --app-font-size-section-title: 1.125rem;
+  --app-font-size-body-sm: 0.875rem;
+  --app-font-size-caption: 0.8125rem;
+  --app-font-size-footnote: 0.75rem;
+  --app-font-weight-semibold: 600;
+  --app-font-weight-bold: 700;
+  --app-line-height-tight: 1.3;
+
+  --app-color-surface-elevated: #fff;
+  --app-color-text-muted-subtle: rgb(0 0 0 / 65%);
+  --app-color-disabled: #bdbdbd;
+
   --app-size-logo-width: 64px;
   --app-size-logo-height: 80px;
   --app-size-logo-offset-top: -8px;
   --app-size-page-header-height: 4rem;
 
-  --app-radius-sm: 4px;
-  --app-radius-focus: 4px;
+  --app-radius-sm: 0;
+  --app-radius-focus: 0;
   --app-focus-ring-width: 2px;
   --app-focus-ring-offset: 2px;
 

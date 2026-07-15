@@ -20,7 +20,7 @@
 .app-notification-snack-bar__close-icon,
 .app-notification-snack-bar__success-icon,
 .app-notification-snack-bar__info-icon {
-  font-size: 1.25rem;
+  font-size: var(--app-font-size-subtitle);
   width: 1.25rem;
   height: 1.25rem;
 }

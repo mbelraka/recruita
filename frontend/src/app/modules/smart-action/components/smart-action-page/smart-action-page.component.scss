@@ -1,12 +1,13 @@
 @use '../../../../styles/shared/breakpoints' as bp;
+@use '../../../../styles/shared/labels' as labels;
 
 .smart-action-page {
   max-width: 880px;
   margin: 0 auto;
-  padding: 16px;
+  padding: var(--app-space-sm);
 
   @include bp.bp-up(md) {
-    padding: 24px;
+    padding: var(--app-space-md);
   }
 }
 
@@ -14,14 +15,13 @@
   margin-bottom: 20px;
 
   h1 {
-    margin: 0 0 8px;
-    font-size: 1.5rem;
-    font-weight: 600;
+    @include labels.page-title;
+    margin-bottom: var(--app-space-xs);
   }
 
   p {
     margin: 0;
-    color: rgb(0 0 0 / 65%);
-    line-height: 1.5;
+    color: var(--app-color-text-muted-subtle);
+    line-height: var(--app-line-height-base);
   }
 }

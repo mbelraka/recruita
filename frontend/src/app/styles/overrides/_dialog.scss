@@ -1,4 +1,5 @@
 @use '../shared/breakpoints' as bp;
+@use '../shared/labels' as labels;
 
 .mat-mdc-dialog-container {
   max-height: 80vh;
@@ -27,18 +28,19 @@
   min-height: 0;
   max-height: inherit;
   overflow: hidden;
-  padding: 24px;
+  padding: var(--app-space-md);
 
   &.-secondary {
-    background-color: #fff;
+    background-color: var(--app-color-surface-elevated);
   }
 }
 
 .mat-mdc-dialog-title {
   padding-inline: 0;
-  font-size: 1.25rem !important;
+  @include labels.subtitle;
+  font-size: var(--app-font-size-subtitle) !important;
   line-height: 1.13rem !important;
-  font-weight: 600 !important;
+  font-weight: var(--app-font-weight-semibold) !important;
   color: var(--app-color-text-label) !important;
 
   &::before {

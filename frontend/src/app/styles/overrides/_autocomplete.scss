@@ -4,11 +4,11 @@
 @include mat.autocomplete-overrides(
   (
     container-shape: 0,
-    background-color: #fff,
+    background-color: var(--app-color-surface-elevated),
   )
 );
 
 .cdk-overlay-container .mat-mdc-autocomplete-panel {
   border-radius: 0 !important;
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
 }

@@ -17,18 +17,26 @@
 /// Compound `.#{$block}.#{$block}--*` beats nested single-class base for status chips.
 @mixin application-status-background-modifiers($block) {
   .#{$block}.#{$block}--received {
-    background: color-mix(in srgb, $border-subtle 42%, #fff);
+    background: color-mix(
+      in srgb,
+      $border-subtle 42%,
+      var(--app-color-surface-elevated)
+    );
   }
 
   .#{$block}.#{$block}--screening {
-    background: color-mix(in srgb, $green-2 14%, #fff);
+    background: color-mix(
+      in srgb,
+      $green-2 14%,
+      var(--app-color-surface-elevated)
+    );
   }
 
   .#{$block}.#{$block}--interview_scheduled {
     background: color-mix(
       in srgb,
       color-mix(in srgb, $green-2 48%, $green-1) 52%,
-      #fff
+      var(--app-color-surface-elevated)
     );
   }
 
@@ -36,16 +44,24 @@
     background: color-mix(
       in srgb,
       color-mix(in srgb, $green-1 86%, $green-2 14%) 66%,
-      #fff
+      var(--app-color-surface-elevated)
     );
   }
 
   .#{$block}.#{$block}--offer_extended {
-    background: color-mix(in srgb, $button-primary-fill 32%, #fff);
+    background: color-mix(
+      in srgb,
+      $button-primary-fill 32%,
+      var(--app-color-surface-elevated)
+    );
   }
 
   .#{$block}.#{$block}--rejected {
-    background: color-mix(in srgb, $warn-color 22%, #fff);
+    background: color-mix(
+      in srgb,
+      $warn-color 22%,
+      var(--app-color-surface-elevated)
+    );
   }
 
   .#{$block}.#{$block}--withdrawn {

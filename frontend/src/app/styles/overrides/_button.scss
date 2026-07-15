@@ -52,7 +52,7 @@
   --mat-button-filled-disabled-container-color: #{color-mix(
       in srgb,
       $button-primary-fill 38%,
-      #fff
+      var(--app-color-surface-elevated)
     )};
   --mat-button-filled-disabled-label-text-color: #{color-mix(
       in srgb,
@@ -76,7 +76,7 @@
   }
 
   .mdc-button__label {
-    font-weight: 700;
+    font-weight: var(--app-font-weight-bold);
     color: inherit !important;
     line-height: 1;
     flex: 1 1 auto;
@@ -115,7 +115,7 @@
   --mat-fab-disabled-state-container-color: #{color-mix(
       in srgb,
       $button-primary-fill 38%,
-      #fff
+      var(--app-color-surface-elevated)
     )};
   --mat-fab-disabled-state-foreground-color: #{color-mix(
       in srgb,
@@ -162,7 +162,7 @@
   --mat-fab-small-disabled-state-container-color: #{color-mix(
       in srgb,
       $button-primary-fill 38%,
-      #fff
+      var(--app-color-surface-elevated)
     )};
   --mat-fab-small-disabled-state-foreground-color: #{color-mix(
       in srgb,
@@ -358,7 +358,7 @@
   }
 
   .mdc-button__label {
-    font-weight: 700;
+    font-weight: var(--app-font-weight-bold);
     line-height: 1;
     flex: 1 1 auto;
     min-width: 0;

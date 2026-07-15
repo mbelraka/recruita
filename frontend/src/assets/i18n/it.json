@@ -8,7 +8,11 @@
     "matchCandidates": "Abbinamento candidati",
     "export": "Esporta",
     "smartAction": "Smart Action",
-    "openMenu": "Apri menu di navigazione"
+    "openMenu": "Apri menu di navigazione",
+    "primary": "Navigazione principale"
+  },
+  "accessibility": {
+    "skipToContent": "Vai al contenuto principale"
   },
   "smartAction": {
     "title": "Smart Action",
@@ -130,6 +134,7 @@
     }
   },
   "applicants": {
+    "pageTitle": "Candidati",
     "searchLabel": "Cerca candidati",
     "searchPlaceholder": "Nome, email, competenze, ruolo…",
     "searchScopeHint": "Le note sono ricercabili dopo aver aperto un candidato.",
@@ -204,6 +209,7 @@
   "newApplicant": {
     "title": "Nuovo candidato",
     "editTitle": "Visualizza / modifica candidato",
+    "close": "Chiudi",
     "name": "Nome",
     "email": "Indirizzo email",
     "emailRequired": "L'email e obbligatoria",

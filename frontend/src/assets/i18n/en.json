@@ -8,7 +8,11 @@
     "matchCandidates": "Match Candidates",
     "export": "Export",
     "smartAction": "Smart Action",
-    "openMenu": "Open navigation menu"
+    "openMenu": "Open navigation menu",
+    "primary": "Primary navigation"
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content"
   },
   "smartAction": {
     "title": "Smart Action",
@@ -130,6 +134,7 @@
     }
   },
   "applicants": {
+    "pageTitle": "Applicants",
     "searchLabel": "Search applicants",
     "searchPlaceholder": "Name, email, skills, role…",
     "searchScopeHint": "Notes are searchable after you open an applicant.",
@@ -204,6 +209,7 @@
   "newApplicant": {
     "title": "New Applicant",
     "editTitle": "View / Edit Applicant",
+    "close": "Close",
     "name": "Name",
     "email": "Email address",
     "emailRequired": "Email is required",

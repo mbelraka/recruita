@@ -38,9 +38,13 @@ import {
 
 import { ProfileEntityCollectionService } from '../data/profile-entity-collection.service';
 import {
+  clearProfileState,
+  erasePrivacySessionData,
+  exportPrivacySessionData,
   loadProfile,
   loadProfileFailure,
   loadProfileSuccess,
+  openPrivacyConsentEditor,
   persistPrivacyConsentOutcome,
   persistPrivacyConsentOutcomeFailure,
   persistPrivacyConsentOutcomeSuccess,
@@ -201,6 +205,45 @@ export class MainEffects {
           })
         )
       )
+    )
+  );
+
+  openPrivacyConsentEditor$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(openPrivacyConsentEditor),
+        tap(() => this._privacyDialog.openConsentEditor())
+      ),
+    { dispatch: false }
+  );
+
+  exportPrivacySessionData$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(exportPrivacySessionData),
+        withLatestFrom(this._store.select(selectProfile)),
+        switchMap(([, profile]) =>
+          this._privacy.buildDataExportJson$(profile).pipe(
+            tap((payload) => {
+              const blob = new Blob([payload], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const anchor = document.createElement('a');
+              anchor.href = url;
+              anchor.download = `recruita-session-export-${Date.now()}.json`;
+              anchor.click();
+              URL.revokeObjectURL(url);
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  erasePrivacySessionData$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(erasePrivacySessionData),
+      tap(() => this._privacy.eraseSessionDataAndReload()),
+      map(() => clearProfileState())
     )
   );
 }

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { FullState } from '../../../../models/full-state.model';
-import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../../constants/match-error-codes';
+import { selectAllowsAiMatching } from '../../../main/state/main.selectors';
 import {
   evaluateCandidates,
   resetMatchState,
@@ -31,12 +31,11 @@ export class MatchCandidatesComponent implements OnInit {
   public readonly error$ = this._store.select(selectMatchError);
   public readonly results$ = this._store.select(selectMatchResults);
   public readonly topResults$ = this._store.select(selectTopMatchResults);
-  public readonly allowsAiMatching$ = this._privacy.allowsAiMatching$();
+  public readonly allowsAiMatching$ = this._store.select(
+    selectAllowsAiMatching
+  );
 
-  public constructor(
-    private readonly _store: Store<FullState>,
-    private readonly _privacy: PrivacyConsentService
-  ) {}
+  public constructor(private readonly _store: Store<FullState>) {}
 
   public ngOnInit(): void {
     this.jobDescriptionInput = '';

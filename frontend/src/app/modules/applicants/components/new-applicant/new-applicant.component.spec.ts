@@ -9,7 +9,6 @@ import {
 } from '@ngx-translate/core';
 
 import { SharedModule } from 'src/app/shared/shared.module';
-import { PrivacyConsentService } from '../../../../services/privacy-consent.service';
 import { ApplicationStatus } from '../../enums/application-status.enum';
 import { NewApplicantComponent } from './new-applicant.component';
 
@@ -20,8 +19,13 @@ describe('NewApplicantComponent', () => {
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<any>>;
 
   beforeEach(async () => {
-    mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    mockStore = jasmine.createSpyObj('Store', [
+      'select',
+      'dispatch',
+      'selectSignal',
+    ]);
     mockStore.select.and.returnValue(of([]));
+    mockStore.selectSignal.and.returnValue(() => true);
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
@@ -37,10 +41,6 @@ describe('NewApplicantComponent', () => {
         { provide: Store, useValue: mockStore },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: null },
-        {
-          provide: PrivacyConsentService,
-          useValue: { optionalGeocoding: () => true } as PrivacyConsentService,
-        },
       ],
     }).compileComponents();
 
@@ -162,12 +162,6 @@ describe('NewApplicantComponent', () => {
           { provide: Store, useValue: mockStore },
           { provide: MatDialogRef, useValue: mockDialogRef },
           { provide: MAT_DIALOG_DATA, useValue: { applicant: mockApplicant } },
-          {
-            provide: PrivacyConsentService,
-            useValue: {
-              optionalGeocoding: () => true,
-            } as PrivacyConsentService,
-          },
         ],
       }).compileComponents();
 

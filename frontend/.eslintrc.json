@@ -12,7 +12,7 @@
     {
       "files": ["*.ts"],
       "parserOptions": {
-        "project": ["./tsconfig.json"],
+        "project": ["./tsconfig.eslint.json"],
         "createDefaultProgram": true
       },
       "extends": [
@@ -101,8 +101,14 @@
     },
     {
       "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
-      "rules": {}
+      "extends": [
+        "plugin:@angular-eslint/template/recommended",
+        "plugin:@angular-eslint/template/accessibility"
+      ],
+      "rules": {
+        "@angular-eslint/template/click-events-have-key-events": "error",
+        "@angular-eslint/template/interactive-supports-focus": "error"
+      }
     },
     {
       "files": ["*.js", "*.cjs"],

@@ -111,8 +111,13 @@
       color="primary"
       class="card__action-end"
       (click)="confirmDelete()"
+      [attr.aria-label]="'applicants.deleteApplicant' | translate"
     >
-      <mat-icon [fontSet]="outlinedIconFontSet" fontIcon="delete"></mat-icon>
+      <mat-icon
+        [fontSet]="outlinedIconFontSet"
+        fontIcon="delete"
+        aria-hidden="true"
+      ></mat-icon>
     </button>
   </mat-card-actions>
 </mat-card>

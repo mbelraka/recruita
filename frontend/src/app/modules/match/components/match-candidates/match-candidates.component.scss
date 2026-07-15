@@ -1,20 +1,20 @@
 @use '../../../../styles/shared/breakpoints' as bp;
+@use '../../../../styles/shared/labels' as labels;
 
 .match-candidates__header {
   background-color: var(--app-color-background-dark);
-  padding: 16px;
+  padding: var(--app-space-sm);
 }
 
 .match-candidates__title {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.3;
+  @include labels.subtitle;
+  line-height: var(--app-line-height-tight);
 }
 
 .match-candidates__subtitle {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--app-font-size-body-sm);
   color: var(--app-color-text-inner-label);
   opacity: 0.85;
 }
@@ -36,7 +36,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 32px;
+  gap: var(--app-space-inline-md);
   align-items: stretch;
   animation: match-candidates-page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -49,14 +49,14 @@
   display: flex;
   flex-direction: column;
   position: sticky;
-  top: 16px;
-  height: min(100%, calc(100dvh - 32px));
-  max-height: calc(100dvh - 32px);
+  top: var(--app-space-sm);
+  height: min(100%, calc(100dvh - var(--app-space-inline-md)));
+  max-height: calc(100dvh - var(--app-space-inline-md));
   animation: match-candidates-page-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .match-candidates__job-card {
-  background: var(--app-color-surface, #fff);
+  background: var(--app-color-surface-elevated);
   border-radius: 0;
   --mat-card-title-text-line-height: 1.5rem;
   height: 100%;
@@ -65,7 +65,7 @@
 }
 
 .match-candidates__job-card-header {
-  padding: 24px 24px 0;
+  padding: var(--app-space-md) var(--app-space-md) 0;
 }
 
 .match-candidates__job-card-title {
@@ -73,8 +73,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--app-font-size-section-title);
+  font-weight: var(--app-font-weight-semibold);
 }
 
 .match-candidates__job-card-title-icon {
@@ -90,8 +90,8 @@
 .match-candidates__job-card-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 24px 24px !important;
+  gap: var(--app-space-sm);
+  padding: var(--app-space-sm) var(--app-space-md) var(--app-space-md) !important;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
@@ -100,9 +100,9 @@
 .match-candidates__panel--results {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  height: min(100%, calc(100dvh - 32px));
-  max-height: calc(100dvh - 32px);
+  gap: var(--app-space-sm);
+  height: min(100%, calc(100dvh - var(--app-space-inline-md)));
+  max-height: calc(100dvh - var(--app-space-inline-md));
   min-height: 0;
   animation: match-candidates-page-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -125,7 +125,7 @@
   text-transform: uppercase;
   line-height: 16px;
   letter-spacing: 1px;
-  margin-bottom: -8px !important;
+  margin-bottom: calc(-1 * var(--app-space-xs)) !important;
 }
 
 .match-candidates__actions {
@@ -142,19 +142,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: var(--app-space-sm);
 
   .mdc-button__label {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--app-space-xs);
     width: 100%;
   }
 
   &:not(:disabled) {
     background-color: var(--app-color-secondary) !important;
-    color: #fff !important;
+    color: var(--app-color-on-secondary-emphasis) !important;
   }
 
   &:hover:not(:disabled) .match-candidates__evaluate-button-icon {
@@ -169,7 +169,7 @@
 
 .match-candidates__privacy-hint {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--app-font-size-caption);
   line-height: 1.45;
   color: var(--app-color-text-inner-label);
 }
@@ -198,7 +198,7 @@
   margin: 0;
   font-size: 1rem;
   line-height: 14px;
-  font-weight: 600;
+  font-weight: var(--app-font-weight-semibold);
 }
 
 .match-candidates__section {
@@ -223,7 +223,7 @@
 }
 
 :host ::ng-deep .match-candidates__card .applicant-shared-card__body {
-  padding-bottom: 24px;
+  padding-bottom: var(--app-space-md);
 }
 
 .match-candidates__card--top {
@@ -236,15 +236,15 @@
 
 .match-candidates__detail {
   margin: 0;
-  font-size: 0.875rem;
-  padding: 16px;
+  font-size: var(--app-font-size-body-sm);
+  padding: var(--app-space-sm);
   background-color: var(--app-color-background-dark);
 }
 
 .match-candidates__cards-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--app-space-sm);
 }
 
 .match-candidates__cards-scroll {
@@ -257,16 +257,16 @@
 
 .match-candidates__score-top {
   position: absolute;
-  top: 24px;
-  right: 16px;
+  top: var(--app-space-md);
+  right: var(--app-space-sm);
   margin: 0;
   width: 48px;
   height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--app-font-size-body-sm);
+  font-weight: var(--app-font-weight-semibold);
   line-height: 1;
   color: var(--app-color-secondary, #1976d2);
   background-color: var(--app-color-background-dark);
@@ -279,7 +279,7 @@
 }
 
 .match-candidates__meta {
-  margin: 8px 0;
+  margin: var(--app-space-xs) 0;
 }
 
 .match-candidates__meta--current-job-title {
@@ -289,7 +289,7 @@
 .match-candidates__divider {
   border: 0;
   border-top: 1px solid var(--app-color-outline, #d0d0d0);
-  margin: 8px 0 10px;
+  margin: var(--app-space-xs) 0 10px;
 }
 
 .match-candidates__meta--with-leading-icon {

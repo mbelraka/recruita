@@ -37,7 +37,20 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--app-font-family);
   color: var(--app-color-text-headline, #{$text-headline});
+}
+
+.visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 // Suppress browser-default focus ring on mouse/touch clicks;

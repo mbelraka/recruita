@@ -26,7 +26,7 @@ import { Languages } from '../../../enums/language.enum';
 import { FullState } from '../../../models/full-state.model';
 import { loadApplicants } from '../../../modules/applicants/state/applicants.actions';
 import { loadProfile } from '../../../modules/main/state/profile.actions';
-import { LocalizationService } from '../../../services/localization.service';
+import { setLanguage } from '../../../state/app.actions';
 import { selectAppLanguage } from '../../../state/app.selectors';
 import { isLanguage } from '../../../utilities/language.utils';
 import { translateInstantString } from '../../../utilities/localization.utils';
@@ -69,7 +69,6 @@ export class RootComponent implements OnInit {
   public constructor(
     private readonly _router: Router,
     private readonly _store: Store<FullState>,
-    private readonly _localization: LocalizationService,
     private readonly _translate: TranslateService
   ) {}
 
@@ -83,7 +82,7 @@ export class RootComponent implements OnInit {
 
   public onLanguageChange(value: unknown): void {
     if (isLanguage(value)) {
-      this._localization.setLanguage(value);
+      this._store.dispatch(setLanguage({ language: value }));
     }
   }
 

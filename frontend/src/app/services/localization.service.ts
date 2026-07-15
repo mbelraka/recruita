@@ -2,7 +2,7 @@ import { DateAdapter } from '@angular/material/core';
 import { Injectable, OnDestroy, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
+import { distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
@@ -31,7 +31,9 @@ export class LocalizationService implements OnDestroy {
         distinctUntilChanged(),
         switchMap((language) => {
           this.applyMaterialDateLocale(language);
-          return this.translate.use(language);
+          return this.translate
+            .use(language)
+            .pipe(tap(() => this.applyDocumentLanguage(language)));
         }),
         takeUntil(this.destroy$)
       )
@@ -45,6 +47,10 @@ export class LocalizationService implements OnDestroy {
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyDocumentLanguage(language: Languages): void {
+    document.documentElement.lang = APP_CONFIG.getLocale(language);
   }
 
   private applyDocumentTitle(): void {

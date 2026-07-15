@@ -1,7 +1,7 @@
 .mat-button-toggle-group {
   --mat-button-toggle-shape: 0;
   --mat-button-toggle-legacy-shape: 0;
-  --mat-button-toggle-background-color: #fff;
+  --mat-button-toggle-background-color: var(--app-color-surface-elevated);
   --mat-button-toggle-divider-color: transparent;
   --mat-button-toggle-selected-state-background-color: var(
     --app-color-secondary-emphasis
@@ -11,7 +11,7 @@
   );
 
   border: 1px solid var(--app-color-border-subtle);
-  background-color: #fff;
+  background-color: var(--app-color-surface-elevated);
   padding: 4px;
   box-sizing: border-box;
 }
@@ -38,7 +38,7 @@
 
 .mat-button-toggle-appearance-standard.mat-button-toggle-checked
   .mat-button-toggle-label-content {
-  font-weight: 700;
+  font-weight: var(--app-font-weight-bold);
 }
 
 .mat-button-toggle {

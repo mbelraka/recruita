@@ -18,14 +18,16 @@
 // Popup: white surface + square corners (theme token on `html` is easy to lose in the cascade).
 .mat-datepicker-content,
 .mat-datepicker-content.mat-datepicker-content-touch {
-  --mat-datepicker-calendar-container-background-color: #fff;
+  --mat-datepicker-calendar-container-background-color: var(
+    --app-color-surface-elevated
+  );
   --mat-datepicker-calendar-container-shape: 0;
   --mat-datepicker-calendar-container-touch-shape: 0;
-  background-color: #fff !important;
+  background-color: var(--app-color-surface-elevated) !important;
 }
 
 .mat-datepicker-content-container {
-  background-color: #fff;
+  background-color: var(--app-color-surface-elevated);
 }
 
 // Cancel is a text `mat-button`; square corners (apply stays on raised-button rules).

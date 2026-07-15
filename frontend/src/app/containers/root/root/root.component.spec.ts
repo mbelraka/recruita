@@ -24,8 +24,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { NavLink } from 'src/app/modules/main/models/nav-link.model';
-import { LocalizationService } from '../../../services/localization.service';
 import { loadProfile } from '../../../modules/main/state/profile.actions';
+import { setLanguage } from '../../../state/app.actions';
 import { RootComponent } from './root.component';
 
 @Component({ template: '', standalone: false })
@@ -34,15 +34,9 @@ class RouteStubComponent {}
 describe('RootComponent', () => {
   let fixture: ComponentFixture<RootComponent>;
   let component: RootComponent;
-  let localization: jasmine.SpyObj<LocalizationService>;
   let store: MockStore;
 
   beforeEach(async () => {
-    localization = jasmine.createSpyObj<LocalizationService>(
-      'LocalizationService',
-      ['setLanguage']
-    );
-
     await TestBed.configureTestingModule({
       declarations: [RootComponent, RouteStubComponent],
       imports: [
@@ -68,7 +62,6 @@ describe('RootComponent', () => {
             app: { language: Languages.English },
           },
         }),
-        { provide: LocalizationService, useValue: localization },
       ],
     }).compileComponents();
 
@@ -121,15 +114,17 @@ describe('RootComponent', () => {
     expect(component.selectedLanguage).toBe(Languages.German);
   });
 
-  it('should call localization when language is valid', () => {
+  it('should dispatch setLanguage when language is valid', () => {
     component.onLanguageChange(Languages.German);
-    expect(localization.setLanguage).toHaveBeenCalledWith(Languages.German);
-    expect(localization.setLanguage).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      setLanguage({ language: Languages.German })
+    );
   });
 
   it('should ignore invalid language values', () => {
+    const dispatchCalls = (store.dispatch as jasmine.Spy).calls.count();
     component.onLanguageChange('xx');
-    expect(localization.setLanguage).not.toHaveBeenCalled();
+    expect((store.dispatch as jasmine.Spy).calls.count()).toBe(dispatchCalls);
   });
 
   it('should emit current nav link after navigation', fakeAsync(() => {
