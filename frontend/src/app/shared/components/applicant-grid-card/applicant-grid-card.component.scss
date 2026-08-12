@@ -33,7 +33,7 @@ $_card-ease: var(
   background-color: var(--app-color-surface-elevated) !important;
   border-radius: 0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
-  border: 1px solid var(--app-color-border-subtle, rgba(0, 0, 0, 0.12));
+  border: 1px solid var(--app-color-border-subtle);
   transition:
     box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 0.22s $_card-ease,
@@ -48,7 +48,7 @@ $_card-ease: var(
   &:focus-within {
     border-color: color-mix(
       in srgb,
-      var(--app-color-text-body, #3f4848) 28%,
+      var(--app-color-text-body) 28%,
       var(--app-color-border-subtle)
     );
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
@@ -61,13 +61,13 @@ $_card-ease: var(
   }
 
   &--top {
-    border-left: 4px solid var(--mat-sys-primary-container, #735c00);
+    border-left: 4px solid var(--app-color-button-primary-fill);
   }
 
   &--top:hover,
   &--top:focus-within,
   &--top:active {
-    border-left-color: var(--mat-sys-primary-container, #735c00);
+    border-left-color: var(--app-color-button-primary-fill);
   }
 
   @media (prefers-reduced-motion: reduce) {

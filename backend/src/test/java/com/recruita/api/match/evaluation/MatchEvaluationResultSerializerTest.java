@@ -16,7 +16,7 @@ class MatchEvaluationResultSerializerTest {
   @Test
   void serializesDeterministicResponseBody() throws Exception {
     MatchEvaluationResult result =
-        new MatchEvaluationResult.Deterministic(
+        new DeterministicMatchEvaluationResult(
             new MatchResponseDto(
                 List.of(new MatchScoreDto("a", 80, List.of(), List.of(), null, ""))));
 
@@ -29,7 +29,7 @@ class MatchEvaluationResultSerializerTest {
   @Test
   void serializesGroqResponseBody() throws Exception {
     MatchEvaluationResult result =
-        new MatchEvaluationResult.Groq(
+        new GroqMatchEvaluationResult(
             JsonNodeFactory.instance.objectNode().put("provider", "groq"));
 
     String json = objectMapper.writeValueAsString(result);

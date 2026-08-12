@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '../../../config/app.config';
 import { Applicant } from '../models/applicant.model';
 import { ApplicantApiRecord } from '../models/applicant-api-record.model';
 import { ApplicantApiSummaryRecord } from '../models/applicant-api-summary-record.model';
@@ -59,5 +60,7 @@ function formatAvailableFrom(value: Date | undefined): string | undefined {
   if (!value || Number.isNaN(value.getTime())) {
     return undefined;
   }
-  return value.toISOString().slice(0, 10);
+  return value
+    .toISOString()
+    .slice(0, APP_CONFIG.EXPORT.CSV.DATE_SLICE_END_INDEX);
 }

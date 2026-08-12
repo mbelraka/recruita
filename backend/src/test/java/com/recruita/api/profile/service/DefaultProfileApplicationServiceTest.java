@@ -11,6 +11,7 @@ import com.recruita.api.api.dto.profile.SaveProfileRequestDto;
 import com.recruita.api.common.enums.UiLanguage;
 import com.recruita.api.common.exception.ProfileConflictException;
 import com.recruita.api.common.exception.ProfileNotFoundException;
+import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.persistence.entity.ProfileEntity;
 import com.recruita.api.persistence.repository.ProfileRepository;
 import com.recruita.api.profile.mapper.ProfileMapper;
@@ -32,7 +33,8 @@ class DefaultProfileApplicationServiceTest {
   @BeforeEach
   void setUp() {
     service =
-        new DefaultProfileApplicationService(repository, Mappers.getMapper(ProfileMapper.class));
+        new DefaultProfileApplicationService(
+            repository, Mappers.getMapper(ProfileMapper.class), new RecruitaProperties());
   }
 
   @Test

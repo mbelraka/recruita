@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recruita.api.api.dto.match.CandidateProfileDto;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -27,28 +30,28 @@ class MatchEvaluationResultCodecTest {
                     80,
                     List.of("java"),
                     List.of(),
-                    new MatchScoreDto.CandidateProfileDto(List.of("java"), 1.0, List.of("Dev"), ""),
+                    new CandidateProfileDto(List.of("java"), 1.0, List.of("Dev"), ""),
                     "ok")));
 
-    MatchEvaluationResult encoded = new MatchEvaluationResult.Deterministic(response);
+    MatchEvaluationResult encoded = new DeterministicMatchEvaluationResult(response);
     MatchEvaluationResult decoded = codec.decode(codec.encode(encoded));
 
-    assertInstanceOf(MatchEvaluationResult.Deterministic.class, decoded);
+    assertInstanceOf(DeterministicMatchEvaluationResult.class, decoded);
     assertEquals(
         80,
-        ((MatchEvaluationResult.Deterministic) decoded).value().scores().getFirst().matchScore());
+        ((DeterministicMatchEvaluationResult) decoded).value().scores().getFirst().matchScore());
   }
 
   @Test
   void roundTripsGroqResults() {
     MatchEvaluationResult encoded =
-        new MatchEvaluationResult.Groq(
+        new GroqMatchEvaluationResult(
             new ObjectMapper().createObjectNode().put("scores", 1).put("ok", true));
 
     MatchEvaluationResult decoded = codec.decode(codec.encode(encoded));
 
-    assertInstanceOf(MatchEvaluationResult.Groq.class, decoded);
-    assertEquals(1, ((MatchEvaluationResult.Groq) decoded).value().path("scores").asInt());
+    assertInstanceOf(GroqMatchEvaluationResult.class, decoded);
+    assertEquals(1, ((GroqMatchEvaluationResult) decoded).value().path("scores").asInt());
   }
 
   @Test
@@ -57,7 +60,7 @@ class MatchEvaluationResultCodecTest {
     properties.getMatch().getCache().setSchemaVersion("2");
     String payload =
         codec.encode(
-            new MatchEvaluationResult.Groq(new ObjectMapper().createObjectNode().put("ok", true)));
+            new GroqMatchEvaluationResult(new ObjectMapper().createObjectNode().put("ok", true)));
 
     assertTrue(
         new MatchEvaluationResultCodec(properties, new ObjectMapper())

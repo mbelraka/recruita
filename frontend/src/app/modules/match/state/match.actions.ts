@@ -1,27 +1,30 @@
 import { createAction, props } from '@ngrx/store';
 
+import { MatchActionTypes } from '../enums/match-action-types.enum';
 import { MatchCandidateResult } from '../models/match-candidate-result.model';
 
 export const setJobDescription = createAction(
-  '[Match] Set Job Description',
+  MatchActionTypes.SetJobDescription,
   props<{ jobDescription: string }>()
 );
 
-export const resetMatchState = createAction('[Match] Reset State');
+export const resetMatchState = createAction(MatchActionTypes.ResetState);
 
 /** Clears evaluation results when applicant data changes; keeps the job description. */
 export const invalidateMatchResults = createAction(
-  '[Match] Invalidate Results'
+  MatchActionTypes.InvalidateResults
 );
 
-export const evaluateCandidates = createAction('[Match] Evaluate Candidates');
+export const evaluateCandidates = createAction(
+  MatchActionTypes.EvaluateCandidates
+);
 
 export const evaluateCandidatesSuccess = createAction(
-  '[Match] Evaluate Candidates Success',
+  MatchActionTypes.EvaluateCandidatesSuccess,
   props<{ results: MatchCandidateResult[] }>()
 );
 
 export const evaluateCandidatesFailure = createAction(
-  '[Match] Evaluate Candidates Failure',
+  MatchActionTypes.EvaluateCandidatesFailure,
   props<{ error: string }>()
 );

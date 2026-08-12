@@ -28,10 +28,4 @@ record GroqChatCompletionPayload(
             new GroqChatMessage(messageRoles.getUser(), request.userPrompt())),
         new GroqResponseFormat(responseFormatType));
   }
-
-  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-  record GroqChatMessage(String role, String content) {}
-
-  @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-  record GroqResponseFormat(String type) {}
 }

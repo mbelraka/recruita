@@ -172,7 +172,7 @@
                 <importMapping>MatchCandidateDto=com.recruita.api.api.dto.match.MatchCandidateDto</importMapping>
                 <importMapping>MatchScoreDto=com.recruita.api.api.dto.match.MatchScoreDto</importMapping>
                 <importMapping>MatchResponseDto=com.recruita.api.api.dto.match.MatchResponseDto</importMapping>
-                <importMapping>CandidateProfileDto=com.recruita.api.api.dto.match.MatchScoreDto.CandidateProfileDto</importMapping>
+                <importMapping>CandidateProfileDto=com.recruita.api.api.dto.match.CandidateProfileDto</importMapping>
                 <importMapping>ParseActionCommandRequest=com.recruita.api.action.model.ParseActionCommandRequest</importMapping>
                 <importMapping>ParseActionResponse=com.recruita.api.action.model.ParseActionResponse</importMapping>
                 <importMapping>ParsedActionDto=com.recruita.api.action.model.ParsedActionDto</importMapping>

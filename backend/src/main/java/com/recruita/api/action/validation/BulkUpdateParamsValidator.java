@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ApplicationStatusWire;
 import com.recruita.api.action.model.ParamsValidationResult;
+import com.recruita.api.config.properties.ActionMessageProperties;
+import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,14 +20,17 @@ public class BulkUpdateParamsValidator {
       Set.of(ActionParamKey.APPLICATION_STATUS, ActionParamKey.NOTES);
 
   private final FilterParamsValidator filterParamsValidator;
+  private final ActionMessageProperties messages;
 
-  public BulkUpdateParamsValidator(FilterParamsValidator filterParamsValidator) {
+  public BulkUpdateParamsValidator(
+      FilterParamsValidator filterParamsValidator, RecruitaProperties properties) {
     this.filterParamsValidator = filterParamsValidator;
+    this.messages = properties.getAction().getMessages();
   }
 
   public ParamsValidationResult validate(JsonNode params) {
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Bulk update params must be an object"));
+      return ParamsValidationResult.invalid(List.of(messages.getBulkUpdateParamsMustBeObject()));
     }
 
     ParamsValidationResult filtersResult =
@@ -33,13 +38,13 @@ public class BulkUpdateParamsValidator {
     if (!filtersResult.isValid() || filtersResult.value().isEmpty()) {
       return ParamsValidationResult.invalid(
           filtersResult.errors().isEmpty()
-              ? List.of("filters are required")
+              ? List.of(messages.getFiltersRequired())
               : filtersResult.errors());
     }
 
     JsonNode updates = params.get(ActionParamKey.UPDATES);
     if (!ActionJsonSupport.isObject(updates)) {
-      return ParamsValidationResult.invalid(List.of("updates must be an object"));
+      return ParamsValidationResult.invalid(List.of(messages.getUpdatesMustBeObject()));
     }
 
     List<String> invalidKeys = new ArrayList<>();
@@ -53,14 +58,14 @@ public class BulkUpdateParamsValidator {
             });
     if (!invalidKeys.isEmpty()) {
       return ParamsValidationResult.invalid(
-          List.of("Invalid update fields: " + String.join(", ", invalidKeys)));
+          List.of(messages.formatInvalidUpdateFields(String.join(", ", invalidKeys))));
     }
 
     JsonNode applicationStatus = updates.get(ActionParamKey.APPLICATION_STATUS);
     if (applicationStatus != null
         && !applicationStatus.isMissingNode()
         && !ApplicationStatusWire.isWireValue(applicationStatus.asText())) {
-      return ParamsValidationResult.invalid(List.of("Invalid applicationStatus value"));
+      return ParamsValidationResult.invalid(List.of(messages.getInvalidApplicationStatus()));
     }
 
     Map<String, Object> actionParams = new LinkedHashMap<>();

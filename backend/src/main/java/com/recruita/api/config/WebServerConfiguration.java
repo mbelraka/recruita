@@ -12,6 +12,8 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 @Configuration
 public class WebServerConfiguration {
 
+  private static final int FORWARDED_HEADER_FILTER_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
+
   @Bean
   WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatMaxPostSizeCustomizer(
       RecruitaProperties properties) {
@@ -25,7 +27,7 @@ public class WebServerConfiguration {
       RecruitaProperties properties) {
     FilterRegistrationBean<ForwardedHeaderFilter> registration = new FilterRegistrationBean<>();
     registration.setFilter(new ForwardedHeaderFilter());
-    registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+    registration.setOrder(FORWARDED_HEADER_FILTER_ORDER);
     registration.setEnabled(properties.getSecurity().getHttp().isTrustProxy());
     return registration;
   }

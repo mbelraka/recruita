@@ -4,7 +4,6 @@ import { catchError, map, Observable, of, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { LruStringArrayCache } from '../../../utilities/lru-string-cache.util';
 import { OpenMeteoGeocodeResponse } from '../models/open-meteo-geocode-response.model';
 
@@ -14,13 +13,11 @@ export class CitySearchService {
     APP_CONFIG.APPLICANTS.LOCATION_GEOCODE_CACHE_MAX_ENTRIES
   );
 
-  public constructor(
-    private readonly _http: HttpClient,
-    private readonly _privacy: PrivacyConsentService
-  ) {}
+  public constructor(private readonly _http: HttpClient) {}
 
   /**
    * Returns distinct "City, Country" labels for autocomplete. Empty when the query is too short or the request fails.
+   * Callers must gate on geocoding consent.
    */
   public searchCityLabels(
     query: string,
@@ -28,9 +25,6 @@ export class CitySearchService {
   ): Observable<string[]> {
     const name = query.trim();
     if (name.length < APP_CONFIG.APPLICANTS.LOCATION_GEOCODE_MIN_QUERY_LENGTH) {
-      return of([]);
-    }
-    if (!this._privacy.optionalGeocoding()) {
       return of([]);
     }
 
@@ -41,11 +35,12 @@ export class CitySearchService {
     }
 
     const applicants = APP_CONFIG.APPLICANTS;
+    const queryKeys = applicants.LOCATION_GEOCODE_QUERY;
     const params = new HttpParams()
-      .set('name', name)
-      .set('count', applicants.LOCATION_GEOCODE_RESULT_COUNT)
-      .set('language', language)
-      .set('format', applicants.LOCATION_GEOCODE_FORMAT);
+      .set(queryKeys.NAME, name)
+      .set(queryKeys.COUNT, String(applicants.LOCATION_GEOCODE_RESULT_COUNT))
+      .set(queryKeys.LANGUAGE, language)
+      .set(queryKeys.FORMAT, applicants.LOCATION_GEOCODE_FORMAT);
 
     return this._http
       .get<OpenMeteoGeocodeResponse>(applicants.LOCATION_GEOCODE_SEARCH_URL, {

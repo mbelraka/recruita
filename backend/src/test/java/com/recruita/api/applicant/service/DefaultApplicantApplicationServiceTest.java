@@ -14,6 +14,7 @@ import com.recruita.api.applicant.roster.RosterMutationCoordinator;
 import com.recruita.api.applicant.roster.RosterVersionService;
 import com.recruita.api.common.exception.ApplicantConflictException;
 import com.recruita.api.common.exception.ApplicantNotFoundException;
+import com.recruita.api.config.properties.RecruitaProperties;
 import com.recruita.api.persistence.entity.ApplicantEntity;
 import com.recruita.api.persistence.repository.ApplicantRepository;
 import java.time.Instant;
@@ -34,6 +35,7 @@ class DefaultApplicantApplicationServiceTest {
   @Mock private RosterVersionService rosterVersionService;
   @Mock private RosterMutationCoordinator rosterMutationCoordinator;
 
+  private final RecruitaProperties properties = new RecruitaProperties();
   private DefaultApplicantApplicationService service;
 
   @BeforeEach
@@ -45,7 +47,8 @@ class DefaultApplicantApplicationServiceTest {
             repository,
             Mappers.getMapper(ApplicantMapper.class),
             rosterWatermarkService,
-            rosterMutationCoordinator);
+            rosterMutationCoordinator,
+            properties);
   }
 
   @Test
@@ -60,7 +63,8 @@ class DefaultApplicantApplicationServiceTest {
 
     assertEquals(1, applicants.size());
     assertEquals("a-1", applicants.get(0).id());
-    verify(repository).findAll(Sort.by(Sort.Direction.DESC, "updatedAt"));
+    verify(repository)
+        .findAll(Sort.by(Sort.Direction.DESC, properties.getApplicant().getListSortProperty()));
   }
 
   @Test

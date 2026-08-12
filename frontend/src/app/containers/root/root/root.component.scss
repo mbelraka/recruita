@@ -68,6 +68,8 @@
       .language-select-form-field {
         flex-shrink: 0;
         width: 7.5rem;
+        --mat-form-field-leading-icon-color: var(--app-color-text-inner);
+        --mat-select-enabled-arrow-color: var(--app-color-text-inner);
       }
 
       .nav-container {

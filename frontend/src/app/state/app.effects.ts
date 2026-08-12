@@ -3,13 +3,25 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { NavigationEnd, Router } from '@angular/router';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, map, tap } from 'rxjs';
+import { concatLatestFrom } from '@ngrx/operators';
+import { Store } from '@ngrx/store';
+import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app.config';
 import { NotificationSnackBarComponent } from '../components/notification-snack-bar/notification-snack-bar.component';
+import { FullState } from '../models/full-state.model';
+import { selectOptionalRemoteTranslation } from '../modules/main/state/main.selectors';
 import { RouteFocusService } from '../services/route-focus.service';
+import { RemoteTranslateService } from '../services/remote-translate.service';
 import { notificationPanelClasses } from '../utilities/notification.utils';
-import { clearNotification, showNotification } from './app.actions';
+import { buildRemoteTranslationCacheKey } from '../utilities/remote-translate-cache.util';
+import {
+  clearNotification,
+  clearRemoteTranslations,
+  remoteTranslationSuccess,
+  requestRemoteTranslation,
+  showNotification,
+} from './app.actions';
 
 @Injectable()
 export class AppEffects {
@@ -44,10 +56,40 @@ export class AppEffects {
     )
   );
 
+  public requestRemoteTranslation$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(requestRemoteTranslation),
+      concatLatestFrom(() =>
+        this._store.select(selectOptionalRemoteTranslation)
+      ),
+      mergeMap(([{ text, from, to }, allowed]) => {
+        const key = buildRemoteTranslationCacheKey(from, to, text);
+        if (!allowed) {
+          return [remoteTranslationSuccess({ key, translated: text })];
+        }
+        return this._remoteTranslate
+          .translate(text, from, to)
+          .pipe(
+            map((translated) => remoteTranslationSuccess({ key, translated }))
+          );
+      })
+    )
+  );
+
+  public clearRemoteTranslationsWhenConsentOff$ = createEffect(() =>
+    this._store.select(selectOptionalRemoteTranslation).pipe(
+      distinctUntilChanged(),
+      filter((enabled) => !enabled),
+      map(() => clearRemoteTranslations())
+    )
+  );
+
   constructor(
     private readonly _actions$: Actions,
     private readonly _snackBar: MatSnackBar,
     private readonly _router: Router,
-    private readonly _routeFocus: RouteFocusService
+    private readonly _routeFocus: RouteFocusService,
+    private readonly _store: Store<FullState>,
+    private readonly _remoteTranslate: RemoteTranslateService
   ) {}
 }

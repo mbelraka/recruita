@@ -2,19 +2,23 @@ import { createReducer, on } from '@ngrx/store';
 
 import { APP_CONFIG } from '../config/app.config';
 import { AppState } from '../models/app-state.model';
+import { buildRemoteTranslationCacheKey } from '../utilities/remote-translate-cache.util';
 import {
   clearNotification,
+  clearRemoteTranslations,
+  remoteTranslationSuccess,
+  requestRemoteTranslation,
   setLanguage,
   showNotification,
 } from './app.actions';
 
-// Initial application state
 export const initialAppState: AppState = {
   language: APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE,
   notification: null,
+  remoteTranslations: {},
+  remoteTranslationInFlight: {},
 };
 
-// Define the reducer properly
 export const appReducer = createReducer(
   initialAppState,
   on(
@@ -36,6 +40,38 @@ export const appReducer = createReducer(
     (state): AppState => ({
       ...state,
       notification: null,
+    })
+  ),
+  on(requestRemoteTranslation, (state, { text, from, to }): AppState => {
+    const key = buildRemoteTranslationCacheKey(from, to, text);
+    if (state.remoteTranslations[key] || state.remoteTranslationInFlight[key]) {
+      return state;
+    }
+    return {
+      ...state,
+      remoteTranslationInFlight: {
+        ...state.remoteTranslationInFlight,
+        [key]: true,
+      },
+    };
+  }),
+  on(remoteTranslationSuccess, (state, { key, translated }): AppState => {
+    const { [key]: _removed, ...inFlight } = state.remoteTranslationInFlight;
+    return {
+      ...state,
+      remoteTranslations: {
+        ...state.remoteTranslations,
+        [key]: translated,
+      },
+      remoteTranslationInFlight: inFlight,
+    };
+  }),
+  on(
+    clearRemoteTranslations,
+    (state): AppState => ({
+      ...state,
+      remoteTranslations: {},
+      remoteTranslationInFlight: {},
     })
   )
 );

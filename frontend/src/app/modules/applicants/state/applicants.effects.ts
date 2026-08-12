@@ -26,11 +26,13 @@ import {
   concatWithErrorNotification,
   concatWithNotification,
 } from '../../../utilities/notification.utils';
+import { selectOptionalGeocoding } from '../../main/state/main.selectors';
 import { invalidateMatchResults } from '../../match/state/match.actions';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantRosterLoadResult } from '../models/applicant-roster-load-result.model';
 import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
+import { ConfirmDeleteApplicantDialogService } from '../services/confirm-delete-applicant-dialog.service';
 import {
   mergeApplicantListFilters,
   navigateApplicantFiltersUrl,
@@ -47,6 +49,7 @@ import {
   loadApplicants,
   loadApplicantsFailure,
   openApplicantForm,
+  openConfirmDeleteApplicant,
   patchApplicantFilters,
   searchLocationSuggestions,
   searchLocationSuggestionsFailure,
@@ -77,7 +80,8 @@ export class ApplicantsEffects {
     private readonly _router: Router,
     private readonly _applicants: ApplicantEntityCollectionService,
     private readonly _citySearchService: CitySearchService,
-    private readonly _editDialog: ApplicantEditDialogService
+    private readonly _editDialog: ApplicantEditDialogService,
+    private readonly _confirmDeleteDialog: ConfirmDeleteApplicantDialogService
   ) {}
 
   routerApplicantFiltersSync$ = createEffect(() =>
@@ -132,6 +136,17 @@ export class ApplicantsEffects {
     { dispatch: false }
   );
 
+  openConfirmDeleteApplicant$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(openConfirmDeleteApplicant),
+        tap(({ applicant }) => {
+          this._confirmDeleteDialog.open(applicant);
+        })
+      ),
+    { dispatch: false }
+  );
+
   loadApplicants$ = createEffect(() =>
     this._actions$.pipe(
       ofType(loadApplicants),
@@ -155,15 +170,19 @@ export class ApplicantsEffects {
   searchLocationSuggestions$ = createEffect(() =>
     this._actions$.pipe(
       ofType(searchLocationSuggestions),
-      switchMap(({ query, language }) =>
-        this._citySearchService.searchCityLabels(query, language).pipe(
+      concatLatestFrom(() => this._store.select(selectOptionalGeocoding)),
+      switchMap(([{ query, language }, optionalGeocoding]) => {
+        if (!optionalGeocoding) {
+          return of(searchLocationSuggestionsSuccess({ suggestions: [] }));
+        }
+        return this._citySearchService.searchCityLabels(query, language).pipe(
           mapResponse({
             next: (suggestions) =>
               searchLocationSuggestionsSuccess({ suggestions }),
             error: () => searchLocationSuggestionsFailure(),
           })
-        )
-      )
+        );
+      })
     )
   );
 

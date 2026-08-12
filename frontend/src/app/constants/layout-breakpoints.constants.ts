@@ -1,22 +1,22 @@
-import { LayoutWidthTier } from '../models/layout-width-tier.type';
+import { LayoutWidthTier } from '../enums/layout-width-tier.enum';
 
 /**
  * Max viewport widths per {@link LayoutWidthTier} (exclusive upper bound for xs/sm/md).
  * Keep in sync with `styles/shared/_breakpoints.scss` and `tailwind.config.js`.
  */
 export const LAYOUT_WIDTH_TIER_MAX_PX: Readonly<
-  Record<Exclude<LayoutWidthTier, 'lg'>, number>
+  Record<Exclude<LayoutWidthTier, LayoutWidthTier.Lg>, number>
 > = {
-  xs: 599.98,
-  sm: 959.98,
-  md: 1279.98,
+  [LayoutWidthTier.Xs]: 599.98,
+  [LayoutWidthTier.Sm]: 959.98,
+  [LayoutWidthTier.Md]: 1279.98,
 };
 
 /** CDK `BreakpointObserver` media queries for each non-lg width tier. */
 export const LAYOUT_WIDTH_TIER_MEDIA_QUERIES: Readonly<
-  Record<Exclude<LayoutWidthTier, 'lg'>, string>
+  Record<Exclude<LayoutWidthTier, LayoutWidthTier.Lg>, string>
 > = {
-  xs: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX.xs}px)`,
-  sm: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX.sm}px)`,
-  md: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX.md}px)`,
+  [LayoutWidthTier.Xs]: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX[LayoutWidthTier.Xs]}px)`,
+  [LayoutWidthTier.Sm]: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX[LayoutWidthTier.Sm]}px)`,
+  [LayoutWidthTier.Md]: `(max-width: ${LAYOUT_WIDTH_TIER_MAX_PX[LayoutWidthTier.Md]}px)`,
 };

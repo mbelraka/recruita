@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { Applicant } from 'src/app/modules/applicants/models/applicant.model';
-import { ApplicantSkillsVariant } from '../../../modules/applicants/types/applicant-skills-variant.type';
+import { ApplicantSkillsVariant } from '../../../modules/applicants/enums/applicant-skills-variant.enum';
 import { MATERIAL_SYMBOLS_OUTLINED_FONT_SET } from 'src/app/utilities/initializers/material-symbols-outlined-font.initializer';
 
 @Component({
@@ -18,7 +18,8 @@ export class ApplicantGridCardComponent {
   @Input() public showDeleteAction = false;
   @Input() public showApplicationStatus = true;
   @Input() public showMetaDetails = true;
-  @Input() public skillVariant: ApplicantSkillsVariant = 'filter-chip';
+  @Input() public skillVariant: ApplicantSkillsVariant =
+    ApplicantSkillsVariant.FilterChip;
 
   @Output() public readonly cardSelected = new EventEmitter<Applicant>();
   @Output() public readonly deleteRequested = new EventEmitter<Applicant>();

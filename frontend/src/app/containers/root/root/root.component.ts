@@ -22,6 +22,7 @@ import {
 import { NavLink } from 'src/app/modules/main/models/nav-link.model';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { DocumentVisibilityState } from '../../../enums/document-visibility-state.enum';
 import { Languages } from '../../../enums/language.enum';
 import { FullState } from '../../../models/full-state.model';
 import { loadApplicants } from '../../../modules/applicants/state/applicants.actions';
@@ -40,6 +41,8 @@ import { translateInstantString } from '../../../utilities/localization.utils';
 export class RootComponent implements OnInit {
   /** Landing / home route (main module). */
   public readonly landingRoute = APP_CONFIG.NAV_LINKS[0].link;
+
+  public readonly privacyRoute = APP_CONFIG.ROUTES.PRIVACY;
 
   public readonly navLinks: readonly NavLink[] = APP_CONFIG.NAV_LINKS;
 
@@ -105,7 +108,11 @@ export class RootComponent implements OnInit {
 
     fromEvent(document, 'visibilitychange')
       .pipe(
-        filter(() => document.visibilityState === 'visible'),
+        filter(
+          () =>
+            (document.visibilityState as DocumentVisibilityState) ===
+            DocumentVisibilityState.Visible
+        ),
         takeUntilDestroyed(this._destroyRef)
       )
       .subscribe(() => {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { ApplicantSkillsVariant } from '../../../applicants/enums/applicant-skills-variant.enum';
 import { FullState } from '../../../../models/full-state.model';
 import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../../constants/match-error-codes';
 import { selectAllowsAiMatching } from '../../../main/state/main.selectors';
@@ -25,6 +26,7 @@ import {
 export class MatchCandidatesComponent implements OnInit {
   /** Error code stored in NgRx when optional AI matching is off (see {@link MATCH_ERROR_PRIVACY_AI_DISABLED}). */
   protected readonly privacyAiDisabledCode = MATCH_ERROR_PRIVACY_AI_DISABLED;
+  protected readonly filterChipVariant = ApplicantSkillsVariant.FilterChip;
 
   public jobDescriptionInput = '';
   public readonly loading$ = this._store.select(selectMatchLoading);

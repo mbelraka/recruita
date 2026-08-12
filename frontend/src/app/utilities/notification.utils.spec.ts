@@ -1,5 +1,7 @@
 import { Action } from '@ngrx/store';
 
+import { APP_CONFIG } from '../config/app.config';
+import { AppActionTypes } from '../enums/app-action-types.enum';
 import { AppNotificationType } from '../enums/app-notification-type.enum';
 import { addApplicantFailure } from '../modules/applicants/state/applicants.actions';
 
@@ -12,23 +14,24 @@ import {
 describe('notification.utils', () => {
   it('builds panel classes from notification type', () => {
     expect(notificationPanelClasses(AppNotificationType.Success)).toEqual([
-      'app-notification-snackbar',
-      'app-notification-snackbar--success',
+      APP_CONFIG.NOTIFICATION.SNACKBAR.PANEL_CLASS_BASE,
+      `${APP_CONFIG.NOTIFICATION.SNACKBAR.PANEL_CLASS_BASE}--${AppNotificationType.Success}`,
     ]);
   });
 
   it('concatWithNotification emits domain and showNotification actions', (done) => {
     const failure = addApplicantFailure({ error: 'offline' });
+    const seen: Action[] = [];
     concatWithNotification(failure, {
       type: AppNotificationType.Error,
       message: 'offline.',
     }).subscribe({
-      next: (action) => {
-        if (action.type === failure.type) {
-          expect(action).toEqual(failure);
-          return;
-        }
-        expect(action.type).toBe('[App] Show Notification');
+      next: (action) => seen.push(action),
+      complete: () => {
+        expect(seen).toEqual([
+          failure,
+          jasmine.objectContaining({ type: AppActionTypes.ShowNotification }),
+        ]);
         done();
       },
     });
@@ -44,7 +47,7 @@ describe('notification.utils', () => {
         expect(seen[0]).toEqual(failure);
         const notification = seen[1];
         expect(notification).toBeDefined();
-        expect(notification!.type).toBe('[App] Show Notification');
+        expect(notification!.type).toBe(AppActionTypes.ShowNotification);
         done();
       },
     });
@@ -60,7 +63,7 @@ describe('notification.utils', () => {
         expect(seen[0]).toEqual(failure);
         const notification = seen[1];
         expect(notification).toBeDefined();
-        expect(notification!.type).toBe('[App] Show Notification');
+        expect(notification!.type).toBe(AppActionTypes.ShowNotification);
         done();
       },
     });

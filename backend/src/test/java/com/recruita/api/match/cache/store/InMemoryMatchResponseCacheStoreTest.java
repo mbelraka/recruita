@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.github.benmanes.caffeine.cache.Ticker;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.time.Duration;
 import java.util.List;
@@ -45,7 +46,7 @@ class InMemoryMatchResponseCacheStoreTest {
   }
 
   private static MatchEvaluationResult deterministicResult() {
-    return new MatchEvaluationResult.Deterministic(new MatchResponseDto(List.of()));
+    return new DeterministicMatchEvaluationResult(new MatchResponseDto(List.of()));
   }
 
   private static final class StepTicker implements Ticker {

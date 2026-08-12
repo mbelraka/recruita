@@ -3,6 +3,7 @@ package com.recruita.api.match.scoring;
 import com.recruita.api.common.math.NumericRanges;
 import com.recruita.api.config.properties.MatchProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.domain.CandidateProfile;
 import com.recruita.api.match.domain.JobRequirements;
 import com.recruita.api.match.domain.MatchCandidate;
 import com.recruita.api.match.domain.MatchScore;
@@ -132,7 +133,7 @@ public class DeterministicMatchScoringStrategy implements MatchScoringStrategy {
         overall,
         matchingSkills,
         missingSkills,
-        new MatchScore.CandidateProfile(
+        new CandidateProfile(
             candidate.skills(),
             Double.isFinite(years) ? years : exp.getCandidateYoeMissingFallback(),
             candidate.currentJobTitle().isBlank()

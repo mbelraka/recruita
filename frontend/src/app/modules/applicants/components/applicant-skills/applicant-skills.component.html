@@ -1,6 +1,6 @@
 @if ((skills ?? []).length > 0) {
   @switch (variant) {
-    @case ('filter-chip') {
+    @case (skillsVariant.FilterChip) {
       <div class="applicant-skills applicant-skills--filter-chip">
         @for (skill of skills ?? []; track skill) {
           <button
@@ -14,7 +14,7 @@
         }
       </div>
     }
-    @case ('inline-link') {
+    @case (skillsVariant.InlineLink) {
       <span class="applicant-skills applicant-skills--inline-link">
         @for (skill of skills ?? []; track skill) {
           @if (!$first) {

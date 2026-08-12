@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -48,9 +50,9 @@ public class MatchEvaluationResultCodec {
       return switch (type) {
         case TYPE_DETERMINISTIC ->
             Optional.of(
-                new MatchEvaluationResult.Deterministic(
+                new DeterministicMatchEvaluationResult(
                     objectMapper.treeToValue(body, MatchResponseDto.class)));
-        case TYPE_GROQ -> Optional.of(new MatchEvaluationResult.Groq(body.deepCopy()));
+        case TYPE_GROQ -> Optional.of(new GroqMatchEvaluationResult(body.deepCopy()));
         default -> Optional.empty();
       };
     } catch (JsonProcessingException exception) {
@@ -60,10 +62,10 @@ public class MatchEvaluationResultCodec {
 
   private CacheEnvelope toEnvelope(MatchEvaluationResult result) {
     return switch (result) {
-      case MatchEvaluationResult.Deterministic deterministic ->
+      case DeterministicMatchEvaluationResult deterministic ->
           new CacheEnvelope(
               schemaVersion, TYPE_DETERMINISTIC, objectMapper.valueToTree(deterministic.value()));
-      case MatchEvaluationResult.Groq groq ->
+      case GroqMatchEvaluationResult groq ->
           new CacheEnvelope(schemaVersion, TYPE_GROQ, groq.value().deepCopy());
     };
   }

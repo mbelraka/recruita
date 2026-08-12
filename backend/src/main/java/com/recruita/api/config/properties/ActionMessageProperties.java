@@ -97,6 +97,10 @@ public class ActionMessageProperties {
     this.actionTypeRequired = actionTypeRequired;
   }
 
+  public String getInvalidActionType() {
+    return invalidActionType;
+  }
+
   public String formatInvalidActionType(String type, String validTypes) {
     return MessageFormat.format(invalidActionType, type, validTypes);
   }
@@ -137,6 +141,10 @@ public class ActionMessageProperties {
     this.skillsMustBeArray = skillsMustBeArray;
   }
 
+  public String getTooManySkills() {
+    return tooManySkills;
+  }
+
   public String formatTooManySkills(int maxSkills) {
     return MessageFormat.format(tooManySkills, maxSkills);
   }
@@ -161,12 +169,20 @@ public class ActionMessageProperties {
     this.invalidCountry = invalidCountry;
   }
 
+  public String getMinExperienceTooLow() {
+    return minExperienceTooLow;
+  }
+
   public String formatMinExperienceTooLow(int minExperience) {
     return MessageFormat.format(minExperienceTooLow, minExperience);
   }
 
   public void setMinExperienceTooLow(String minExperienceTooLow) {
     this.minExperienceTooLow = minExperienceTooLow;
+  }
+
+  public String getMaxExperienceTooHigh() {
+    return maxExperienceTooHigh;
   }
 
   public String formatMaxExperienceTooHigh(int maxExperience) {
@@ -177,12 +193,20 @@ public class ActionMessageProperties {
     this.maxExperienceTooHigh = maxExperienceTooHigh;
   }
 
+  public String getInvalidStatus() {
+    return invalidStatus;
+  }
+
   public String formatInvalidStatus(String validStatuses) {
     return MessageFormat.format(invalidStatus, validStatuses);
   }
 
   public void setInvalidStatus(String invalidStatus) {
     this.invalidStatus = invalidStatus;
+  }
+
+  public String getOptionalTextFieldInvalid() {
+    return optionalTextFieldInvalid;
   }
 
   public String formatOptionalTextFieldInvalid(String fieldName, int maxLength) {
@@ -199,6 +223,10 @@ public class ActionMessageProperties {
 
   public void setCreateApplicantParamsMustBeObject(String createApplicantParamsMustBeObject) {
     this.createApplicantParamsMustBeObject = createApplicantParamsMustBeObject;
+  }
+
+  public String getInvalidName() {
+    return invalidName;
   }
 
   public String formatInvalidName(int minLength, int maxLength) {
@@ -223,6 +251,10 @@ public class ActionMessageProperties {
 
   public void setSkillsRequired(String skillsRequired) {
     this.skillsRequired = skillsRequired;
+  }
+
+  public String getYearsOfExperienceRange() {
+    return yearsOfExperienceRange;
   }
 
   public String formatYearsOfExperienceRange(int minExperience, int maxExperience) {
@@ -257,6 +289,10 @@ public class ActionMessageProperties {
     this.applicantIdentifierRequired = applicantIdentifierRequired;
   }
 
+  public String getInvalidNewStatus() {
+    return invalidNewStatus;
+  }
+
   public String formatInvalidNewStatus(String validStatuses) {
     return MessageFormat.format(invalidNewStatus, validStatuses);
   }
@@ -271,6 +307,10 @@ public class ActionMessageProperties {
 
   public void setExportParamsMustBeObject(String exportParamsMustBeObject) {
     this.exportParamsMustBeObject = exportParamsMustBeObject;
+  }
+
+  public String getInvalidFormat() {
+    return invalidFormat;
   }
 
   public String formatInvalidFormat(String validFormats) {
@@ -297,6 +337,10 @@ public class ActionMessageProperties {
     this.generateReportParamsMustBeObject = generateReportParamsMustBeObject;
   }
 
+  public String getInvalidReportType() {
+    return invalidReportType;
+  }
+
   public String formatInvalidReportType(String validReportTypes) {
     return MessageFormat.format(invalidReportType, validReportTypes);
   }
@@ -319,6 +363,10 @@ public class ActionMessageProperties {
 
   public void setJobDescriptionRequired(String jobDescriptionRequired) {
     this.jobDescriptionRequired = jobDescriptionRequired;
+  }
+
+  public String getInvalidMatchLimit() {
+    return invalidMatchLimit;
   }
 
   public String formatInvalidMatchLimit(int minLimit, int maxLimit) {
@@ -351,6 +399,10 @@ public class ActionMessageProperties {
 
   public void setUpdatesMustBeObject(String updatesMustBeObject) {
     this.updatesMustBeObject = updatesMustBeObject;
+  }
+
+  public String getInvalidUpdateFields() {
+    return invalidUpdateFields;
   }
 
   public String formatInvalidUpdateFields(String invalidKeys) {

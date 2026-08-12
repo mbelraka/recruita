@@ -27,7 +27,9 @@ export class PdfApplicantExporter {
     ];
     let page = pdfDoc.addPage(pageSize);
     const { height } = page.getSize();
-    const contentWidth = pageSize[0] - this._config.PDF.BODY_X * 2;
+    const contentWidth =
+      pageSize[0] -
+      this._config.PDF.BODY_X * this._config.PDF.HORIZONTAL_MARGIN_SIDES;
     const lineHeight =
       this._config.PDF.BODY_FONT_SIZE + this._config.PDF.BODY.LINE_HEIGHT_EXTRA;
     const maxLineChars = estimatePdfMaxLineChars(

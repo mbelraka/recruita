@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ParamsValidationResult;
 import com.recruita.api.action.model.ReportType;
+import com.recruita.api.config.properties.ActionMessageProperties;
+import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,20 +15,24 @@ import org.springframework.stereotype.Component;
 public class GenerateReportParamsValidator {
 
   private final FilterParamsValidator filterParamsValidator;
+  private final ActionMessageProperties messages;
 
-  public GenerateReportParamsValidator(FilterParamsValidator filterParamsValidator) {
+  public GenerateReportParamsValidator(
+      FilterParamsValidator filterParamsValidator, RecruitaProperties properties) {
     this.filterParamsValidator = filterParamsValidator;
+    this.messages = properties.getAction().getMessages();
   }
 
   public ParamsValidationResult validate(JsonNode params) {
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Generate report params must be an object"));
+      return ParamsValidationResult.invalid(
+          List.of(messages.getGenerateReportParamsMustBeObject()));
     }
 
     JsonNode reportType = params.get(ActionParamKey.REPORT_TYPE);
     if (reportType == null || !ReportType.isWireValue(reportType.asText())) {
       return ParamsValidationResult.invalid(
-          List.of("reportType must be one of: " + ReportType.joinedPipe()));
+          List.of(messages.formatInvalidReportType(ReportType.joinedPipe())));
     }
 
     Map<String, Object> actionParams = new LinkedHashMap<>();

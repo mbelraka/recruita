@@ -1,12 +1,15 @@
 import { createSelector } from '@ngrx/store';
 
+import { APP_CONFIG } from '../../../config/app.config';
 import {
   selectAllFromEntityCollection,
   selectEntityCollectionLoaded,
   selectEntityCollectionLoading,
 } from '../../../core/entity-data/entity-cache.selectors';
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import { StateFeatures } from '../../../containers/root/enums/state-features.enum';
+import { APPLICANT_FIELD } from '../constants/applicant-field.constants';
+import { DEFAULT_APPLICANT_UI_STATE } from '../constants/applicants-ui-state.constants';
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { SortDirection } from '../enums/sort-direction.enum';
 import { ViewTypes } from '../enums/view-types.enum';
@@ -16,20 +19,6 @@ import { filterApplicantList } from '../utilities/applicant-filters.util';
 import { countryFromLocation } from '../utilities/applicant-location.util';
 
 const APPLICATION_STATUS_ORDER = Object.values(ApplicationStatus);
-const EMPTY_APPLICANT_UI_STATE: ApplicantUiState = {
-  filter: '',
-  sortBy: 'name',
-  sortDirection: SortDirection.Asc,
-  filterBySkill: null,
-  filterByStatus: null,
-  filterByCountry: null,
-  viewType: ViewTypes.GRID,
-  locationSuggestions: [],
-  newApplicantFabExpanded: false,
-  rosterEtag: null,
-  rosterVersion: null,
-  suppressNewApplicantFabPointerExpandUntil: 0,
-};
 
 const selectApplicantUiState = (state: {
   [StateFeatures.Applicants]?: ApplicantUiState;
@@ -37,7 +26,7 @@ const selectApplicantUiState = (state: {
 
 const selectApplicantUiStateSafe = createSelector(
   selectApplicantUiState,
-  (state): ApplicantUiState => state ?? EMPTY_APPLICANT_UI_STATE
+  (state): ApplicantUiState => state ?? DEFAULT_APPLICANT_UI_STATE
 );
 
 export const selectAllApplicants = selectAllFromEntityCollection<Applicant>(
@@ -105,8 +94,10 @@ export const selectUniqueApplicationStatuses = createSelector(
     return [...set].sort((a, b) => {
       const ia = APPLICATION_STATUS_ORDER.indexOf(a);
       const ib = APPLICATION_STATUS_ORDER.indexOf(b);
-      const ra = ia === -1 ? 999 : ia;
-      const rb = ib === -1 ? 999 : ib;
+      const ra =
+        ia === -1 ? APP_CONFIG.APPLICANTS.UNKNOWN_STATUS_SORT_INDEX : ia;
+      const rb =
+        ib === -1 ? APP_CONFIG.APPLICANTS.UNKNOWN_STATUS_SORT_INDEX : ib;
       if (ra !== rb) {
         return ra - rb;
       }
@@ -174,7 +165,7 @@ function compareApplicantValues(
   if (vb === undefined || vb === null) {
     return 1;
   }
-  if (key === 'availableFrom') {
+  if (key === APPLICANT_FIELD.AVAILABLE_FROM) {
     const da = va instanceof Date ? va : new Date(va as string | number);
     const db = vb instanceof Date ? vb : new Date(vb as string | number);
     const ta = da.getTime();

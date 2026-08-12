@@ -58,7 +58,8 @@ public class ActionParseApplicationService {
       JsonNode parsed = llmJsonPayloadParser.parse(payload);
       if (parsed == null) {
         return ParseActionResponse.from(
-            ActionValidationResult.invalid(List.of("Failed to parse LLM response as JSON")));
+            ActionValidationResult.invalid(
+                List.of(properties.getAction().getMessages().getFailedToParseLlmResponse())));
       }
       return ParseActionResponse.from(actionValidator.validate(parsed));
     } catch (MatchServiceUnavailableException ex) {

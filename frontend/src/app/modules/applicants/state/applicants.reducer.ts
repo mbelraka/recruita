@@ -1,8 +1,8 @@
 import { createReducer, on } from '@ngrx/store';
 
-import { ApplicantUiState } from '../models/applicant-state.model';
+import { DEFAULT_APPLICANT_UI_STATE } from '../constants/applicants-ui-state.constants';
 import { SortDirection } from '../enums/sort-direction.enum';
-import { ViewTypes } from '../enums/view-types.enum';
+import { ApplicantUiState } from '../models/applicant-state.model';
 import {
   applicantFormDialogClosed,
   setNewApplicantFabExpanded,
@@ -15,20 +15,7 @@ import {
   applicantsRosterLoaded,
 } from './applicants.actions';
 
-const initialApplicantUiState: ApplicantUiState = {
-  filter: '',
-  sortBy: 'name',
-  sortDirection: SortDirection.Asc,
-  filterBySkill: null,
-  filterByStatus: null,
-  filterByCountry: null,
-  viewType: ViewTypes.GRID,
-  locationSuggestions: [],
-  newApplicantFabExpanded: false,
-  rosterEtag: null,
-  rosterVersion: null,
-  suppressNewApplicantFabPointerExpandUntil: 0,
-};
+const initialApplicantUiState: ApplicantUiState = DEFAULT_APPLICANT_UI_STATE;
 
 export const applicantsReducer = createReducer(
   initialApplicantUiState,

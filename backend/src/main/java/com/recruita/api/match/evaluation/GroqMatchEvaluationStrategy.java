@@ -23,7 +23,7 @@ public class GroqMatchEvaluationStrategy implements MatchEvaluationStrategy {
   @Override
   public MatchEvaluationResult evaluate(
       MatchRequest request, List<MatchCandidate> normalizedCandidates) {
-    return new MatchEvaluationResult.Groq(
+    return new GroqMatchEvaluationResult(
         groqMatchEvaluationService.evaluate(request, normalizedCandidates));
   }
 }

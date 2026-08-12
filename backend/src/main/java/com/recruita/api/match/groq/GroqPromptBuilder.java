@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroqPromptBuilder {
 
+  private static final int USER_PROMPT_BUFFER_CHARS = 1024;
+
   private final MatchProperties.GroqProperties groq;
   private final ObjectMapper objectMapper;
   private final String serializationFailedMessage;
@@ -26,7 +28,7 @@ public class GroqPromptBuilder {
   public String buildUserPrompt(String jobDescription, List<MatchCandidate> candidates) {
     MatchProperties.GroqProperties.PromptProperties prompts = groq.getPrompts();
     String lineJoiner = prompts.getUserLineJoiner();
-    StringBuilder prompt = PromptTextSupport.newBuffer(1024);
+    StringBuilder prompt = PromptTextSupport.newBuffer(USER_PROMPT_BUFFER_CHARS);
 
     for (String line : prompts.getUserLines()) {
       appendJoinedLine(prompt, line, lineJoiner);

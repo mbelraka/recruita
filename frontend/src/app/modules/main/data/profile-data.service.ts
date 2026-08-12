@@ -5,7 +5,7 @@ import { DefaultDataService, HttpUrlGenerator } from '@ngrx/data';
 import { map, Observable } from 'rxjs';
 
 import { ProfilesService } from '../../../generated/api-client/services/profiles.service';
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import type { Profile } from '../models/profile.model';
 import type { SaveProfileRequest } from '../models/save-profile-request.model';
 import { profileFromApi } from './profile-api.mapper';

@@ -15,6 +15,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 
 import { Languages } from 'src/app/enums/language.enum';
+import { initialAppState } from 'src/app/state/app.reducer';
 import { MainComponent } from 'src/app/modules/main/components/main.component';
 import { MainLangRefreshHostDirective } from 'src/app/modules/main/directives/main-lang-refresh-host.directive';
 import { MAIN_LANG_REFRESH_ZONE } from 'src/app/modules/main/constants/main-lang-refresh.constants';
@@ -57,7 +58,7 @@ describe('MainComponent', () => {
       providers: [
         provideMockStore({
           initialState: {
-            app: { language: Languages.English },
+            app: { ...initialAppState, language: Languages.English },
           },
         }),
       ],

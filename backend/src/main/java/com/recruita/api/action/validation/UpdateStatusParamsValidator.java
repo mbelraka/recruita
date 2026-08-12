@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ApplicationStatusWire;
 import com.recruita.api.action.model.ParamsValidationResult;
+import com.recruita.api.config.properties.ActionMessageProperties;
+import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,22 +15,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class UpdateStatusParamsValidator {
 
+  private final ActionMessageProperties messages;
+
+  public UpdateStatusParamsValidator(RecruitaProperties properties) {
+    this.messages = properties.getAction().getMessages();
+  }
+
   public ParamsValidationResult validate(JsonNode params) {
     List<String> errors = new ArrayList<>();
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Update status params must be an object"));
+      return ParamsValidationResult.invalid(List.of(messages.getUpdateStatusParamsMustBeObject()));
     }
 
     JsonNode applicantIdentifier = params.get(ActionParamKey.APPLICANT_IDENTIFIER);
     if (applicantIdentifier == null
         || !applicantIdentifier.isTextual()
         || applicantIdentifier.asText().isBlank()) {
-      errors.add("applicantIdentifier is required and must be a non-empty string");
+      errors.add(messages.getApplicantIdentifierRequired());
     }
 
     JsonNode newStatus = params.get(ActionParamKey.NEW_STATUS);
     if (newStatus == null || !ApplicationStatusWire.isWireValue(newStatus.asText())) {
-      errors.add("newStatus must be one of: " + ApplicationStatusWire.formatList());
+      errors.add(messages.formatInvalidNewStatus(ApplicationStatusWire.formatList()));
     }
 
     if (!errors.isEmpty()) {

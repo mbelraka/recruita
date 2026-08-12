@@ -1,2 +1,7 @@
 /** Viewport width tier for responsive layout (matches layout-breakpoints.constants.ts). */
-export type LayoutWidthTier = 'xs' | 'sm' | 'md' | 'lg';
+export enum LayoutWidthTier {
+  Xs = 'xs',
+  Sm = 'sm',
+  Md = 'md',
+  Lg = 'lg',
+}

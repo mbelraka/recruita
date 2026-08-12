@@ -1,17 +1,7 @@
 import { APPLICANT } from '../constants/applicant.constants';
-import { ApplicationStatus } from '../enums/application-status.enum';
 import { Applicant } from '../models/applicant.model';
+import { ApplicantInit } from '../models/applicant-init.model';
 import { parseApplicationStatus } from './application-status.util';
-
-export type ApplicantInit = Partial<
-  Omit<Applicant, 'applicationStatus' | 'yearsOfExperience' | 'availableFrom'>
-> & {
-  firstName?: string;
-  lastName?: string;
-  yearsOfExperience?: number | string | null;
-  availableFrom?: Date | string | number | null;
-  applicationStatus?: string | ApplicationStatus | null;
-};
 
 export function createApplicant(init?: ApplicantInit): Applicant {
   if (!init) {

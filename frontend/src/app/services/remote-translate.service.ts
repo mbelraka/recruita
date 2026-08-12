@@ -1,11 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { DestroyRef, Injectable, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable } from '@angular/core';
 
 import {
   catchError,
-  distinctUntilChanged,
-  filter,
   finalize,
   map,
   Observable,
@@ -22,58 +19,18 @@ import {
   buildRemoteTranslationCacheKey,
   buildRemoteTranslationLangPair,
 } from '../utilities/remote-translate-cache.util';
-import { PrivacyConsentService } from './privacy-consent.service';
 
 /**
  * MyMemory’s public `get` API for short strings. Results are cached in memory;
- * parallel identical requests are deduplicated.
+ * parallel identical requests are deduplicated. Callers must gate on consent.
  */
 @Injectable({ providedIn: 'root' })
 export class RemoteTranslateService {
   private readonly _cache = new Map<string, string>();
   private readonly _inFlight = new Map<string, Observable<string>>();
-  private readonly _destroyRef = inject(DestroyRef);
 
-  public constructor(
-    private readonly _http: HttpClient,
-    private readonly _privacy: PrivacyConsentService
-  ) {
-    this._privacy
-      .optionalRemoteTranslation$()
-      .pipe(
-        distinctUntilChanged(),
-        filter((enabled) => !enabled),
-        takeUntilDestroyed(this._destroyRef)
-      )
-      .subscribe(() => this._clearCache());
-  }
+  public constructor(private readonly _http: HttpClient) {}
 
-  /**
-   * Synchronous read of a completed translation (see {@link translate}).
-   * The UI can use this to avoid showing a fallback before the first HTTP response.
-   */
-  public getCached(
-    text: string | null | undefined,
-    from: Languages,
-    to: Languages
-  ): string | undefined {
-    const raw = this._normalizeText(text);
-    if (raw === null) {
-      return undefined;
-    }
-    if (from === to) {
-      return raw;
-    }
-    if (!this._privacy.optionalRemoteTranslation()) {
-      return undefined;
-    }
-    return this._cache.get(buildRemoteTranslationCacheKey(from, to, raw));
-  }
-
-  /**
-   * Key used for {@link getCached} / `translate` caches, or `null` if `text` is empty.
-   * Exposed for consumers that memoize on the same key (e.g. the `remoteTranslate` pipe).
-   */
   public lookupKey(
     text: string | null | undefined,
     from: Languages,
@@ -86,6 +43,21 @@ export class RemoteTranslateService {
     return buildRemoteTranslationCacheKey(from, to, raw);
   }
 
+  public getCached(
+    text: string | null | undefined,
+    from: Languages,
+    to: Languages
+  ): string | undefined {
+    const raw = this._normalizeText(text);
+    if (raw === null) {
+      return undefined;
+    }
+    if (from === to) {
+      return raw;
+    }
+    return this._cache.get(buildRemoteTranslationCacheKey(from, to, raw));
+  }
+
   public translate(
     text: string | null | undefined,
     from: Languages,
@@ -96,9 +68,6 @@ export class RemoteTranslateService {
       return of('');
     }
     if (from === to) {
-      return of(raw);
-    }
-    if (!this._privacy.optionalRemoteTranslation()) {
       return of(raw);
     }
 
@@ -138,11 +107,7 @@ export class RemoteTranslateService {
     return this._http.get<MyMemoryResponse>(MYMEMORY_URL, { params }).pipe(
       timeout(REQUEST_TIMEOUT_MS),
       map((res) => (res?.responseData?.translatedText?.trim() ?? '') || raw),
-      tap((translated) => {
-        if (this._privacy.optionalRemoteTranslation()) {
-          this._cache.set(cacheKey, translated);
-        }
-      }),
+      tap((translated) => this._cache.set(cacheKey, translated)),
       catchError(() => of(raw)),
       finalize(() => {
         this._inFlight.delete(cacheKey);
@@ -152,11 +117,6 @@ export class RemoteTranslateService {
         refCount: true,
       })
     );
-  }
-
-  private _clearCache(): void {
-    this._cache.clear();
-    this._inFlight.clear();
   }
 
   private _normalizeText(text: string | null | undefined): string | null {

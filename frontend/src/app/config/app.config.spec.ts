@@ -1,5 +1,6 @@
 import { APP_CONFIG } from './app.config';
 import { Languages } from '../enums/language.enum';
+import { LayoutWidthTier } from '../enums/layout-width-tier.enum';
 
 describe('AppConfig', () => {
   it('should fallback to default locale if language unsupported', () => {
@@ -45,7 +46,9 @@ describe('AppConfig', () => {
   });
 
   it('should return full applicant list columns on large viewports', () => {
-    expect(APP_CONFIG.getApplicantListDisplayedColumns('lg')).toEqual([
+    expect(
+      APP_CONFIG.getApplicantListDisplayedColumns(LayoutWidthTier.Lg)
+    ).toEqual([
       'name',
       'currentJobTitle',
       'yearsOfExperience',
@@ -59,16 +62,14 @@ describe('AppConfig', () => {
   });
 
   it('should return reduced applicant list columns on narrow viewports', () => {
-    expect(APP_CONFIG.getApplicantListDisplayedColumns('xs')).toEqual([
-      'name',
-      'applicationStatus',
-      'currentJobTitle',
-    ]);
-    expect(APP_CONFIG.getApplicantListDisplayedColumns('md')).toContain(
-      'location'
-    );
-    expect(APP_CONFIG.getApplicantListDisplayedColumns('md')).not.toContain(
-      'skills'
-    );
+    expect(
+      APP_CONFIG.getApplicantListDisplayedColumns(LayoutWidthTier.Xs)
+    ).toEqual(['name', 'applicationStatus', 'currentJobTitle']);
+    expect(
+      APP_CONFIG.getApplicantListDisplayedColumns(LayoutWidthTier.Md)
+    ).toContain('location');
+    expect(
+      APP_CONFIG.getApplicantListDisplayedColumns(LayoutWidthTier.Md)
+    ).not.toContain('skills');
   });
 });

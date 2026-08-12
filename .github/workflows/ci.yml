@@ -24,8 +24,16 @@ jobs:
             frontend:
               - 'frontend/**'
               - 'patches/**'
+              - 'scripts/check-one-definition-per-file.cjs'
+              - 'scripts/check-one-definition-per-file.sh'
+              - 'scripts/check-no-magic-values.cjs'
+              - 'scripts/check-no-magic-values.sh'
             backend:
               - 'backend/**'
+              - 'scripts/check-one-definition-per-file.cjs'
+              - 'scripts/check-one-definition-per-file.sh'
+              - 'scripts/check-no-magic-values.cjs'
+              - 'scripts/check-no-magic-values.sh'
             lockfile:
               - 'package.json'
               - 'package-lock.json'
@@ -53,8 +61,12 @@ jobs:
         with:
           cache-npm: true
           npm-ci: true
+      - name: Engineering standards
+        run: ./scripts/bin/npm run check:standards:frontend
       - name: Frontend CI
         run: ./scripts/bin/npm run validate:ci:frontend
+      - name: Frontend a11y e2e
+        run: ./scripts/bin/npm run e2e:install -w @recruita/frontend && ./scripts/bin/npm run a11y:e2e -w @recruita/frontend
 
   backend:
     runs-on: ubuntu-latest
@@ -75,6 +87,8 @@ jobs:
           cache-dependency-path: |
             backend/pom.xml
             backend/.mvn/wrapper/maven-wrapper.properties
+      - name: Engineering standards
+        run: ./scripts/bin/npm run check:standards:backend
       - name: Backend CI
         run: ./scripts/bin/npm run validate:ci:backend
       - name: Validate OpenAPI drift (springdoc vs contract)

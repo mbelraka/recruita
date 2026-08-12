@@ -121,7 +121,6 @@
   font-size: 0.625rem;
   font-weight: 500;
   color: var(--app-color-text-inner-label);
-  opacity: 0.7;
   text-transform: uppercase;
   line-height: 16px;
   letter-spacing: 1px;
@@ -181,7 +180,7 @@
 
 .match-candidates__error {
   margin: 0;
-  color: var(--app-color-warn, #b00020);
+  color: var(--app-color-warn);
 }
 
 .match-candidates__summary {
@@ -227,7 +226,7 @@
 }
 
 .match-candidates__card--top {
-  border-left-color: var(--app-color-button-primary-fill, #1976d2);
+  border-left-color: var(--app-color-button-primary-fill);
 }
 
 .match-candidates__reasoning {
@@ -268,7 +267,7 @@
   font-size: var(--app-font-size-body-sm);
   font-weight: var(--app-font-weight-semibold);
   line-height: 1;
-  color: var(--app-color-secondary, #1976d2);
+  color: var(--app-color-secondary);
   background-color: var(--app-color-background-dark);
   border-radius: 0;
 }
@@ -288,7 +287,7 @@
 
 .match-candidates__divider {
   border: 0;
-  border-top: 1px solid var(--app-color-outline, #d0d0d0);
+  border-top: 1px solid var(--app-color-outline);
   margin: var(--app-space-xs) 0 10px;
 }
 

@@ -1,7 +1,11 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
-export const APPLICANT_YEARS_OF_EXPERIENCE_MIN = 0;
-export const APPLICANT_YEARS_OF_EXPERIENCE_MAX = 80;
+import { APP_CONFIG } from '../../config/app.config';
+
+export const APPLICANT_YEARS_OF_EXPERIENCE_MIN =
+  APP_CONFIG.APPLICANTS.YEARS_OF_EXPERIENCE_MIN;
+export const APPLICANT_YEARS_OF_EXPERIENCE_MAX =
+  APP_CONFIG.APPLICANTS.YEARS_OF_EXPERIENCE_MAX;
 
 export function applicantYearsOfExperienceValidator(
   control: AbstractControl

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ActionValidationLimits;
 import com.recruita.api.action.model.ParamsValidationResult;
+import com.recruita.api.config.properties.ActionMessageProperties;
 import com.recruita.api.config.properties.ActionProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.ArrayList;
@@ -19,37 +20,35 @@ public class CreateApplicantParamsValidator {
   private static final Pattern VALID_NAME_CHARS = Pattern.compile("^[a-zA-Z\\s\\-']+$");
 
   private final ActionProperties.ValidationLimitsProperties limits;
+  private final ActionMessageProperties messages;
 
   public CreateApplicantParamsValidator(RecruitaProperties properties) {
     this.limits = properties.getAction().getValidation();
+    this.messages = properties.getAction().getMessages();
   }
 
   public ParamsValidationResult validate(JsonNode params) {
     List<String> errors = new ArrayList<>();
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Create applicant params must be an object"));
+      return ParamsValidationResult.invalid(
+          List.of(messages.getCreateApplicantParamsMustBeObject()));
     }
 
     JsonNode name = params.get(ActionParamKey.NAME);
     if (name == null || !name.isTextual() || !isValidName(name.asText())) {
-      errors.add(
-          "name must be a valid name ("
-              + limits.getMinNameLength()
-              + "-"
-              + limits.getMaxNameLength()
-              + " characters)");
+      errors.add(messages.formatInvalidName(limits.getMinNameLength(), limits.getMaxNameLength()));
     }
 
     JsonNode email = params.get(ActionParamKey.EMAIL);
     if (email == null
         || !email.isTextual()
         || !ActionValidationLimits.isValidEmail(email.asText())) {
-      errors.add("email must be a valid email address");
+      errors.add(messages.getInvalidEmail());
     }
 
     JsonNode skills = params.get(ActionParamKey.SKILLS);
     if (!ActionJsonSupport.isStringArray(skills) || skills.isEmpty()) {
-      errors.add("skills must be a non-empty array of strings");
+      errors.add(messages.getSkillsRequired());
     }
 
     JsonNode yearsOfExperience = params.get(ActionParamKey.YEARS_OF_EXPERIENCE);
@@ -58,17 +57,15 @@ public class CreateApplicantParamsValidator {
         || yearsOfExperience.asInt() < limits.getMinExperience()
         || yearsOfExperience.asInt() > limits.getMaxExperience()) {
       errors.add(
-          "yearsOfExperience must be between "
-              + limits.getMinExperience()
-              + " and "
-              + limits.getMaxExperience());
+          messages.formatYearsOfExperienceRange(
+              limits.getMinExperience(), limits.getMaxExperience()));
     }
 
     JsonNode currentJobTitle = params.get(ActionParamKey.CURRENT_JOB_TITLE);
     if (currentJobTitle == null
         || !currentJobTitle.isTextual()
         || currentJobTitle.asText().isBlank()) {
-      errors.add("currentJobTitle is required");
+      errors.add(messages.getCurrentJobTitleRequired());
     }
 
     if (!errors.isEmpty()) {

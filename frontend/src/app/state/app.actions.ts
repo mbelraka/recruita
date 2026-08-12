@@ -16,3 +16,17 @@ export const showNotification = createAction(
 );
 
 export const clearNotification = createAction(AppActionTypes.ClearNotification);
+
+export const requestRemoteTranslation = createAction(
+  AppActionTypes.RequestRemoteTranslation,
+  props<{ text: string; from: Languages; to: Languages }>()
+);
+
+export const remoteTranslationSuccess = createAction(
+  AppActionTypes.RemoteTranslationSuccess,
+  props<{ key: string; translated: string }>()
+);
+
+export const clearRemoteTranslations = createAction(
+  AppActionTypes.ClearRemoteTranslations
+);

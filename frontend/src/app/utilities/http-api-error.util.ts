@@ -2,13 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DataServiceError } from '@ngrx/data';
 import { TimeoutError } from 'rxjs';
 
+import { APP_CONFIG } from '../config/app.config';
 import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-property-key.enum';
 import { ApiErrorCode } from '../enums/api-error-code.enum';
 import { HttpStatusCode } from '../enums/http-status-code.enum';
 import type { HttpApiErrorMessages } from '../models/http-api-error-messages.model';
 import { HttpApiError } from '../models/http-api-error.model';
-
-export type { HttpApiErrorMessages } from '../models/http-api-error-messages.model';
 
 /** Connection-class failures worth retrying: the backend may simply not be up yet. */
 const TRANSIENT_HTTP_STATUSES = new Set<number>([
@@ -118,6 +117,7 @@ export function extractHttpApiErrorCode(error: unknown): ApiErrorCode | null {
 function isRxjsTimeoutError(error: unknown): boolean {
   return (
     error instanceof TimeoutError ||
-    (error instanceof Error && error.name === 'TimeoutError')
+    (error instanceof Error &&
+      error.name === APP_CONFIG.HTTP.RXJS_TIMEOUT_ERROR_NAME)
   );
 }

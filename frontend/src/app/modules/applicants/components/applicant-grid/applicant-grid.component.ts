@@ -10,12 +10,13 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
+import { ApplicantSkillsVariant } from '../../enums/applicant-skills-variant.enum';
 import { Applicant } from '../../models/applicant.model';
+import { openConfirmDeleteApplicant } from '../../state/applicants.actions';
 import {
   selectFilterByCountry,
   selectFilterBySkill,
@@ -25,7 +26,6 @@ import {
   selectSortDirection,
   selectSortedApplicants,
 } from '../../state/applicants.selectors';
-import { confirmDeleteApplicant } from '../../utilities/confirm-delete.util';
 import { createPaginatedViewState } from '../../utilities/pagination.util';
 import {
   dispatchApplicantSkillFilterToggle,
@@ -39,12 +39,8 @@ import {
   standalone: false,
 })
 export class ApplicantGridComponent implements AfterViewInit {
-  private static readonly GRID_CARD_MIN_PX = 264;
-  private static readonly GRID_GAP_PX = 16;
-
   @Output() public readonly editApplicant = new EventEmitter<Applicant>();
 
-  private readonly _dialog = inject(MatDialog);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _cardsMeasure =
     viewChild<ElementRef<HTMLElement>>('cardsMeasure');
@@ -62,6 +58,7 @@ export class ApplicantGridComponent implements AfterViewInit {
   );
   public readonly sortBy = this._store.selectSignal(selectSortBy);
   public readonly sortDirection = this._store.selectSignal(selectSortDirection);
+  public readonly filterChipVariant = ApplicantSkillsVariant.FilterChip;
 
   /** Matches `repeat(auto-fill, minmax(264px, 1fr))` + 16px gap in SCSS. */
   public readonly columnsPerRow = signal(1);
@@ -147,16 +144,12 @@ export class ApplicantGridComponent implements AfterViewInit {
   }
 
   public confirmRemoveApplicant(applicant: Applicant): void {
-    confirmDeleteApplicant(
-      this._dialog,
-      this._store as Store<FullState>,
-      applicant
-    );
+    this._store.dispatch(openConfirmDeleteApplicant({ applicant }));
   }
 
   private _updateColumnsFromWidth(widthPx: number): void {
-    const minW = ApplicantGridComponent.GRID_CARD_MIN_PX;
-    const gap = ApplicantGridComponent.GRID_GAP_PX;
+    const minW = APP_CONFIG.APPLICANTS.GRID_CARD_MIN_PX;
+    const gap = APP_CONFIG.APPLICANTS.GRID_GAP_PX;
     const cols = Math.max(
       1,
       Math.floor((Math.max(0, widthPx) + gap) / (minW + gap))

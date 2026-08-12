@@ -20,6 +20,7 @@ import { StateFeatures } from '../../../containers/root/enums/state-features.enu
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { Languages } from '../../../enums/language.enum';
+import { initialAppState } from '../../../state/app.reducer';
 import { setLanguage } from '../../../state/app.actions';
 import { initialMainState } from './main.reducer';
 import { ProfileEntityCollectionService } from '../data/profile-entity-collection.service';
@@ -57,7 +58,7 @@ describe('MainEffects', () => {
     optionalAiMatching: false,
   };
 
-  const mockAppState = { language: Languages.English, notification: null };
+  const mockAppState = { ...initialAppState };
 
   const mockStoreState = (profileInCache: typeof profile | null = null) => ({
     app: mockAppState,
@@ -91,7 +92,11 @@ describe('MainEffects', () => {
           provide: PrivacyConsentService,
           useValue: jasmine.createSpyObj<PrivacyConsentService>(
             'PrivacyConsentService',
-            ['isConsentCompleteAndCurrent']
+            [
+              'isConsentCompleteAndCurrent',
+              'buildDataExportJson$',
+              'eraseSessionDataAndReload',
+            ]
           ),
         },
         {
@@ -228,7 +233,12 @@ describe('MainEffects', () => {
   });
 
   it('skips the privacy gate when profile load fails but consent is already complete', () => {
-    privacy.isConsentCompleteAndCurrent.and.returnValue(true);
+    store.setState(
+      mockStoreState({
+        ...profile,
+        privacyNoticeAccepted: true,
+      })
+    );
     const subscription =
       effects.openPrivacyGateAfterProfileLoadFailure$.subscribe();
 

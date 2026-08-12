@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActionPromptFactory {
 
+  private static final int SYSTEM_PROMPT_BUFFER_CHARS = 4096;
+  private static final int USER_PROMPT_BUFFER_PADDING_CHARS = 64;
+  private static final int ACTION_CATALOG_BUFFER_CHARS = 3072;
+  private static final int ROSTER_CONTEXT_BUFFER_CHARS = 512;
+
   private static final String ROSTER_EMPTY_LABEL = "(none loaded)";
 
   private final ActionProperties.PromptCatalogProperties catalog;
@@ -29,7 +34,7 @@ public class ActionPromptFactory {
   }
 
   public String systemPrompt() {
-    StringBuilder prompt = PromptTextSupport.newBuffer(4096);
+    StringBuilder prompt = PromptTextSupport.newBuffer(SYSTEM_PROMPT_BUFFER_CHARS);
     PromptTextSupport.appendParagraph(prompt, catalog.getAssistantRole());
     PromptTextSupport.appendParagraph(prompt, catalog.getResponseRule());
     PromptTextSupport.appendParagraph(prompt, buildActionCatalog());
@@ -41,7 +46,7 @@ public class ActionPromptFactory {
   public String userPrompt(String command, UiLanguage language) {
     UiLanguage resolved = language != null ? language : UiLanguage.EN;
     String sanitized = command.trim().replace("\"", "'");
-    return PromptTextSupport.newBuffer(64 + sanitized.length())
+    return PromptTextSupport.newBuffer(USER_PROMPT_BUFFER_PADDING_CHARS + sanitized.length())
         .append("User language: ")
         .append(resolved.code())
         .append("\nUser command: \"")
@@ -56,7 +61,7 @@ public class ActionPromptFactory {
     String validFormats = ExportFormatWire.joinedPipe();
     String validReportTypes = ReportType.joinedPipe();
 
-    StringBuilder catalog = PromptTextSupport.newBuffer(3072);
+    StringBuilder catalog = PromptTextSupport.newBuffer(ACTION_CATALOG_BUFFER_CHARS);
     PromptTextSupport.appendLine(
         catalog,
         "You convert the user command into ONE JSON action. You own all semantic matching.");
@@ -149,7 +154,7 @@ public class ActionPromptFactory {
   }
 
   private static String buildFilterRosterContext(FilterRosterContext roster) {
-    StringBuilder context = PromptTextSupport.newBuffer(512);
+    StringBuilder context = PromptTextSupport.newBuffer(ROSTER_CONTEXT_BUFFER_CHARS);
     PromptTextSupport.appendLine(
         context,
         "ROSTER CONTEXT (live applicant data — use these exact labels in country and skills):");

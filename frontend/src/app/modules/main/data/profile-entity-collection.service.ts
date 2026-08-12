@@ -7,7 +7,7 @@ import {
 import { Observable, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import type { Profile } from '../models/profile.model';
 import type { SaveProfileRequest } from '../models/save-profile-request.model';
 import { profileFromSaveRequest } from './profile-api.mapper';

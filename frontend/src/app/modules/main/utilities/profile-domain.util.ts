@@ -2,15 +2,7 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { isLanguage } from '../../../utilities/language.utils';
 import type { Profile } from '../models/profile.model';
-
-export type ProfileInit = Partial<{
-  id: string;
-  privacyNoticeAccepted: unknown;
-  lastLanguage: unknown;
-  optionalRemoteTranslation: unknown;
-  optionalGeocoding: unknown;
-  optionalAiMatching: unknown;
-}>;
+import type { ProfileInit } from '../models/profile-init.model';
 
 function coerceBoolean(value: unknown): boolean {
   return value === true;

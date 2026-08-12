@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.config.properties.RecruitaProperties;
-import com.recruita.api.match.evaluation.MatchEvaluationResult;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import org.junit.jupiter.api.Test;
 
 class MatchResponseNormalizerTest {
@@ -53,7 +54,7 @@ class MatchResponseNormalizerTest {
                     "x", 90, java.util.List.of(), java.util.List.of(), null, "")));
 
     MatchResponseDto mapped =
-        normalizer.toResponseDto(new MatchEvaluationResult.Deterministic(response));
+        normalizer.toResponseDto(new DeterministicMatchEvaluationResult(response));
 
     assertEquals(response, mapped);
   }
@@ -62,7 +63,7 @@ class MatchResponseNormalizerTest {
   void toResponseDtoNormalizesGroqWirePayload() throws Exception {
     MatchResponseDto mapped =
         normalizer.toResponseDto(
-            new MatchEvaluationResult.Groq(
+            new GroqMatchEvaluationResult(
                 objectMapper.readTree("{\"scores\":[{\"id\":\"g\",\"matchScore\":70}]}")));
 
     assertEquals(1, mapped.scores().size());
@@ -86,7 +87,7 @@ class MatchResponseNormalizerTest {
 
   @Test
   void toResponseDtoReturnsEmptyScoresForNullGroqPayload() {
-    MatchResponseDto response = normalizer.toResponseDto(new MatchEvaluationResult.Groq(null));
+    MatchResponseDto response = normalizer.toResponseDto(new GroqMatchEvaluationResult(null));
 
     assertEquals(0, response.scores().size());
   }

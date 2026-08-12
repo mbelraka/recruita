@@ -1,7 +1,9 @@
 package com.recruita.api.match.mapper;
 
+import com.recruita.api.api.dto.match.CandidateProfileDto;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
+import com.recruita.api.match.domain.CandidateProfile;
 import com.recruita.api.match.domain.MatchScore;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -17,5 +19,5 @@ public interface MatchResponseMapper {
   @Mapping(source = "correlationId", target = "id")
   MatchScoreDto toScoreDto(MatchScore score);
 
-  MatchScoreDto.CandidateProfileDto toCandidateProfileDto(MatchScore.CandidateProfile profile);
+  CandidateProfileDto toCandidateProfileDto(CandidateProfile profile);
 }

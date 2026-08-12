@@ -6,6 +6,7 @@ import com.recruita.api.api.dto.match.MatchCandidateDto;
 import com.recruita.api.api.dto.match.MatchRequestDto;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
+import com.recruita.api.match.domain.CandidateProfile;
 import com.recruita.api.match.domain.MatchCandidate;
 import com.recruita.api.match.domain.MatchRequest;
 import com.recruita.api.match.domain.MatchScore;
@@ -49,7 +50,7 @@ class MatchMapperTest {
             88,
             List.of("java"),
             List.of(),
-            new MatchScore.CandidateProfile(List.of("java"), 4.0, List.of("Developer"), ""),
+            new CandidateProfile(List.of("java"), 4.0, List.of("Developer"), ""),
             "Strong fit");
     MatchResponseDto response = responseMapper.toDto(List.of(score));
 

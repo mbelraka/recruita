@@ -16,7 +16,7 @@
           [clickable]="true"
           [showDeleteAction]="true"
           [animationDelayMs]="cardEnterDelayMs(idx)"
-          [skillVariant]="'filter-chip'"
+          [skillVariant]="filterChipVariant"
           (cardSelected)="onCardClick($event)"
           (deleteRequested)="confirmRemoveApplicant($event)"
           (skillSelected)="filterBySkill($event)"

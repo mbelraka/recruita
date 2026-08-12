@@ -13,6 +13,7 @@ public class ActionProperties {
   @Valid @NotNull private GroqInvocationProperties groq = new GroqInvocationProperties();
   @Valid @NotNull private PromptCatalogProperties promptCatalog = new PromptCatalogProperties();
   @Valid @NotNull private ValidationLimitsProperties validation = new ValidationLimitsProperties();
+  @Valid @NotNull private ActionMessageProperties messages = new ActionMessageProperties();
 
   public String getParsePath() {
     return parsePath;
@@ -44,6 +45,14 @@ public class ActionProperties {
 
   public void setValidation(ValidationLimitsProperties validation) {
     this.validation = validation;
+  }
+
+  public ActionMessageProperties getMessages() {
+    return messages;
+  }
+
+  public void setMessages(ActionMessageProperties messages) {
+    this.messages = messages;
   }
 
   public static class ValidationLimitsProperties {

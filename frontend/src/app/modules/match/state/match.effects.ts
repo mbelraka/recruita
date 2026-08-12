@@ -19,6 +19,7 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { AppNotificationType } from '../../../enums/app-notification-type.enum';
 import { FullState } from '../../../models/full-state.model';
 import { selectAppLanguage } from '../../../state/app.selectors';
+import { selectAllowsAiMatching } from '../../main/state/main.selectors';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import {
   concatWithErrorNotification,
@@ -28,6 +29,7 @@ import {
   selectAllApplicants,
   selectApplicantsReady,
 } from '../../applicants/state/applicants.selectors';
+import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { MatchCandidatesService } from '../services/match-candidates.service';
 import { MatchEvaluationInputs } from '../models/match-evaluation-inputs.interface';
 import {
@@ -92,24 +94,34 @@ export class MatchEffects {
   private _runEvaluation$(inputs: MatchEvaluationInputs): Observable<Action> {
     const { REQUEST_TIMEOUT_MS, EFFECT_TIMEOUT_GRACE_MS } = APP_CONFIG.MATCH;
 
-    return this._matchCandidatesService
-      .evaluate(
-        inputs.jobDescription,
-        [...inputs.applicants],
-        inputs.topCandidatesCount,
-        inputs.language
-      )
-      .pipe(
-        timeout({ first: REQUEST_TIMEOUT_MS + EFFECT_TIMEOUT_GRACE_MS }),
-        concatMap((results) =>
-          concatWithNotification(evaluateCandidatesSuccess({ results }), {
-            type: AppNotificationType.Info,
-            messageKey: NOTIFICATION_MESSAGE_KEYS.matchCompleted,
-            messageParams: { count: results.length },
-          })
-        ),
-        catchError((error: unknown) => this._matchEvaluationError$(error))
-      );
+    return this._store.select(selectAllowsAiMatching).pipe(
+      take(1),
+      concatMap((allowed) => {
+        if (!allowed) {
+          return this._matchEvaluationError$(
+            new Error(MATCH_ERROR_PRIVACY_AI_DISABLED)
+          );
+        }
+        return this._matchCandidatesService
+          .evaluate(
+            inputs.jobDescription,
+            [...inputs.applicants],
+            inputs.topCandidatesCount,
+            inputs.language
+          )
+          .pipe(
+            timeout({ first: REQUEST_TIMEOUT_MS + EFFECT_TIMEOUT_GRACE_MS }),
+            concatMap((results) =>
+              concatWithNotification(evaluateCandidatesSuccess({ results }), {
+                type: AppNotificationType.Info,
+                messageKey: NOTIFICATION_MESSAGE_KEYS.matchCompleted,
+                messageParams: { count: results.length },
+              })
+            ),
+            catchError((error: unknown) => this._matchEvaluationError$(error))
+          );
+      })
+    );
   }
 
   private _matchEvaluationError$(error: unknown): Observable<Action> {

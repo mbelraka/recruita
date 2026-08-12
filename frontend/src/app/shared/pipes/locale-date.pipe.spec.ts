@@ -2,8 +2,9 @@ import { DestroyRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { LocaleDatePipe } from './locale-date.pipe';
+import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
+import { LocaleDatePipe } from './locale-date.pipe';
 
 import { registerLocaleData } from '@angular/common';
 import localeEn from '@angular/common/locales/en';
@@ -64,10 +65,16 @@ describe('LocaleDatePipe', () => {
     const date = new Date('2024-01-01T12:00:00Z');
     langSubject.next(Languages.German);
 
-    const resultDe = pipe.transform(date, 'shortDate'); // Builtin format
+    const resultDe = pipe.transform(
+      date,
+      APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
+    );
 
     langSubject.next(Languages.French);
-    const resultFr = pipe.transform(date, 'shortDate');
+    const resultFr = pipe.transform(
+      date,
+      APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
+    );
 
     expect(resultDe).not.toEqual(resultFr); // Likely different formatting
     expect(resultDe).toBeTruthy();

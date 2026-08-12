@@ -99,7 +99,7 @@
       class="footer flex flex-row flex-nowrap items-center justify-center gap-3"
     >
       <span>{{ 'footer.copyright' | translate }}</span>
-      <a class="footer__privacy" routerLink="/privacy">{{
+      <a class="footer__privacy" [routerLink]="privacyRoute">{{
         'footer.privacy' | translate
       }}</a>
     </footer>

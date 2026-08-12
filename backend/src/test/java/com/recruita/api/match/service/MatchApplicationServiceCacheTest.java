@@ -12,6 +12,7 @@ import com.recruita.api.api.dto.match.MatchRequestDto;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.match.cache.MatchResponseCache;
 import com.recruita.api.match.domain.MatchRequest;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import com.recruita.api.match.groq.GroqChatClient;
 import com.recruita.api.match.mapper.MatchRequestMapper;
@@ -56,7 +57,7 @@ class MatchApplicationServiceCacheTest {
     MatchEvaluationResult cached = matchResponseCache.get(domainRequest, normalized).orElseThrow();
 
     verify(groqChatClient, times(1)).complete(any());
-    assertInstanceOf(MatchEvaluationResult.Groq.class, cached);
+    assertInstanceOf(GroqMatchEvaluationResult.class, cached);
     assertEquals(77, first.scores().getFirst().matchScore());
     assertEquals(77, second.scores().getFirst().matchScore());
   }

@@ -9,6 +9,7 @@ import {
 
 import { StateFeatures } from 'src/app/containers/root/enums/state-features.enum';
 import { Languages } from 'src/app/enums/language.enum';
+import { initialAppState } from 'src/app/state/app.reducer';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ExportComponent } from './export.component';
 import { ExportFormats } from '../../enums/export-formats.enum';
@@ -31,7 +32,7 @@ describe('ExportComponent', () => {
       providers: [
         provideMockStore({
           initialState: {
-            app: { language: Languages.English },
+            app: { ...initialAppState, language: Languages.English },
             [StateFeatures.Export]: { loading: false, error: null },
           },
         }),

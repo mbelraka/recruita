@@ -14,13 +14,4 @@ public record MatchScore(
     matchingSkills = List.copyOf(matchingSkills);
     missingSkills = List.copyOf(missingSkills);
   }
-
-  public record CandidateProfile(
-      List<String> skills, double yearsExperience, List<String> topJobTitles, String education) {
-
-    public CandidateProfile {
-      skills = List.copyOf(skills);
-      topJobTitles = List.copyOf(topJobTitles);
-    }
-  }
 }

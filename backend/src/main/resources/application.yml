@@ -90,6 +90,44 @@ spring:
       min-match-limit: 1
       match-limit-default: 10
       match-limit-max: 100
+    messages:
+      action-must-be-object: Action must be an object
+      action-type-required: Action type is required
+      invalid-action-type: 'Invalid action type: {0}. Valid types: {1}'
+      clarify-params-must-be-object: Clarify params must be an object
+      questions-must-be-non-empty-array: questions must be a non-empty string array
+      filter-params-must-be-object: Filter params must be an object
+      skills-must-be-array: Skills must be an array of strings
+      too-many-skills: 'Too many skills. Maximum: {0}'
+      invalid-skill: Invalid skill. Use roster skill labels from ROSTER CONTEXT
+      invalid-country: Invalid country. Use roster country labels from ROSTER CONTEXT
+      min-experience-too-low: 'minExperience must be a number >= {0}'
+      max-experience-too-high: 'maxExperience must be a number <= {0}'
+      invalid-status: 'Invalid status. Valid: {0}'
+      optional-text-field-invalid: '{0} must be a string <= {1} characters'
+      create-applicant-params-must-be-object: Create applicant params must be an object
+      invalid-name: 'name must be a valid name ({0}-{1} characters)'
+      invalid-email: email must be a valid email address
+      skills-required: skills must be a non-empty array of strings
+      years-of-experience-range: 'yearsOfExperience must be between {0} and {1}'
+      current-job-title-required: currentJobTitle is required
+      update-status-params-must-be-object: Update status params must be an object
+      applicant-identifier-required: applicantIdentifier is required and must be a non-empty string
+      invalid-new-status: 'newStatus must be one of: {0}'
+      export-params-must-be-object: Export params must be an object
+      invalid-format: 'format must be one of: {0}'
+      delete-applicant-params-must-be-object: Delete applicant params must be an object
+      generate-report-params-must-be-object: Generate report params must be an object
+      invalid-report-type: 'reportType must be one of: {0}'
+      match-job-params-must-be-object: Match job params must be an object
+      job-description-required: jobDescription is required
+      invalid-match-limit: 'limit must be a number between {0} and {1}'
+      bulk-update-params-must-be-object: Bulk update params must be an object
+      filters-required: filters are required
+      updates-must-be-object: updates must be an object
+      invalid-update-fields: 'Invalid update fields: {0}'
+      invalid-application-status: Invalid applicationStatus value
+      failed-to-parse-llm-response: Failed to parse LLM response as JSON
   operational:
     startup:
       missing-groq-api-key: Missing GROQ_API_KEY in environment.
@@ -161,9 +199,24 @@ spring:
   persistence:
     enabled: false
   applicant:
+    list-sort-property: updatedAt
     roster:
       redis-version-key: 'recruita:roster:version'
       version-response-header: X-Recruita-Roster-Version
+      updated-at-response-header: X-Recruita-Roster-Updated-At
+    messages:
+      id-required: Applicant id is required.
+      name-required: Applicant name is required.
+      email-required: Applicant email is required.
+      phone-required: Applicant phone is required.
+      location-required: Applicant location is required.
+      application-status-required: Applicant application status is required.
+      current-job-title-required: Applicant current job title is required.
+      years-of-experience-required: Applicant years of experience is required.
+      skills-required: Applicant must include at least one skill.
+      id-mismatch: Applicant id in the request body must match the path id.
+      not-found: Applicant not found.
+      already-exists: An applicant with this id already exists.
   seed:
     applicants-demo: false
     admin-profile: false

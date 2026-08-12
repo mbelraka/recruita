@@ -1,6 +1,6 @@
 import { EntityCache } from '@ngrx/data';
 
-import { RecruitaEntityNames } from '../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../core/entity-data/recruita-entity-names.constants';
 import { ENTITY_CACHE_STATE_KEY } from '../core/entity-data/entity-cache.selectors';
 import type { Profile } from '../modules/main/models/profile.model';
 import { Applicant } from '../modules/applicants/models/applicant.model';

@@ -14,7 +14,8 @@ import {
 } from 'src/app/shared/animations/fade-in-out.animation';
 import { APP_CONFIG } from '../../../../config/app.config';
 import { FullState } from '../../../../models/full-state.model';
-import { isViewType, ViewTypes } from '../../enums/view-types.enum';
+import { ViewTypes } from '../../enums/view-types.enum';
+import { isViewType } from '../../utilities/view-types.util';
 import { SortDirection } from '../../enums/sort-direction.enum';
 import { Applicant } from '../../models/applicant.model';
 import { isApplicationStatus } from '../../utilities/application-status.util';

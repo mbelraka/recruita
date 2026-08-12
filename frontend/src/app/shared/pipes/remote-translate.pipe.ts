@@ -7,13 +7,17 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Subscription, take } from 'rxjs';
 
 import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
 import { FullState } from '../../models/full-state.model';
-import { RemoteTranslateService } from '../../services/remote-translate.service';
-import { selectAppLanguage } from '../../state/app.selectors';
+import { requestRemoteTranslation } from '../../state/app.actions';
+import {
+  selectAppLanguage,
+  selectRemoteTranslationInFlight,
+  selectRemoteTranslations,
+} from '../../state/app.selectors';
+import { buildRemoteTranslationCacheKey } from '../../utilities/remote-translate-cache.util';
 
 @Pipe({
   name: 'remoteTranslate',
@@ -21,84 +25,50 @@ import { selectAppLanguage } from '../../state/app.selectors';
   standalone: false,
 })
 export class RemoteTranslatePipe implements PipeTransform {
-  /** Shown only while a non-English translation is loading (avoids English “flash”). */
-  private static readonly _PENDING = '\u2026';
-
   private readonly _store = inject(Store<FullState>);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _remoteTranslate = inject(RemoteTranslateService);
+  private readonly _translations = this._store.selectSignal(
+    selectRemoteTranslations
+  );
+  private readonly _inFlight = this._store.selectSignal(
+    selectRemoteTranslationInFlight
+  );
 
   private _language: Languages = APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
-  private _lastKey: string | null = null;
-  private _lastValue = '';
-  private _translationSubscription: Subscription | undefined;
 
   public constructor() {
-    this._destroyRef.onDestroy(() => this._cancelPendingTranslation());
-
     this._store
       .select(selectAppLanguage)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((lang) => {
         this._language = lang;
-        this._lastKey = null;
-        this._cancelPendingTranslation();
         this._cdr.markForCheck();
       });
   }
 
   public transform(value: string | null | undefined): string {
-    const from = Languages.English;
-    const to = this._language;
-    const key = this._remoteTranslate.lookupKey(value, from, to);
-    if (key === null) {
-      this._lastKey = null;
-      this._lastValue = '';
-      this._cancelPendingTranslation();
+    const raw = value?.trim() ?? '';
+    if (!raw) {
       return '';
     }
 
-    const raw = value?.trim() ?? '';
-
-    if (this._lastKey === key) {
-      return this._lastValue;
-    }
-
-    this._cancelPendingTranslation();
-
-    if (to === Languages.English) {
-      this._lastKey = key;
-      this._lastValue = raw;
+    const from = Languages.English;
+    const to = this._language;
+    if (to === from) {
       return raw;
     }
 
-    const cached = this._remoteTranslate.getCached(raw, from, to);
+    const key = buildRemoteTranslationCacheKey(from, to, raw);
+    const cached = this._translations()[key];
     if (cached !== undefined) {
-      this._lastKey = key;
-      this._lastValue = cached;
       return cached;
     }
 
-    this._lastKey = key;
-    this._lastValue = RemoteTranslatePipe._PENDING;
+    if (!this._inFlight()[key]) {
+      this._store.dispatch(requestRemoteTranslation({ text: raw, from, to }));
+    }
 
-    this._translationSubscription = this._remoteTranslate
-      .translate(raw, from, to)
-      .pipe(take(1))
-      .subscribe((translated) => {
-        if (this._lastKey !== key) {
-          return;
-        }
-        this._lastValue = translated;
-        this._cdr.markForCheck();
-      });
-
-    return this._lastValue;
-  }
-
-  private _cancelPendingTranslation(): void {
-    this._translationSubscription?.unsubscribe();
-    this._translationSubscription = undefined;
+    return APP_CONFIG.TRANSLATION.PENDING_PLACEHOLDER;
   }
 }

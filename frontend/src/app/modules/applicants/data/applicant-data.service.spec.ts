@@ -13,6 +13,7 @@ import { HttpUrlGenerator } from '@ngrx/data';
 import { firstValueFrom } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
+import { HttpMethod } from '../../../enums/http-method.enum';
 import { HttpStatusCode } from '../../../enums/http-status-code.enum';
 import { HttpApiInterceptor } from '../../../core/http/http-api.interceptor';
 import { ApiConfiguration } from '../../../generated/api-client/api-configuration';
@@ -60,7 +61,7 @@ describe('ApplicantDataService', () => {
     const promise = firstValueFrom(service.getAll());
 
     const req = httpMock.expectOne(basePath);
-    expect(req.request.method).toBe('GET');
+    expect(req.request.method).toBe(HttpMethod.Get);
     req.flush([
       {
         id: 'a-1',
@@ -82,7 +83,11 @@ describe('ApplicantDataService', () => {
     const promise = firstValueFrom(service.loadRosterSync('"roster-1"'));
 
     const req = httpMock.expectOne(basePath);
-    expect(req.request.headers.get('If-None-Match')).toBe('"roster-1"');
+    expect(
+      req.request.headers.get(
+        APP_CONFIG.APPLICANTS.API.ROSTER_ETAG_REQUEST_HEADER
+      )
+    ).toBe('"roster-1"');
     req.flush(null, {
       status: HttpStatusCode.NotModified,
       statusText: 'Not Modified',
@@ -103,7 +108,7 @@ describe('ApplicantDataService', () => {
     const promise = firstValueFrom(service.getAllFull());
 
     const req = httpMock.expectOne(APP_CONFIG.APPLICANTS.API.FULL_LIST_PATH);
-    expect(req.request.method).toBe('GET');
+    expect(req.request.method).toBe(HttpMethod.Get);
     req.flush([{ id: 'a-1', name: 'Alex', skills: [], notes: 'detail' }]);
 
     const applicants = await promise;
@@ -116,7 +121,7 @@ describe('ApplicantDataService', () => {
     const req = httpMock.expectOne(
       `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
     );
-    expect(req.request.method).toBe('GET');
+    expect(req.request.method).toBe(HttpMethod.Get);
     req.flush({ id: 'a-1', name: 'Alex', skills: [], notes: 'notes' });
 
     const applicant = await promise;
@@ -133,7 +138,7 @@ describe('ApplicantDataService', () => {
 
     const promise = firstValueFrom(service.add(applicant));
     const req = httpMock.expectOne(basePath);
-    expect(req.request.method).toBe('POST');
+    expect(req.request.method).toBe(HttpMethod.Post);
     expect(req.request.body.availableFrom).toBe('2026-07-15');
     req.flush({ id: 'new-1', name: 'Sam', skills: ['Java'] });
 
@@ -187,7 +192,7 @@ describe('ApplicantDataService', () => {
     const updateReq = httpMock.expectOne(
       `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
     );
-    expect(updateReq.request.method).toBe('PUT');
+    expect(updateReq.request.method).toBe(HttpMethod.Put);
     updateReq.flush({ id: 'a-1', name: 'Alex', skills: ['Go'] });
     await expectAsync(updatePromise).toBeResolved();
 
@@ -195,7 +200,7 @@ describe('ApplicantDataService', () => {
     const deleteReq = httpMock.expectOne(
       `${APP_CONFIG.APPLICANTS.API.BASE_PATH}/a-1`
     );
-    expect(deleteReq.request.method).toBe('DELETE');
+    expect(deleteReq.request.method).toBe(HttpMethod.Delete);
     deleteReq.flush(null);
     await expectAsync(deletePromise).toBeResolved();
   });

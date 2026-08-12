@@ -4,8 +4,6 @@ import { createApplicant } from '../../applicants/utilities/applicant-domain.uti
 import { Languages } from '../../../enums/language.enum';
 import { MatchService } from '../../../generated/api-client/services/match.service';
 import type { MatchResponseDto } from '../../../generated/api/types';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
-import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { ApplicationStatus } from '../../applicants/enums/application-status.enum';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { MatchGroqResponseParser } from './match-groq-response.parser';
@@ -14,9 +12,6 @@ import { MatchCandidatesService } from './match-candidates.service';
 describe('MatchCandidatesService', () => {
   let service: MatchCandidatesService;
   let matchApiSpy: jasmine.SpyObj<Pick<MatchService, 'match'>>;
-  let privacySpy: jasmine.SpyObj<
-    Pick<PrivacyConsentService, 'allowsAiMatching'>
-  >;
 
   const applicants: Applicant[] = [
     createApplicant({ id: 'a1', name: 'Alice', skills: ['Angular'] }),
@@ -34,13 +29,8 @@ describe('MatchCandidatesService', () => {
       'MatchService',
       ['match']
     );
-    privacySpy = jasmine.createSpyObj('PrivacyConsentService', [
-      'allowsAiMatching',
-    ]);
-    privacySpy.allowsAiMatching.and.returnValue(true);
     service = new MatchCandidatesService(
       matchApiSpy as unknown as MatchService,
-      privacySpy as unknown as PrivacyConsentService,
       new MatchGroqResponseParser()
     );
   });
@@ -58,15 +48,6 @@ describe('MatchCandidatesService', () => {
         service.evaluate('Angular developer', [], 3, Languages.English)
       )
     ).toBeRejected();
-    expect(matchApiSpy.match).not.toHaveBeenCalled();
-  });
-
-  it('should reject when AI matching consent is disabled', async () => {
-    privacySpy.allowsAiMatching.and.returnValue(false);
-
-    await expectAsync(
-      firstValueFrom(service.evaluate('Role', applicants, 1, Languages.English))
-    ).toBeRejectedWithError(Error, MATCH_ERROR_PRIVACY_AI_DISABLED);
     expect(matchApiSpy.match).not.toHaveBeenCalled();
   });
 

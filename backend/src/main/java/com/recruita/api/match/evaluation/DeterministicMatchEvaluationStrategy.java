@@ -28,6 +28,6 @@ public class DeterministicMatchEvaluationStrategy implements MatchEvaluationStra
   public MatchEvaluationResult evaluate(
       MatchRequest request, List<MatchCandidate> normalizedCandidates) {
     var scores = scoringRouter.score(true, request.jobDescription(), normalizedCandidates);
-    return new MatchEvaluationResult.Deterministic(responseMapper.toDto(scores));
+    return new DeterministicMatchEvaluationResult(responseMapper.toDto(scores));
   }
 }

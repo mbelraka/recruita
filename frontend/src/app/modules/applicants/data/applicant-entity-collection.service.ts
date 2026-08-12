@@ -6,7 +6,7 @@ import {
 } from '@ngrx/data';
 import { map, Observable, switchMap, take, tap } from 'rxjs';
 
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import { ApplicantRosterLoadResult } from '../models/applicant-roster-load-result.model';
 import { Applicant } from '../models/applicant.model';
 import {

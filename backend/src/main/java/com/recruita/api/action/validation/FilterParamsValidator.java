@@ -7,6 +7,7 @@ import com.recruita.api.action.model.FilterRosterContext;
 import com.recruita.api.action.model.ParamsValidationResult;
 import com.recruita.api.action.model.RosterLocaleSupport;
 import com.recruita.api.action.prompt.ActionFilterRosterContextProvider;
+import com.recruita.api.config.properties.ActionMessageProperties;
 import com.recruita.api.config.properties.ActionProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.ArrayList;
@@ -18,18 +19,20 @@ import org.springframework.stereotype.Component;
 public class FilterParamsValidator {
 
   private final ActionProperties.ValidationLimitsProperties limits;
+  private final ActionMessageProperties messages;
   private final ActionFilterRosterContextProvider rosterContextProvider;
 
   public FilterParamsValidator(
       RecruitaProperties properties, ActionFilterRosterContextProvider rosterContextProvider) {
     this.limits = properties.getAction().getValidation();
+    this.messages = properties.getAction().getMessages();
     this.rosterContextProvider = rosterContextProvider;
   }
 
   public ParamsValidationResult validate(JsonNode params) {
     List<String> errors = new ArrayList<>();
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Filter params must be an object"));
+      return ParamsValidationResult.invalid(List.of(messages.getFilterParamsMustBeObject()));
     }
 
     validateSkillsStructure(params, errors);
@@ -46,15 +49,11 @@ public class FilterParamsValidator {
     validateExperience(normalized, errors);
     validateStatus(normalized, errors);
     validateOptionalTextField(
-        errors,
-        normalized,
-        ActionParamKey.SEARCH_TERM,
-        "searchTerm",
-        limits.getMaxSearchTermLength());
+        errors, normalized, ActionParamKey.SEARCH_TERM, limits.getMaxSearchTermLength());
     validateOptionalTextField(
-        errors, normalized, ActionParamKey.COUNTRY, "country", limits.getMaxSearchTermLength());
+        errors, normalized, ActionParamKey.COUNTRY, limits.getMaxSearchTermLength());
     validateOptionalTextField(
-        errors, normalized, ActionParamKey.LOCATION, "location", limits.getMaxSearchTermLength());
+        errors, normalized, ActionParamKey.LOCATION, limits.getMaxSearchTermLength());
 
     if (!errors.isEmpty()) {
       return ParamsValidationResult.invalid(errors);
@@ -63,18 +62,18 @@ public class FilterParamsValidator {
     return ParamsValidationResult.valid(normalized);
   }
 
-  private static void validateSkillsStructure(JsonNode params, List<String> errors) {
+  private void validateSkillsStructure(JsonNode params, List<String> errors) {
     JsonNode skills = params.get(ActionParamKey.SKILLS);
     if (skills == null || skills.isMissingNode()) {
       return;
     }
     if (!skills.isArray()) {
-      errors.add("Skills must be an array of strings");
+      errors.add(messages.getSkillsMustBeArray());
       return;
     }
     for (JsonNode item : skills) {
       if (!item.isTextual()) {
-        errors.add("Skills must be an array of strings");
+        errors.add(messages.getSkillsMustBeArray());
         return;
       }
     }
@@ -87,25 +86,25 @@ public class FilterParamsValidator {
       return;
     }
     if (!(skills instanceof List<?> skillList)) {
-      errors.add("Skills must be an array of strings");
+      errors.add(messages.getSkillsMustBeArray());
       return;
     }
     if (skillList.size() > limits.getMaxSkills()) {
-      errors.add("Too many skills. Maximum: " + limits.getMaxSkills());
+      errors.add(messages.formatTooManySkills(limits.getMaxSkills()));
     }
     for (Object value : skillList) {
       if (!(value instanceof String skill)) {
-        errors.add("Skills must be an array of strings");
+        errors.add(messages.getSkillsMustBeArray());
         return;
       }
       if (!isRosterLabel(skill, rosterSkills)) {
-        errors.add("Invalid skill. Use roster skill labels from ROSTER CONTEXT");
+        errors.add(messages.getInvalidSkill());
         return;
       }
     }
   }
 
-  private static void validateCountry(
+  private void validateCountry(
       Map<String, Object> params, List<String> rosterCountries, List<String> errors) {
     Object country = params.get(ActionParamKey.COUNTRY);
     if (country == null) {
@@ -115,7 +114,7 @@ public class FilterParamsValidator {
       return;
     }
     if (!isRosterLabel(countryText, rosterCountries)) {
-      errors.add("Invalid country. Use roster country labels from ROSTER CONTEXT");
+      errors.add(messages.getInvalidCountry());
     }
   }
 
@@ -128,13 +127,13 @@ public class FilterParamsValidator {
     Object minExperience = params.get(ActionParamKey.MIN_EXPERIENCE);
     if (minExperience instanceof Number minValue
         && minValue.intValue() < limits.getMinExperience()) {
-      errors.add("minExperience must be a number >= " + limits.getMinExperience());
+      errors.add(messages.formatMinExperienceTooLow(limits.getMinExperience()));
     }
 
     Object maxExperience = params.get(ActionParamKey.MAX_EXPERIENCE);
     if (maxExperience instanceof Number maxValue
         && maxValue.intValue() > limits.getMaxExperience()) {
-      errors.add("maxExperience must be a number <= " + limits.getMaxExperience());
+      errors.add(messages.formatMaxExperienceTooHigh(limits.getMaxExperience()));
     }
   }
 
@@ -144,22 +143,18 @@ public class FilterParamsValidator {
       return;
     }
     if (!(status instanceof String statusText) || !ApplicationStatusWire.isWireValue(statusText)) {
-      errors.add("Invalid status. Valid: " + ApplicationStatusWire.formatList());
+      errors.add(messages.formatInvalidStatus(ApplicationStatusWire.formatList()));
     }
   }
 
-  private static void validateOptionalTextField(
-      List<String> errors,
-      Map<String, Object> params,
-      String fieldKey,
-      String fieldName,
-      int maxLength) {
+  private void validateOptionalTextField(
+      List<String> errors, Map<String, Object> params, String fieldKey, int maxLength) {
     Object value = params.get(fieldKey);
     if (value == null) {
       return;
     }
     if (!(value instanceof String text) || text.length() > maxLength) {
-      errors.add(fieldName + " must be a string <= " + maxLength + " characters");
+      errors.add(messages.formatOptionalTextFieldInvalid(fieldKey, maxLength));
     }
   }
 }

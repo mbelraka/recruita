@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { Sort } from '@angular/material/sort';
 import { LayoutBreakpointService } from 'src/app/services/layout-breakpoint.service';
+import { LayoutWidthTier } from 'src/app/enums/layout-width-tier.enum';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { mockApplicantViewSelectSignals } from 'src/app/testing/mock-applicant-view-select-signals.util';
 import { ApplicantListComponent } from './applicant-list.component';
@@ -37,7 +38,7 @@ describe('ApplicantListComponent', () => {
         {
           provide: LayoutBreakpointService,
           useValue: {
-            widthTier: signal('lg'),
+            widthTier: signal(LayoutWidthTier.Lg),
             isCompactNav: signal(false),
           },
         },

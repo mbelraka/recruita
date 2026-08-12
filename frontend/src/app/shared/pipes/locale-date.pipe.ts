@@ -29,13 +29,16 @@ export class LocaleDatePipe implements PipeTransform {
 
   public transform(
     value: Date | string | number | null | undefined,
-    format = 'mediumDate'
+    format = APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
   ): string {
     if (value === null || value === undefined) {
       return '';
     }
     const locale = APP_CONFIG.getLocale(this.language);
-    const resolvedFormat = format === 'mediumDate' ? 'longDate' : format;
+    const resolvedFormat =
+      format === APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
+        ? APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.LONG
+        : format;
     return formatDate(value, resolvedFormat, locale) ?? '';
   }
 }

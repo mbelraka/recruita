@@ -35,9 +35,12 @@
   </ul>
 
   <p class="privacy-consent-dialog__more">
-    <a mat-button routerLink="/privacy" (click)="closeBeforePrivacyNav()">{{
-      'privacy.dialog.privacyNoticeLink' | translate
-    }}</a>
+    <a
+      mat-button
+      [routerLink]="privacyRoute"
+      (click)="closeBeforePrivacyNav()"
+      >{{ 'privacy.dialog.privacyNoticeLink' | translate }}</a
+    >
   </p>
 </mat-dialog-content>
 

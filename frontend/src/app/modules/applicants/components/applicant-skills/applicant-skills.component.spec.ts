@@ -3,6 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ApplicantSkillsComponent } from './applicant-skills.component';
+import { ApplicantSkillsVariant } from '../../enums/applicant-skills-variant.enum';
 
 describe('ApplicantSkillsComponent', () => {
   let component: ApplicantSkillsComponent;
@@ -27,7 +28,7 @@ describe('ApplicantSkillsComponent', () => {
 
   it('should emit selected skill and stop propagation for interactive variants', () => {
     component.skills = ['Angular'];
-    component.variant = 'inline-link';
+    component.variant = ApplicantSkillsVariant.InlineLink;
     fixture.detectChanges();
 
     spyOn(component.skillSelected, 'emit');

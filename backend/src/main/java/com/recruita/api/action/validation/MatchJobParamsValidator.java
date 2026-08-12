@@ -3,6 +3,7 @@ package com.recruita.api.action.validation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.recruita.api.action.model.ActionParamKey;
 import com.recruita.api.action.model.ParamsValidationResult;
+import com.recruita.api.config.properties.ActionMessageProperties;
 import com.recruita.api.config.properties.ActionProperties;
 import com.recruita.api.config.properties.RecruitaProperties;
 import java.util.ArrayList;
@@ -15,22 +16,24 @@ import org.springframework.stereotype.Component;
 public class MatchJobParamsValidator {
 
   private final ActionProperties.ValidationLimitsProperties limits;
+  private final ActionMessageProperties messages;
 
   public MatchJobParamsValidator(RecruitaProperties properties) {
     this.limits = properties.getAction().getValidation();
+    this.messages = properties.getAction().getMessages();
   }
 
   public ParamsValidationResult validate(JsonNode params) {
     List<String> errors = new ArrayList<>();
     if (!ActionJsonSupport.isObject(params)) {
-      return ParamsValidationResult.invalid(List.of("Match job params must be an object"));
+      return ParamsValidationResult.invalid(List.of(messages.getMatchJobParamsMustBeObject()));
     }
 
     JsonNode jobDescription = params.get(ActionParamKey.JOB_DESCRIPTION);
     if (jobDescription == null
         || !jobDescription.isTextual()
         || jobDescription.asText().isBlank()) {
-      errors.add("jobDescription is required");
+      errors.add(messages.getJobDescriptionRequired());
     }
 
     JsonNode limit = params.get(ActionParamKey.LIMIT);
@@ -40,10 +43,7 @@ public class MatchJobParamsValidator {
             || limit.asInt() < limits.getMinMatchLimit()
             || limit.asInt() > limits.getMatchLimitMax())) {
       errors.add(
-          "limit must be a number between "
-              + limits.getMinMatchLimit()
-              + " and "
-              + limits.getMatchLimitMax());
+          messages.formatInvalidMatchLimit(limits.getMinMatchLimit(), limits.getMatchLimitMax()));
     }
 
     if (!errors.isEmpty()) {

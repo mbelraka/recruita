@@ -13,6 +13,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { APP_CONFIG } from '../../../config/app.config';
 import { PrivacyConsentDialogMode } from '../../../enums/privacy-consent-dialog-mode.enum';
 import type { PrivacyConsentDialogCloseResult } from '../../../models/privacy-consent-dialog-close-result.model';
 import type { PrivacyConsentDialogData } from '../../../models/privacy-consent-dialog-data.model';
@@ -42,6 +43,8 @@ export class PrivacyConsentDialogComponent {
   private readonly _data = inject(MAT_DIALOG_DATA, {
     optional: true,
   }) as PrivacyConsentDialogData | undefined;
+
+  protected readonly privacyRoute = APP_CONFIG.ROUTES.PRIVACY;
 
   protected optionalRemoteTranslation =
     this._data?.initialChoices.optionalRemoteTranslation ?? false;

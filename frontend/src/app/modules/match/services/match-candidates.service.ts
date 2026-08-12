@@ -5,9 +5,7 @@ import { map, Observable, throwError } from 'rxjs';
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
 import { MatchService } from '../../../generated/api-client/services/match.service';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { Applicant } from '../../applicants/models/applicant.model';
-import { MATCH_ERROR_PRIVACY_AI_DISABLED } from '../constants/match-error-codes';
 import { MatchErrorMessage } from '../enums/match-error-message.enum';
 import { MatchProxyRequestBody } from '../models/match-proxy-request-body.model';
 import { MatchCandidateResult } from '../models/match-candidate-result.model';
@@ -27,7 +25,6 @@ export class MatchCandidatesService {
 
   public constructor(
     private readonly _matchApi: MatchService,
-    private readonly _privacy: PrivacyConsentService,
     private readonly _groqParser: MatchGroqResponseParser
   ) {}
 
@@ -46,9 +43,6 @@ export class MatchCandidatesService {
       return throwError(
         () => new Error(MatchErrorMessage.NoApplicantsAvailable)
       );
-    }
-    if (!this._privacy.allowsAiMatching()) {
-      return throwError(() => new Error(MATCH_ERROR_PRIVACY_AI_DISABLED));
     }
     const stableApplicants = this._sortApplicantsForMatching(applicants);
     const { requestBody, llmTempIdToInternalId } =

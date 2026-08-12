@@ -2,22 +2,44 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
 import { Languages } from '../enums/language.enum';
 import { ApiProblemDetailPropertyKey } from '../enums/api-problem-detail-property-key.enum';
+import { GeocodeResponseFormat } from '../enums/geocode-response-format.enum';
+import { HttpMethod } from '../enums/http-method.enum';
+import { SnackBarHorizontalPosition } from '../enums/snack-bar-horizontal-position.enum';
+import { SnackBarVerticalPosition } from '../enums/snack-bar-vertical-position.enum';
 import { Applicant } from '../modules/applicants/models/applicant.model';
 import { ExportFormats } from '../modules/export/enums/export-formats.enum';
 import { NavLink } from '../modules/main/models/nav-link.model';
-import { LayoutWidthTier } from '../models/layout-width-tier.type';
+import { LayoutWidthTier } from '../enums/layout-width-tier.enum';
+import { RouterPathMatch } from '../enums/router-path-match.enum';
 
-/** Canonical in-app route paths (shared by nav links and smart-action execution). */
+/** Path segments for the Angular router (`path` / `redirectTo`, no leading slash). */
+export const APP_ROUTE_PATHS = {
+  MAIN: 'main',
+  APPLICANTS: 'applicants',
+  MATCH: 'match',
+  EXPORT: 'export',
+  SMART_ACTION: 'smart-action',
+  PRIVACY: 'privacy',
+} as const;
+
+/** Canonical in-app URL paths (shared by nav links and smart-action execution). */
 export const APP_ROUTES = {
-  MAIN: '/main',
-  APPLICANTS: '/applicants',
-  MATCH: '/match',
-  EXPORT: '/export',
-  SMART_ACTION: '/smart-action',
+  MAIN: `/${APP_ROUTE_PATHS.MAIN}`,
+  APPLICANTS: `/${APP_ROUTE_PATHS.APPLICANTS}`,
+  MATCH: `/${APP_ROUTE_PATHS.MATCH}`,
+  EXPORT: `/${APP_ROUTE_PATHS.EXPORT}`,
+  SMART_ACTION: `/${APP_ROUTE_PATHS.SMART_ACTION}`,
+  PRIVACY: `/${APP_ROUTE_PATHS.PRIVACY}`,
 } as const;
 
 export const APP_CONFIG = {
   ROUTES: APP_ROUTES,
+  ROUTE_PATHS: APP_ROUTE_PATHS,
+  ROUTER: {
+    EMPTY_PATH: '',
+    WILDCARD_PATH: '**',
+    PATH_MATCH_FULL: RouterPathMatch.Full,
+  } as const,
   /** Browser tab title (`index.html` fallback until i18n loads). */
   APP: {
     SITE_TITLE_I18N_KEY: 'app.siteTitle',
@@ -28,9 +50,14 @@ export const APP_CONFIG = {
   HTTP: {
     XSRF_COOKIE_NAME: 'XSRF-TOKEN',
     XSRF_HEADER_NAME: 'X-XSRF-TOKEN',
-    CSRF_SAFE_METHODS: ['GET', 'HEAD', 'OPTIONS'] as const,
+    CSRF_SAFE_METHODS: [
+      HttpMethod.Get,
+      HttpMethod.Head,
+      HttpMethod.Options,
+    ] as const,
     /** Must match backend `recruita.api.problem-detail.error-property-key`. */
     PROBLEM_DETAIL_ERROR_PROPERTY: ApiProblemDetailPropertyKey.Error,
+    RXJS_TIMEOUT_ERROR_NAME: 'TimeoutError',
   } as const,
 
   /** NgRx Store DevTools (`StoreDevtoolsModule.instrument`). */
@@ -55,8 +82,8 @@ export const APP_CONFIG = {
       DEFAULT_DURATION_MS: 4000,
       /** Longer auto-dismiss for error toasts (ms). */
       ERROR_DURATION_MS: 7000,
-      HORIZONTAL_POSITION: 'right' as const,
-      VERTICAL_POSITION: 'top' as const,
+      HORIZONTAL_POSITION: SnackBarHorizontalPosition.Right,
+      VERTICAL_POSITION: SnackBarVerticalPosition.Top,
       PANEL_CLASS_BASE: 'app-notification-snackbar',
     } as const,
   } as const,
@@ -145,6 +172,7 @@ export const APP_CONFIG = {
         b: 0.71,
       } as const,
       BODY_X: 50,
+      HORIZONTAL_MARGIN_SIDES: 2,
       BODY_TOP_OFFSET: 100,
       BODY_FONT_SIZE: 12,
       BODY_COLOR: {
@@ -262,10 +290,16 @@ export const APP_CONFIG = {
     /** Open-Meteo geocoding API base URL (location autocomplete). */
     LOCATION_GEOCODE_SEARCH_URL:
       'https://geocoding-api.open-meteo.com/v1/search',
+    LOCATION_GEOCODE_QUERY: {
+      NAME: 'name',
+      COUNT: 'count',
+      LANGUAGE: 'language',
+      FORMAT: 'format',
+    } as const,
     /** Open-Meteo geocode query: `count` (max results). */
-    LOCATION_GEOCODE_RESULT_COUNT: '10',
+    LOCATION_GEOCODE_RESULT_COUNT: 10,
     /** Open-Meteo geocode query: `format` (response shape). */
-    LOCATION_GEOCODE_FORMAT: 'json',
+    LOCATION_GEOCODE_FORMAT: GeocodeResponseFormat.Json,
     /** Minimum trimmed query length before geocoding runs. */
     LOCATION_GEOCODE_MIN_QUERY_LENGTH: 2,
     /** Max cached geocode queries per session (query + language key). */
@@ -283,6 +317,11 @@ export const APP_CONFIG = {
     LIST_ROW_ENTER_STAGGER_STEP_MS: 40,
     /** Rows per page in list view (grid uses dynamic columns per row). */
     LIST_ROWS_PER_PAGE: 10,
+    /** Sort index used when a status is missing from `ApplicationStatus` order. */
+    UNKNOWN_STATUS_SORT_INDEX: 999,
+    /** Applicant grid card min width and gap used to compute columns (px). */
+    GRID_CARD_MIN_PX: 264,
+    GRID_GAP_PX: 16,
     /**
      * List table mat-column ids per viewport tier (`lg` uses `FULL`).
      * `availability` is the UI column for store key `availableFrom`.
@@ -300,15 +339,19 @@ export const APP_CONFIG = {
         'skills',
       ] as const,
       BY_WIDTH_TIER: {
-        xs: ['name', 'applicationStatus', 'currentJobTitle'] as const,
-        sm: [
+        [LayoutWidthTier.Xs]: [
+          'name',
+          'applicationStatus',
+          'currentJobTitle',
+        ] as const,
+        [LayoutWidthTier.Sm]: [
           'name',
           'currentJobTitle',
           'yearsOfExperience',
           'applicationStatus',
           'email',
         ] as const,
-        md: [
+        [LayoutWidthTier.Md]: [
           'name',
           'currentJobTitle',
           'yearsOfExperience',
@@ -317,7 +360,7 @@ export const APP_CONFIG = {
           'location',
         ] as const,
       } as const satisfies Record<
-        Exclude<LayoutWidthTier, 'lg'>,
+        Exclude<LayoutWidthTier, LayoutWidthTier.Lg>,
         readonly string[]
       >,
     } as const,
@@ -442,6 +485,11 @@ export const APP_CONFIG = {
       [Languages.Romansh]: 'de-CH',
       [Languages.Spanish]: 'es-ES',
     },
+    ANGULAR_DATE_PIPE: {
+      DEFAULT: 'mediumDate',
+      LONG: 'longDate',
+    } as const,
+    DEFAULT_NUMBER_DIGITS_INFO: '1.0-2',
   },
 
   /**
@@ -460,6 +508,8 @@ export const APP_CONFIG = {
     LANGPAIR_SEPARATOR: '|',
     CACHE_KEY_SEGMENT_SEPARATOR: '|',
     IN_FLIGHT_SHARE_REPLAY_BUFFER_SIZE: 1,
+    /** Shown while a non-English remote translation is loading. */
+    PENDING_PLACEHOLDER: '\u2026',
   } as const,
 
   getLocale: (language: Languages): string => {
@@ -479,11 +529,11 @@ export const APP_CONFIG = {
   },
 
   getApplicantListDisplayedColumns: (widthTier: LayoutWidthTier): string[] => {
-    if (widthTier === 'lg') {
+    if (widthTier === LayoutWidthTier.Lg) {
       return [...APP_CONFIG.APPLICANTS.LIST_DISPLAYED_COLUMNS.FULL];
     }
-    return [
-      ...APP_CONFIG.APPLICANTS.LIST_DISPLAYED_COLUMNS.BY_WIDTH_TIER[widthTier],
-    ];
+    const columnsByTier =
+      APP_CONFIG.APPLICANTS.LIST_DISPLAYED_COLUMNS.BY_WIDTH_TIER;
+    return [...columnsByTier[widthTier]];
   },
 };

@@ -26,6 +26,7 @@ import { Languages } from '../../../enums/language.enum';
 import { NavLink } from 'src/app/modules/main/models/nav-link.model';
 import { loadProfile } from '../../../modules/main/state/profile.actions';
 import { setLanguage } from '../../../state/app.actions';
+import { initialAppState } from '../../../state/app.reducer';
 import { RootComponent } from './root.component';
 
 @Component({ template: '', standalone: false })
@@ -59,7 +60,7 @@ describe('RootComponent', () => {
       providers: [
         provideMockStore({
           initialState: {
-            app: { language: Languages.English },
+            app: { ...initialAppState, language: Languages.English },
           },
         }),
       ],
@@ -108,7 +109,7 @@ describe('RootComponent', () => {
     expect(component.selectedLanguage).toBe(Languages.English);
 
     store.setState({
-      app: { language: Languages.German, notification: null },
+      app: { ...initialAppState, language: Languages.German },
     });
 
     expect(component.selectedLanguage).toBe(Languages.German);

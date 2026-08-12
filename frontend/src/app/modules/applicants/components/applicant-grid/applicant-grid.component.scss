@@ -26,7 +26,7 @@
 .applicant-grid__cards {
   display: grid;
   grid-template-columns: repeat(var(--applicant-grid-cols, 1), minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--app-space-sm);
   align-items: stretch;
 }
 
@@ -68,7 +68,7 @@ $_card-ease: var(
   &:focus-within {
     border-color: color-mix(
       in srgb,
-      var(--app-color-text-body, #3f4848) 28%,
+      var(--app-color-text-body) 28%,
       var(--app-color-border-subtle)
     );
     box-shadow:

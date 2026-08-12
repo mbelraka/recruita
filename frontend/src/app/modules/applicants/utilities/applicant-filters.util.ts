@@ -4,6 +4,7 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { ApplicationStatus } from '../enums/application-status.enum';
 import { ApplicantFilterQueryParam } from '../enums/applicant-filter-query-param.enum';
 import { Applicant } from '../models/applicant.model';
+import { ApplicantListFilters } from '../models/applicant-list-filters.model';
 import { applicantGlobalSearchHaystack } from './applicant-global-search.util';
 import { countryFromLocation } from './applicant-location.util';
 import { isApplicationStatus } from './application-status.util';
@@ -12,15 +13,6 @@ import {
   canonicalizeRosterSkill,
   canonicalizeRosterStatus,
 } from './roster.util';
-
-export interface ApplicantListFilters {
-  readonly globalFilter: string;
-  readonly skill: string | null;
-  readonly status: ApplicationStatus | null;
-  readonly country: string | null;
-  readonly minExperience?: number;
-  readonly maxExperience?: number;
-}
 
 export const EMPTY_APPLICANT_LIST_FILTERS: ApplicantListFilters = {
   globalFilter: '',

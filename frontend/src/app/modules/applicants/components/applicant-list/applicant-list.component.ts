@@ -13,6 +13,7 @@ import { APP_CONFIG } from '../../../../config/app.config';
 import { LayoutBreakpointService } from '../../../../services/layout-breakpoint.service';
 import { FullState } from '../../../../models/full-state.model';
 import { Applicant } from '../../models/applicant.model';
+import { ApplicantSkillsVariant } from '../../enums/applicant-skills-variant.enum';
 import { SortDirection } from '../../enums/sort-direction.enum';
 import {
   sortDirectionFromMaterial,
@@ -88,6 +89,7 @@ export class ApplicantListComponent {
   public readonly displayedColumns = computed(() =>
     APP_CONFIG.getApplicantListDisplayedColumns(this._layout.widthTier())
   );
+  public readonly inlineLinkVariant = ApplicantSkillsVariant.InlineLink;
 
   public constructor(private readonly _store: Store<FullState>) {
     effect(() => {

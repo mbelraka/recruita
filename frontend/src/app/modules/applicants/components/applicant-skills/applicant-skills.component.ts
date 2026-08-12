@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 
-import { ApplicantSkillsVariant } from '../../types/applicant-skills-variant.type';
+import { ApplicantSkillsVariant } from '../../enums/applicant-skills-variant.enum';
 
 @Component({
   selector: 'app-applicant-skills',
@@ -18,7 +18,9 @@ import { ApplicantSkillsVariant } from '../../types/applicant-skills-variant.typ
 export class ApplicantSkillsComponent {
   @Input() public skills: readonly string[] | null | undefined = [];
 
-  @Input() public variant: ApplicantSkillsVariant = 'chip';
+  @Input() public variant: ApplicantSkillsVariant = ApplicantSkillsVariant.Chip;
+
+  public readonly skillsVariant = ApplicantSkillsVariant;
 
   @Output() public readonly skillSelected = new EventEmitter<string>();
 

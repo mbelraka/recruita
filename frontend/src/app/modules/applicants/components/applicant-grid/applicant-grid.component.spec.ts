@@ -1,9 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { createApplicant } from '../../utilities/applicant-domain.util';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { EMPTY } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -15,7 +13,6 @@ describe('ApplicantGridComponent', () => {
   let component: ApplicantGridComponent;
   let fixture: ComponentFixture<ApplicantGridComponent>;
   let mockStore: jasmine.SpyObj<Store>;
-  let mockDialog: jasmine.SpyObj<MatDialog>;
   const mockApplicant = createApplicant({
     id: '1',
     name: 'John Doe',
@@ -29,16 +26,11 @@ describe('ApplicantGridComponent', () => {
       'dispatch',
     ]);
     mockApplicantViewSelectSignals(mockStore);
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockDialog.open.and.returnValue({ afterClosed: () => EMPTY } as any);
     await TestBed.configureTestingModule({
       declarations: [ApplicantGridComponent],
       imports: [TranslateModule.forRoot(), SharedModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [
-        { provide: MatDialog, useValue: mockDialog },
-        { provide: Store, useValue: mockStore },
-      ],
+      providers: [{ provide: Store, useValue: mockStore }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicantGridComponent);
@@ -87,9 +79,13 @@ describe('ApplicantGridComponent', () => {
       );
     });
 
-    it('should confirm remove applicant', () => {
+    it('should dispatch openConfirmDeleteApplicant', () => {
       component.confirmRemoveApplicant(mockApplicant);
-      expect(mockDialog.open).toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        ApplicantsActions.openConfirmDeleteApplicant({
+          applicant: mockApplicant,
+        })
+      );
     });
   });
 

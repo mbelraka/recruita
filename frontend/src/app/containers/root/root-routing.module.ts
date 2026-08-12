@@ -1,57 +1,61 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { APP_CONFIG, APP_ROUTE_PATHS } from 'src/app/config/app.config';
 import { RootComponent } from 'src/app/containers/root/root/root.component';
 
 const routes: Routes = [
   {
-    path: '',
+    path: APP_CONFIG.ROUTER.EMPTY_PATH,
     component: RootComponent,
     children: [
       {
-        path: 'main',
+        path: APP_ROUTE_PATHS.MAIN,
         loadChildren: () =>
           import('../../modules/main/main.module').then((m) => m.MainModule),
       },
       {
-        path: 'applicants',
+        path: APP_ROUTE_PATHS.APPLICANTS,
         loadChildren: () =>
           import('../../modules/applicants/applicants.module').then(
             (m) => m.ApplicantsModule
           ),
       },
       {
-        path: 'match',
+        path: APP_ROUTE_PATHS.MATCH,
         loadChildren: () =>
           import('../../modules/match/match.module').then((m) => m.MatchModule),
       },
       {
-        path: 'export',
+        path: APP_ROUTE_PATHS.EXPORT,
         loadChildren: () =>
           import('../../modules/export/export.module').then(
             (m) => m.ExportModule
           ),
       },
       {
-        path: 'smart-action',
+        path: APP_ROUTE_PATHS.SMART_ACTION,
         loadChildren: () =>
           import('../../modules/smart-action/smart-action.module').then(
             (m) => m.SmartActionModule
           ),
       },
       {
-        path: 'privacy',
+        path: APP_ROUTE_PATHS.PRIVACY,
         loadComponent: () =>
           import('./privacy/privacy-page.component').then(
             (m) => m.PrivacyPageComponent
           ),
       },
       {
-        path: '',
-        redirectTo: 'main',
-        pathMatch: 'full',
+        path: APP_CONFIG.ROUTER.EMPTY_PATH,
+        redirectTo: APP_ROUTE_PATHS.MAIN,
+        pathMatch: APP_CONFIG.ROUTER.PATH_MATCH_FULL,
       },
-      { path: '**', redirectTo: 'main' },
+      {
+        path: APP_CONFIG.ROUTER.WILDCARD_PATH,
+        redirectTo: APP_ROUTE_PATHS.MAIN,
+      },
     ],
   },
 ];

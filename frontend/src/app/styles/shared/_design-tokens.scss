@@ -28,9 +28,13 @@
   --secondary-main-color: #{$secondary-main-color};
   --app-color-secondary-emphasis: var(--secondary-main-color);
   --app-color-on-secondary-emphasis: #{$secondary-emphasis-on-surface};
-  --app-color-on-primary: #ffffff;
+  --app-color-on-primary: #{$button-primary-label};
   --app-overlay-elevated: #d7e4ea;
   --app-color-border-subtle: #{$border-subtle};
+  --app-color-warn: #{$warn-color};
+  --app-color-outline: #{$border-subtle};
+  --app-color-button-primary-fill: #{$button-primary-fill};
+  --app-color-surface-cream: #{$surface-cream};
 
   --app-bp-sm: 600px;
   --app-bp-md: 960px;

@@ -5,7 +5,7 @@ import {
   selectEntityCollection,
   selectEntityCollectionLoaded,
 } from '../../../core/entity-data/entity-cache.selectors';
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import type { PrivacyConsentFormState } from '../../../models/privacy-consent-form-state.model';
 import {
   DEFAULT_DISABLED_PRIVACY_CHOICES,

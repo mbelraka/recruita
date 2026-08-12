@@ -4,6 +4,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.time.Duration;
 import java.util.Optional;
@@ -55,9 +57,8 @@ public class InMemoryMatchResponseCacheStore implements MatchResponseCacheStore 
 
   private static MatchEvaluationResult copy(MatchEvaluationResult result) {
     return switch (result) {
-      case MatchEvaluationResult.Deterministic deterministic -> deterministic;
-      case MatchEvaluationResult.Groq groq ->
-          new MatchEvaluationResult.Groq(groq.value().deepCopy());
+      case DeterministicMatchEvaluationResult deterministic -> deterministic;
+      case GroqMatchEvaluationResult groq -> new GroqMatchEvaluationResult(groq.value().deepCopy());
     };
   }
 }

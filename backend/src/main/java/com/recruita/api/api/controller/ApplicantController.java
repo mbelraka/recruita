@@ -34,7 +34,7 @@ public class ApplicantController implements ApplicantsApi {
       ApplicantApplicationService applicantApplicationService, RecruitaProperties properties) {
     this.applicantApplicationService = applicantApplicationService;
     this.rosterVersionHeader = properties.getApplicant().getRoster().getVersionResponseHeader();
-    this.rosterUpdatedAtHeader = "X-Recruita-Roster-Updated-At";
+    this.rosterUpdatedAtHeader = properties.getApplicant().getRoster().getUpdatedAtResponseHeader();
   }
 
   @Override

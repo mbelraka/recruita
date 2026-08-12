@@ -37,14 +37,12 @@
     color-mix(in srgb, $green-2 48%, $green-1) 52%,
     var(--app-color-surface-elevated)
   );
+  color: var(--app-color-text-headline);
 }
 
 :host.application-status-chip--shortlisted {
-  background: color-mix(
-    in srgb,
-    color-mix(in srgb, $green-1 86%, $green-2 14%) 66%,
-    var(--app-color-surface-elevated)
-  );
+  background: var(--app-color-secondary-emphasis);
+  color: var(--app-color-on-secondary-emphasis);
 }
 
 :host.application-status-chip--offer_extended {
@@ -64,5 +62,5 @@
 }
 
 :host.application-status-chip--withdrawn {
-  background: color-mix(in srgb, $primary-color 14%, #fffef2);
+  background: color-mix(in srgb, $primary-color 14%, $surface-cream);
 }

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpUrlGenerator, Pluralizer } from '@ngrx/data';
 
 import { APP_CONFIG } from '../../config/app.config';
-import { RecruitaEntityNames } from './recruita-entity-names';
+import { RecruitaEntityNames } from './recruita-entity-names.constants';
 import { recruitaEntityHttpResourceUrls } from './recruita-entity-http-resource-urls';
 import { RecruitaHttpUrlGenerator } from './recruita-http-url-generator.service';
 

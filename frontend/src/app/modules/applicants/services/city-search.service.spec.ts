@@ -7,28 +7,18 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
 import { Languages } from '../../../enums/language.enum';
-import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { CitySearchService } from './city-search.service';
 
 describe('CitySearchService', () => {
   let service: CitySearchService;
   let httpMock: HttpTestingController;
-  let privacySpy: jasmine.SpyObj<
-    Pick<PrivacyConsentService, 'optionalGeocoding'>
-  >;
 
   beforeEach(() => {
-    privacySpy = jasmine.createSpyObj('PrivacyConsentService', [
-      'optionalGeocoding',
-    ]);
-    privacySpy.optionalGeocoding.and.returnValue(true);
-
     TestBed.configureTestingModule({
       providers: [
         CitySearchService,
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: PrivacyConsentService, useValue: privacySpy },
       ],
     });
 
@@ -44,16 +34,6 @@ describe('CitySearchService', () => {
     const labels = await firstValueFrom(
       service.searchCityLabels('z', Languages.English)
     );
-    expect(labels).toEqual([]);
-  });
-
-  it('returns empty results when geocoding consent is disabled', async () => {
-    privacySpy.optionalGeocoding.and.returnValue(false);
-
-    const labels = await firstValueFrom(
-      service.searchCityLabels('Zurich', Languages.English)
-    );
-
     expect(labels).toEqual([]);
   });
 

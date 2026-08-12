@@ -1,9 +1,12 @@
 package com.recruita.api.match.normalization;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.recruita.api.api.dto.match.CandidateProfileDto;
 import com.recruita.api.api.dto.match.MatchResponseDto;
 import com.recruita.api.api.dto.match.MatchScoreDto;
 import com.recruita.api.config.properties.RecruitaProperties;
+import com.recruita.api.match.evaluation.DeterministicMatchEvaluationResult;
+import com.recruita.api.match.evaluation.GroqMatchEvaluationResult;
 import com.recruita.api.match.evaluation.MatchEvaluationResult;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +27,8 @@ public class MatchResponseNormalizer {
 
   public MatchResponseDto toResponseDto(MatchEvaluationResult result) {
     return switch (result) {
-      case MatchEvaluationResult.Deterministic deterministic -> deterministic.value();
-      case MatchEvaluationResult.Groq groq -> normalize(groq.value());
+      case DeterministicMatchEvaluationResult deterministic -> deterministic.value();
+      case GroqMatchEvaluationResult groq -> normalize(groq.value());
     };
   }
 
@@ -73,11 +76,11 @@ public class MatchResponseNormalizer {
         readText(item, "recommendation"));
   }
 
-  private static MatchScoreDto.CandidateProfileDto readCandidateProfile(JsonNode profile) {
+  private static CandidateProfileDto readCandidateProfile(JsonNode profile) {
     if (profile == null || profile.isNull() || !profile.isObject()) {
       return null;
     }
-    return new MatchScoreDto.CandidateProfileDto(
+    return new CandidateProfileDto(
         readStringList(profile, "skills"),
         profile.path("yearsExperience").asDouble(0),
         readStringList(profile, "topJobTitles"),

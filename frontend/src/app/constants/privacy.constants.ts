@@ -8,6 +8,9 @@ export const PRIVACY_DATA_EXPORT_NOTE =
 /** SPA base path after resetting the session (Angular `base href` default). */
 export const PRIVACY_POST_ERASE_APP_PATH = '/';
 
+/** Download stem for session JSON export (timestamp and extension appended). */
+export const PRIVACY_DATA_EXPORT_FILE_PREFIX = 'recruita-session-export-';
+
 /** Persisted on the admin profile when the user completes a consent dialog flow. */
 export const PRIVACY_NOTICE_ACCEPTED = true as const;
 

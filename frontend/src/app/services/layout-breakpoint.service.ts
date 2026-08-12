@@ -4,9 +4,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
 import { LAYOUT_WIDTH_TIER_MEDIA_QUERIES } from '../constants/layout-breakpoints.constants';
-import { LayoutWidthTier } from '../models/layout-width-tier.type';
+import { LayoutWidthTier } from '../enums/layout-width-tier.enum';
 
-const { xs: BP_XS, sm: BP_SM, md: BP_MD } = LAYOUT_WIDTH_TIER_MEDIA_QUERIES;
+const BP_XS = LAYOUT_WIDTH_TIER_MEDIA_QUERIES[LayoutWidthTier.Xs];
+const BP_SM = LAYOUT_WIDTH_TIER_MEDIA_QUERIES[LayoutWidthTier.Sm];
+const BP_MD = LAYOUT_WIDTH_TIER_MEDIA_QUERIES[LayoutWidthTier.Md];
 
 @Injectable({ providedIn: 'root' })
 export class LayoutBreakpointService {
@@ -16,18 +18,18 @@ export class LayoutBreakpointService {
     this._observer.observe([BP_XS, BP_SM, BP_MD]).pipe(
       map((state): LayoutWidthTier => {
         if (state.breakpoints[BP_XS]) {
-          return 'xs';
+          return LayoutWidthTier.Xs;
         }
         if (state.breakpoints[BP_SM]) {
-          return 'sm';
+          return LayoutWidthTier.Sm;
         }
         if (state.breakpoints[BP_MD]) {
-          return 'md';
+          return LayoutWidthTier.Md;
         }
-        return 'lg';
+        return LayoutWidthTier.Lg;
       })
     ),
-    { initialValue: 'lg' }
+    { initialValue: LayoutWidthTier.Lg }
   );
 
   /** True at tablet widths and below (≤959px) — compact header nav. */

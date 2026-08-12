@@ -130,7 +130,7 @@
           @if (applicant.skills?.length) {
             <app-applicant-skills
               [skills]="applicant.skills"
-              variant="inline-link"
+              [variant]="inlineLinkVariant"
               (skillSelected)="filterBySkill($event)"
             ></app-applicant-skills>
           } @else {

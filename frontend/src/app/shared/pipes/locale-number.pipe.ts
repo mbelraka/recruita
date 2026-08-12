@@ -39,6 +39,10 @@ export class LocaleNumberPipe implements PipeTransform {
       return '';
     }
     const locale = APP_CONFIG.getLocale(this.language);
-    return formatNumber(num, locale, digitsInfo ?? '1.0-2');
+    return formatNumber(
+      num,
+      locale,
+      digitsInfo ?? APP_CONFIG.LOCALIZATION.DEFAULT_NUMBER_DIGITS_INFO
+    );
   }
 }

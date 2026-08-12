@@ -14,7 +14,7 @@ import { APP_CONFIG } from '../../../config/app.config';
 import { HttpStatusCode } from '../../../enums/http-status-code.enum';
 import { ApplicantsService } from '../../../generated/api-client/services/applicants.service';
 import { ApplicantSummaryDto } from '../../../generated/api-client/models/applicant-summary-dto';
-import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names';
+import { RecruitaEntityNames } from '../../../core/entity-data/recruita-entity-names.constants';
 import { ApplicantRosterLoadResult } from '../models/applicant-roster-load-result.model';
 import { Applicant } from '../models/applicant.model';
 import {

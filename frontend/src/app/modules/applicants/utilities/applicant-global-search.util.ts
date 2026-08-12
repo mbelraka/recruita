@@ -1,4 +1,6 @@
 import { Applicant } from '../models/applicant.model';
+import { APP_CONFIG } from '../../../config/app.config';
+import { APPLICANT } from '../constants/applicant.constants';
 
 /** Text fields matched by the applicants list global search (summary roster fields). */
 export function applicantGlobalSearchHaystack(applicant: Applicant): string {
@@ -8,7 +10,7 @@ export function applicantGlobalSearchHaystack(applicant: Applicant): string {
     const d =
       avail instanceof Date ? avail : new Date(avail as string | number);
     if (!Number.isNaN(d.getTime())) {
-      availStr = `${d.toISOString().slice(0, 10)} ${d.toLocaleDateString()}`;
+      availStr = `${d.toISOString().slice(0, APP_CONFIG.EXPORT.CSV.DATE_SLICE_END_INDEX)} ${d.toLocaleDateString()}`;
     }
   }
 
@@ -25,12 +27,12 @@ export function applicantGlobalSearchHaystack(applicant: Applicant): string {
     applicant.yearsOfExperience !== null
       ? String(applicant.yearsOfExperience)
       : '',
-    (applicant.skills ?? []).join(' '),
+    (applicant.skills ?? []).join(APPLICANT.NAME_PART_SEPARATOR),
     availStr,
     // Notes are not on the summary API; only searchable after detail is cached (e.g. edit).
     ...(notes ? [notes] : []),
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(APPLICANT.NAME_PART_SEPARATOR)
     .toLowerCase();
 }

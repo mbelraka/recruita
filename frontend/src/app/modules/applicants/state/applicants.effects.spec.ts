@@ -19,6 +19,7 @@ import { HttpApiError } from '../../../models/http-api-error.model';
 import { ApplicantEntityCollectionService } from '../data/applicant-entity-collection.service';
 import { ApplicantEditDialogService } from '../services/applicant-edit-dialog.service';
 import { CitySearchService } from '../services/city-search.service';
+import { ConfirmDeleteApplicantDialogService } from '../services/confirm-delete-applicant-dialog.service';
 import {
   addApplicant,
   addApplicantFailure,
@@ -29,6 +30,7 @@ import {
   loadApplicants,
   loadApplicantsFailure,
   openApplicantForm,
+  openConfirmDeleteApplicant,
   updateApplicant,
   updateApplicantFailure,
 } from './applicants.actions';
@@ -51,6 +53,7 @@ describe('ApplicantsEffects', () => {
     };
   };
   let mockEditDialog: jasmine.SpyObj<ApplicantEditDialogService>;
+  let mockConfirmDeleteDialog: jasmine.SpyObj<ConfirmDeleteApplicantDialogService>;
 
   const sample = createApplicant({
     id: 'a-1',
@@ -89,6 +92,11 @@ describe('ApplicantsEffects', () => {
       'ApplicantEditDialogService',
       ['openCreateOrEdit']
     );
+    mockConfirmDeleteDialog =
+      jasmine.createSpyObj<ConfirmDeleteApplicantDialogService>(
+        'ConfirmDeleteApplicantDialogService',
+        ['open']
+      );
 
     TestBed.configureTestingModule({
       providers: [
@@ -98,6 +106,10 @@ describe('ApplicantsEffects', () => {
         provideMockStore(),
         { provide: Router, useValue: mockRouter },
         { provide: ApplicantEditDialogService, useValue: mockEditDialog },
+        {
+          provide: ConfirmDeleteApplicantDialogService,
+          useValue: mockConfirmDeleteDialog,
+        },
         {
           provide: CitySearchService,
           useValue: jasmine.createSpyObj<CitySearchService>(
@@ -213,6 +225,15 @@ describe('ApplicantsEffects', () => {
       effects.openApplicantForm$.pipe(defaultIfEmpty(undefined))
     );
     expect(mockEditDialog.openCreateOrEdit).toHaveBeenCalledWith(sample);
+  });
+
+  it('opens the confirm-delete dialog from NgRx', async () => {
+    actions$.next(openConfirmDeleteApplicant({ applicant: sample }));
+
+    await firstValueFrom(
+      effects.openConfirmDeleteApplicant$.pipe(defaultIfEmpty(undefined))
+    );
+    expect(mockConfirmDeleteDialog.open).toHaveBeenCalledWith(sample);
   });
 
   it('invalidates match results after a successful applicant mutation', async () => {

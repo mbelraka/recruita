@@ -1,7 +1,7 @@
 import { createEntityCacheSelector, EntityCollection } from '@ngrx/data';
 import { createSelector } from '@ngrx/store';
 
-import { RecruitaEntityName } from './recruita-entity-names';
+import { RecruitaEntityName } from './recruita-entity-names.constants';
 
 export const ENTITY_CACHE_STATE_KEY = 'entityCache';
 

@@ -24,6 +24,8 @@ import {
 import { PrivacyConsentDialogService } from '../../../containers/root/privacy/privacy-consent-dialog.service';
 import { PrivacyConsentService } from '../../../services/privacy-consent.service';
 import { APP_CONFIG } from '../../../config/app.config';
+import { PRIVACY_DATA_EXPORT_FILE_PREFIX } from '../../../constants/privacy.constants';
+import { ExportFormats } from '../../export/enums/export-formats.enum';
 import { FullState } from '../../../models/full-state.model';
 import { setLanguage } from '../../../state/app.actions';
 import { selectAppLanguage } from '../../../state/app.selectors';
@@ -50,7 +52,11 @@ import {
   persistPrivacyConsentOutcomeSuccess,
   profileUpdated,
 } from './profile.actions';
-import { selectProfile, selectProfileLoaded } from './main.selectors';
+import {
+  selectProfile,
+  selectProfileLoaded,
+  selectPrivacyConsentComplete,
+} from './main.selectors';
 import { buildSaveProfileRequest } from '../../../utilities/build-save-profile-request.util';
 
 /**
@@ -116,8 +122,9 @@ export class MainEffects {
     () =>
       this._actions$.pipe(
         ofType(loadProfileFailure),
-        tap(() => {
-          if (!this._privacy.isConsentCompleteAndCurrent()) {
+        withLatestFrom(this._store.select(selectPrivacyConsentComplete)),
+        tap(([, consentComplete]) => {
+          if (!consentComplete) {
             this._privacyDialog.openConsentDialogIfRequired();
           }
         })
@@ -225,11 +232,13 @@ export class MainEffects {
         switchMap(([, profile]) =>
           this._privacy.buildDataExportJson$(profile).pipe(
             tap((payload) => {
-              const blob = new Blob([payload], { type: 'application/json' });
+              const blob = new Blob([payload], {
+                type: APP_CONFIG.EXPORT.MIME_TYPES[ExportFormats.JSON],
+              });
               const url = URL.createObjectURL(blob);
               const anchor = document.createElement('a');
               anchor.href = url;
-              anchor.download = `recruita-session-export-${Date.now()}.json`;
+              anchor.download = `${PRIVACY_DATA_EXPORT_FILE_PREFIX}${Date.now()}.${APP_CONFIG.EXPORT.FILE_EXTENSIONS[ExportFormats.JSON]}`;
               anchor.click();
               URL.revokeObjectURL(url);
             })
