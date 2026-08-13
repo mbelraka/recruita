@@ -15,6 +15,7 @@ import {
 import { APP_CONFIG } from '../config/app.config';
 import { Languages } from '../enums/language.enum';
 import { MyMemoryResponse } from '../models/mymemory-translate-response.model';
+import { LruMapCache } from '../utilities/lru-map-cache.util';
 import {
   buildRemoteTranslationCacheKey,
   buildRemoteTranslationLangPair,
@@ -26,8 +27,11 @@ import {
  */
 @Injectable({ providedIn: 'root' })
 export class RemoteTranslateService {
-  private readonly _cache = new Map<string, string>();
+  private readonly _cache = new LruMapCache<string>(
+    APP_CONFIG.TRANSLATION.CACHE_MAX_ENTRIES
+  );
   private readonly _inFlight = new Map<string, Observable<string>>();
+  private _cacheEpoch = 0;
 
   public constructor(private readonly _http: HttpClient) {}
 
@@ -56,6 +60,12 @@ export class RemoteTranslateService {
       return raw;
     }
     return this._cache.get(buildRemoteTranslationCacheKey(from, to, raw));
+  }
+
+  public clearCache(): void {
+    this._cacheEpoch += 1;
+    this._cache.clear();
+    this._inFlight.clear();
   }
 
   public translate(
@@ -103,11 +113,16 @@ export class RemoteTranslateService {
     const params = new HttpParams()
       .set(QUERY_PARAM_TEXT, raw)
       .set(QUERY_PARAM_LANGPAIR, buildRemoteTranslationLangPair(from, to));
+    const epoch = this._cacheEpoch;
 
     return this._http.get<MyMemoryResponse>(MYMEMORY_URL, { params }).pipe(
       timeout(REQUEST_TIMEOUT_MS),
       map((res) => (res?.responseData?.translatedText?.trim() ?? '') || raw),
-      tap((translated) => this._cache.set(cacheKey, translated)),
+      tap((translated) => {
+        if (epoch === this._cacheEpoch) {
+          this._cache.set(cacheKey, translated);
+        }
+      }),
       catchError(() => of(raw)),
       finalize(() => {
         this._inFlight.delete(cacheKey);

@@ -38,8 +38,10 @@ export class MainComponent {
   private readonly _zonesRefreshing = signal(
     createMainLangRefreshZoneFlags(false)
   );
+  private _langRefreshFrameIds: number[] = [];
 
   public constructor() {
+    this._destroyRef.onDestroy((): void => this._cancelLangRefreshFrames());
     this._store
       .select(selectAppLanguage)
       .pipe(
@@ -70,14 +72,24 @@ export class MainComponent {
     }
 
     this._zonesRefreshing.set(createMainLangRefreshZoneFlags(false));
-    requestAnimationFrame((): void => {
+    this._cancelLangRefreshFrames();
+    const outerFrameId = requestAnimationFrame((): void => {
       for (const host of this._langRefreshHosts()) {
         void host.elementRef.nativeElement.offsetWidth;
       }
-      requestAnimationFrame((): void => {
+      const innerFrameId = requestAnimationFrame((): void => {
         this._zonesRefreshing.set(createMainLangRefreshZoneFlags(true));
       });
+      this._langRefreshFrameIds.push(innerFrameId);
     });
+    this._langRefreshFrameIds.push(outerFrameId);
+  }
+
+  private _cancelLangRefreshFrames(): void {
+    for (const frameId of this._langRefreshFrameIds) {
+      cancelAnimationFrame(frameId);
+    }
+    this._langRefreshFrameIds = [];
   }
 
   private _prefersReducedMotion(): boolean {

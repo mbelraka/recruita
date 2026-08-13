@@ -1,9 +1,10 @@
-import { DestroyRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
-import { Subject } from 'rxjs';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+
 import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
+import { initialAppState } from '../../state/app.reducer';
 import { LocaleDatePipe } from './locale-date.pipe';
 
 import { registerLocaleData } from '@angular/common';
@@ -19,28 +20,24 @@ registerLocaleData(localeIt, 'it-IT');
 
 describe('LocaleDatePipe', () => {
   let pipe: LocaleDatePipe;
-  let mockStore: jasmine.SpyObj<Store>;
-  let langSubject: Subject<Languages>;
-  let destroyRefMock: Partial<DestroyRef>;
+  let store: MockStore;
 
   beforeEach(() => {
-    langSubject = new Subject<Languages>();
-    mockStore = jasmine.createSpyObj('Store', ['select']);
-    mockStore.select.and.returnValue(langSubject.asObservable());
-
-    destroyRefMock = {
-      onDestroy: jasmine.createSpy('onDestroy'),
-    };
-
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: mockStore },
-        { provide: DestroyRef, useValue: destroyRefMock },
         LocaleDatePipe,
+        provideMockStore({
+          initialState: { app: { ...initialAppState } },
+        }),
+        {
+          provide: ChangeDetectorRef,
+          useValue: { markForCheck: jasmine.createSpy('markForCheck') },
+        },
       ],
     });
 
     pipe = TestBed.inject(LocaleDatePipe);
+    store = TestBed.inject(MockStore);
   });
 
   it('create an instance', () => {
@@ -57,26 +54,29 @@ describe('LocaleDatePipe', () => {
     const result = pipe.transform(date);
     expect(result).toBeTruthy();
     expect(typeof result).toBe('string');
-    // Just verify it doesn't return empty
     expect(result.length).toBeGreaterThan(0);
   });
 
   it('should respond to store language changes', () => {
     const date = new Date('2024-01-01T12:00:00Z');
-    langSubject.next(Languages.German);
+    store.setState({
+      app: { ...initialAppState, language: Languages.German },
+    });
 
     const resultDe = pipe.transform(
       date,
       APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
     );
 
-    langSubject.next(Languages.French);
+    store.setState({
+      app: { ...initialAppState, language: Languages.French },
+    });
     const resultFr = pipe.transform(
       date,
       APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
     );
 
-    expect(resultDe).not.toEqual(resultFr); // Likely different formatting
+    expect(resultDe).not.toEqual(resultFr);
     expect(resultDe).toBeTruthy();
     expect(resultFr).toBeTruthy();
   });

@@ -2,7 +2,10 @@ import { createReducer, on } from '@ngrx/store';
 
 import { APP_CONFIG } from '../config/app.config';
 import { AppState } from '../models/app-state.model';
-import { buildRemoteTranslationCacheKey } from '../utilities/remote-translate-cache.util';
+import {
+  buildRemoteTranslationCacheKey,
+  putCappedStringRecord,
+} from '../utilities/remote-translate-cache.util';
 import {
   clearNotification,
   clearRemoteTranslations,
@@ -59,10 +62,12 @@ export const appReducer = createReducer(
     const { [key]: _removed, ...inFlight } = state.remoteTranslationInFlight;
     return {
       ...state,
-      remoteTranslations: {
-        ...state.remoteTranslations,
-        [key]: translated,
-      },
+      remoteTranslations: putCappedStringRecord(
+        state.remoteTranslations,
+        key,
+        translated,
+        APP_CONFIG.TRANSLATION.CACHE_MAX_ENTRIES
+      ),
       remoteTranslationInFlight: inFlight,
     };
   }),

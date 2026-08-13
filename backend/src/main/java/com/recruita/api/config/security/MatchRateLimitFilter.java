@@ -1,6 +1,9 @@
 package com.recruita.api.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Ticker;
 import com.recruita.api.api.advice.ApiProblemDetailSupport;
 import com.recruita.api.common.problem.ApiProblemType;
 import com.recruita.api.config.properties.RecruitaProperties;
@@ -11,8 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Clock;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,7 +34,7 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
   private final ApiProblemDetailSupport problemDetailSupport;
   private final ObjectMapper objectMapper;
   private final Clock clock;
-  private final Map<String, WindowCounter> counters = new ConcurrentHashMap<>();
+  private final Cache<String, WindowCounter> counters;
 
   @Autowired
   public MatchRateLimitFilter(
@@ -54,6 +57,11 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
     this.problemDetailSupport = problemDetailSupport;
     this.objectMapper = objectMapper;
     this.clock = clock;
+    this.counters =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMillis(rateLimit.windowMillis()))
+            .ticker(tickerFromClock(clock))
+            .build();
   }
 
   @Override
@@ -69,20 +77,20 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
+    counters.cleanUp();
     String clientKey = resolveClientKey(request);
     if (isAtDistinctClientCapacity(clientKey)) {
-      evictExpiredWindows();
-      if (isAtDistinctClientCapacity(clientKey)) {
-        rejectRateLimited(response, rateLimit.getExceededMessage());
-        return;
-      }
+      rejectRateLimited(response, rateLimit.getExceededMessage());
+      return;
     }
 
-    WindowCounter counter =
-        counters.compute(
-            clientKey,
-            (key, existing) ->
-                WindowCounter.rotate(existing, rateLimit.windowMillis(), clock.millis()));
+    long nowEpochMs = clock.millis();
+    long windowMs = rateLimit.windowMillis();
+    WindowCounter existing = counters.getIfPresent(clientKey);
+    WindowCounter counter = WindowCounter.rotate(existing, windowMs, nowEpochMs);
+    if (counter != existing) {
+      counters.put(clientKey, counter);
+    }
 
     int count = counter.count.incrementAndGet();
     int maxRequests = rateLimit.resolvedMaxRequests();
@@ -98,18 +106,8 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
   }
 
   private boolean isAtDistinctClientCapacity(String clientKey) {
-    return !counters.containsKey(clientKey)
-        && counters.size() >= rateLimit.resolvedMaxDistinctClients();
-  }
-
-  /**
-   * Drops counters whose window has elapsed so the distinct-client cap only counts active clients.
-   * Without this, the map fills up once and every new client is rejected forever.
-   */
-  private void evictExpiredWindows() {
-    long now = clock.millis();
-    long windowMs = rateLimit.windowMillis();
-    counters.values().removeIf(counter -> now - counter.windowStartEpochMs >= windowMs);
+    return counters.getIfPresent(clientKey) == null
+        && counters.estimatedSize() >= rateLimit.resolvedMaxDistinctClients();
   }
 
   private void rejectRateLimited(HttpServletResponse response, String message) throws IOException {
@@ -132,6 +130,10 @@ public class MatchRateLimitFilter extends OncePerRequestFilter {
     response.setHeader(rateLimit.getHeaderLimit(), String.valueOf(limit));
     response.setHeader(rateLimit.getHeaderRemaining(), String.valueOf(remaining));
     response.setHeader(rateLimit.getHeaderReset(), String.valueOf(resetEpochSeconds));
+  }
+
+  private static Ticker tickerFromClock(Clock clock) {
+    return () -> TimeUnit.MILLISECONDS.toNanos(clock.millis());
   }
 
   private static final class WindowCounter {

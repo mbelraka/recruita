@@ -1,12 +1,10 @@
 import { formatDate } from '@angular/common';
-import { DestroyRef, inject, Pipe, PipeTransform } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectorRef, inject, Pipe, PipeTransform } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { APP_CONFIG } from '../../config/app.config';
-import { Languages } from '../../enums/language.enum';
 import { FullState } from '../../models/full-state.model';
-import { selectAppLanguage } from '../../state/app.selectors';
+import { bindAppLanguageSignal } from '../../utilities/app-language-signal.util';
 
 @Pipe({
   name: 'localeDate',
@@ -14,18 +12,10 @@ import { selectAppLanguage } from '../../state/app.selectors';
   standalone: false,
 })
 export class LocaleDatePipe implements PipeTransform {
-  private readonly store = inject(Store<FullState>);
-  private readonly destroyRef = inject(DestroyRef);
-  private language: Languages = APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
-
-  constructor() {
-    this.store
-      .select(selectAppLanguage)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((lang) => {
-        this.language = lang;
-      });
-  }
+  private readonly _language = bindAppLanguageSignal(
+    inject<Store<FullState>>(Store),
+    inject(ChangeDetectorRef)
+  );
 
   public transform(
     value: Date | string | number | null | undefined,
@@ -34,7 +24,7 @@ export class LocaleDatePipe implements PipeTransform {
     if (value === null || value === undefined) {
       return '';
     }
-    const locale = APP_CONFIG.getLocale(this.language);
+    const locale = APP_CONFIG.getLocale(this._language());
     const resolvedFormat =
       format === APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.DEFAULT
         ? APP_CONFIG.LOCALIZATION.ANGULAR_DATE_PIPE.LONG

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, DestroyRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
@@ -6,6 +6,7 @@ import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
 import { requestRemoteTranslation } from '../../state/app.actions';
 import { initialAppState } from '../../state/app.reducer';
+import { buildRemoteTranslationCacheKey } from '../../utilities/remote-translate-cache.util';
 import { RemoteTranslatePipe } from './remote-translate.pipe';
 
 describe('RemoteTranslatePipe', () => {
@@ -27,10 +28,6 @@ describe('RemoteTranslatePipe', () => {
         {
           provide: ChangeDetectorRef,
           useValue: { markForCheck: jasmine.createSpy('markForCheck') },
-        },
-        {
-          provide: DestroyRef,
-          useValue: { onDestroy: jasmine.createSpy('onDestroy') },
         },
       ],
     });
@@ -56,17 +53,27 @@ describe('RemoteTranslatePipe', () => {
       app: {
         ...initialAppState,
         language: Languages.German,
-        remoteTranslations: { 'en|de|Hello': 'Hallo' },
+        remoteTranslations: {
+          [buildRemoteTranslationCacheKey(
+            Languages.English,
+            Languages.German,
+            'Hello'
+          )]: 'Hallo',
+        },
       },
     });
-    (pipe as unknown as { _language: Languages })._language = Languages.German;
 
     expect(pipe.transform('Hello')).toBe('Hallo');
     expect(store.dispatch).not.toHaveBeenCalled();
   });
 
   it('dispatches a store request and shows the pending placeholder', () => {
-    (pipe as unknown as { _language: Languages })._language = Languages.French;
+    store.setState({
+      app: {
+        ...initialAppState,
+        language: Languages.French,
+      },
+    });
 
     expect(pipe.transform('Hello')).toBe(
       APP_CONFIG.TRANSLATION.PENDING_PLACEHOLDER

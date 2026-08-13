@@ -78,4 +78,16 @@ describe('RemoteTranslateService', () => {
     expect(second).toBe('Ingenieur');
     http.expectNone((r) => r.url === myMemoryUrl);
   });
+
+  it('should drop cached translations on clearCache', () => {
+    service.translate(query, from, to).subscribe();
+    http
+      .expectOne((r) => r.url === myMemoryUrl)
+      .flush({
+        responseData: { translatedText: 'Ingenieur' },
+      } as MyMemoryResponse);
+
+    service.clearCache();
+    expect(service.getCached(query, from, to)).toBeUndefined();
+  });
 });

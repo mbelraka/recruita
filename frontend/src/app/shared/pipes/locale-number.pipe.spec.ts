@@ -1,9 +1,11 @@
-import { DestroyRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
-import { Subject } from 'rxjs';
-import { LocaleNumberPipe } from './locale-number.pipe';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+
+import { APP_CONFIG } from '../../config/app.config';
 import { Languages } from '../../enums/language.enum';
+import { initialAppState } from '../../state/app.reducer';
+import { LocaleNumberPipe } from './locale-number.pipe';
 
 import { registerLocaleData } from '@angular/common';
 import localeEn from '@angular/common/locales/en';
@@ -18,28 +20,24 @@ registerLocaleData(localeIt, 'it-IT');
 
 describe('LocaleNumberPipe', () => {
   let pipe: LocaleNumberPipe;
-  let mockStore: jasmine.SpyObj<Store>;
-  let langSubject: Subject<Languages>;
-  let destroyRefMock: Partial<DestroyRef>;
+  let store: MockStore;
 
   beforeEach(() => {
-    langSubject = new Subject<Languages>();
-    mockStore = jasmine.createSpyObj('Store', ['select']);
-    mockStore.select.and.returnValue(langSubject.asObservable());
-
-    destroyRefMock = {
-      onDestroy: jasmine.createSpy('onDestroy'),
-    };
-
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: mockStore },
-        { provide: DestroyRef, useValue: destroyRefMock },
         LocaleNumberPipe,
+        provideMockStore({
+          initialState: { app: { ...initialAppState } },
+        }),
+        {
+          provide: ChangeDetectorRef,
+          useValue: { markForCheck: jasmine.createSpy('markForCheck') },
+        },
       ],
     });
 
     pipe = TestBed.inject(LocaleNumberPipe);
+    store = TestBed.inject(MockStore);
   });
 
   it('create an instance', () => {
@@ -64,22 +62,32 @@ describe('LocaleNumberPipe', () => {
   });
 
   it('should format number given digits info', () => {
-    const result = pipe.transform(1234.567, '1.1-1');
+    const result = pipe.transform(
+      1234.567,
+      APP_CONFIG.LOCALIZATION.DEFAULT_NUMBER_DIGITS_INFO
+    );
     expect(result).toBeTruthy();
-    // 1234.567 to 1 decimal should have 1 decimal
   });
 
   it('should respond to store language changes', () => {
-    langSubject.next(Languages.German);
-    // In DE, 1234.56 uses dot for thousands and comma for decimals: 1.234,56
-    const resultDe = pipe.transform(1234.56, '1.2-2');
+    store.setState({
+      app: { ...initialAppState, language: Languages.German },
+    });
+    const resultDe = pipe.transform(
+      1234.56,
+      APP_CONFIG.LOCALIZATION.DEFAULT_NUMBER_DIGITS_INFO
+    );
 
-    langSubject.next(Languages.English);
-    // In EN, 1234.56 uses comma for thousands and dot for decimals: 1,234.56
-    const resultEn = pipe.transform(1234.56, '1.2-2');
+    store.setState({
+      app: { ...initialAppState, language: Languages.English },
+    });
+    const resultEn = pipe.transform(
+      1234.56,
+      APP_CONFIG.LOCALIZATION.DEFAULT_NUMBER_DIGITS_INFO
+    );
 
     expect(resultDe).not.toEqual(resultEn);
-    expect(resultDe).toContain(','); // DE separator
-    expect(resultEn).toContain('.'); // EN separator
+    expect(resultDe).toContain(',');
+    expect(resultEn).toContain('.');
   });
 });

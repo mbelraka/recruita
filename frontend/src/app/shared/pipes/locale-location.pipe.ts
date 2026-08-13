@@ -1,11 +1,10 @@
-import { DestroyRef, inject, Pipe, PipeTransform } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectorRef, inject, Pipe, PipeTransform } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { APP_CONFIG } from '../../config/app.config';
-import { Languages } from '../../enums/language.enum';
 import { FullState } from '../../models/full-state.model';
-import { selectAppLanguage } from '../../state/app.selectors';
+import { bindAppLanguageSignal } from '../../utilities/app-language-signal.util';
+import { regionDisplayNames } from '../../utilities/region-display-names.util';
 
 @Pipe({
   name: 'localeLocation',
@@ -13,9 +12,10 @@ import { selectAppLanguage } from '../../state/app.selectors';
   standalone: false,
 })
 export class LocaleLocationPipe implements PipeTransform {
-  private readonly store = inject(Store<FullState>);
-  private readonly destroyRef = inject(DestroyRef);
-  private language: Languages = APP_CONFIG.LOCALIZATION.DEFAULT_LANGUAGE;
+  private readonly _language = bindAppLanguageSignal(
+    inject<Store<FullState>>(Store),
+    inject(ChangeDetectorRef)
+  );
 
   private readonly countryAliases: Record<string, string> = {
     USA: 'US',
@@ -33,15 +33,6 @@ export class LocaleLocationPipe implements PipeTransform {
     Japan: 'JP',
     Denmark: 'DK',
   };
-
-  public constructor() {
-    this.store
-      .select(selectAppLanguage)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((lang) => {
-        this.language = lang;
-      });
-  }
 
   public transform(value: string | null | undefined): string {
     const raw = value?.trim();
@@ -69,8 +60,8 @@ export class LocaleLocationPipe implements PipeTransform {
   }
 
   private _localizeCountry(countryToken: string): string | null {
-    const locale = APP_CONFIG.getLocale(this.language);
-    const displayNames = new Intl.DisplayNames([locale], { type: 'region' });
+    const locale = APP_CONFIG.getLocale(this._language());
+    const displayNames = regionDisplayNames(locale);
     const normalized = countryToken.trim();
     const aliasCode = this.countryAliases[normalized];
 

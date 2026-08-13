@@ -508,6 +508,8 @@ export const APP_CONFIG = {
     LANGPAIR_SEPARATOR: '|',
     CACHE_KEY_SEGMENT_SEPARATOR: '|',
     IN_FLIGHT_SHARE_REPLAY_BUFFER_SIZE: 1,
+    CACHE_MAX_ENTRIES: 256,
+    MAX_CONCURRENT_REQUESTS: 4,
     /** Shown while a non-English remote translation is loading. */
     PENDING_PLACEHOLDER: '\u2026',
   } as const,

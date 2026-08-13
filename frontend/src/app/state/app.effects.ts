@@ -72,7 +72,7 @@ export class AppEffects {
           .pipe(
             map((translated) => remoteTranslationSuccess({ key, translated }))
           );
-      })
+      }, APP_CONFIG.TRANSLATION.MAX_CONCURRENT_REQUESTS)
     )
   );
 
@@ -82,6 +82,15 @@ export class AppEffects {
       filter((enabled) => !enabled),
       map(() => clearRemoteTranslations())
     )
+  );
+
+  public clearRemoteTranslateServiceCache$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(clearRemoteTranslations),
+        tap(() => this._remoteTranslate.clearCache())
+      ),
+    { dispatch: false }
   );
 
   constructor(

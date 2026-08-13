@@ -1,10 +1,10 @@
-/** Simple LRU cache for string keys → string array values (e.g. geocode labels). */
-export class LruStringArrayCache {
+/** LRU map for string keys. Recency follows `Map` insertion order. */
+export class LruMapCache<T> {
   public constructor(private readonly _maxEntries: number) {}
 
-  private readonly _entries = new Map<string, readonly string[]>();
+  private readonly _entries = new Map<string, T>();
 
-  public get(key: string): readonly string[] | undefined {
+  public get(key: string): T | undefined {
     const value = this._entries.get(key);
     if (value === undefined) {
       return undefined;
@@ -14,7 +14,7 @@ export class LruStringArrayCache {
     return value;
   }
 
-  public set(key: string, value: readonly string[]): void {
+  public set(key: string, value: T): void {
     if (this._entries.has(key)) {
       this._entries.delete(key);
     }
@@ -26,5 +26,13 @@ export class LruStringArrayCache {
       }
       this._entries.delete(oldest);
     }
+  }
+
+  public clear(): void {
+    this._entries.clear();
+  }
+
+  public get size(): number {
+    return this._entries.size;
   }
 }

@@ -4,12 +4,12 @@ import { catchError, map, Observable, of, tap } from 'rxjs';
 
 import { APP_CONFIG } from '../../../config/app.config';
 import { Languages } from '../../../enums/language.enum';
-import { LruStringArrayCache } from '../../../utilities/lru-string-cache.util';
+import { LruMapCache } from '../../../utilities/lru-map-cache.util';
 import { OpenMeteoGeocodeResponse } from '../models/open-meteo-geocode-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class CitySearchService {
-  private readonly _cache = new LruStringArrayCache(
+  private readonly _cache = new LruMapCache<readonly string[]>(
     APP_CONFIG.APPLICANTS.LOCATION_GEOCODE_CACHE_MAX_ENTRIES
   );
 

@@ -17,9 +17,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
- * Regression test: counters for clients whose rate-limit window has elapsed must be evicted when
- * the distinct-client cap is hit, otherwise new clients are locked out permanently and the map
- * grows without bound.
+ * Regression test: counters for clients whose rate-limit window has elapsed must expire (Caffeine
+ * expireAfterWrite + cleanUp) so new clients are not locked out permanently.
  */
 class MatchRateLimitFilterEvictionTest {
 

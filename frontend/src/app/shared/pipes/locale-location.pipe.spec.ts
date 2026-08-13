@@ -1,34 +1,31 @@
-import { DestroyRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
-import { Subject } from 'rxjs';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 
 import { Languages } from '../../enums/language.enum';
+import { initialAppState } from '../../state/app.reducer';
 import { LocaleLocationPipe } from './locale-location.pipe';
 
 describe('LocaleLocationPipe', () => {
   let pipe: LocaleLocationPipe;
-  let mockStore: jasmine.SpyObj<Store>;
-  let langSubject: Subject<Languages>;
-  let destroyRefMock: Partial<DestroyRef>;
+  let store: MockStore;
 
   beforeEach(() => {
-    langSubject = new Subject<Languages>();
-    mockStore = jasmine.createSpyObj('Store', ['select']);
-    mockStore.select.and.returnValue(langSubject.asObservable());
-    destroyRefMock = {
-      onDestroy: jasmine.createSpy('onDestroy'),
-    };
-
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: mockStore },
-        { provide: DestroyRef, useValue: destroyRefMock },
         LocaleLocationPipe,
+        provideMockStore({
+          initialState: { app: { ...initialAppState } },
+        }),
+        {
+          provide: ChangeDetectorRef,
+          useValue: { markForCheck: jasmine.createSpy('markForCheck') },
+        },
       ],
     });
 
     pipe = TestBed.inject(LocaleLocationPipe);
+    store = TestBed.inject(MockStore);
   });
 
   it('should create', () => {
@@ -42,13 +39,17 @@ describe('LocaleLocationPipe', () => {
   });
 
   it('should localize known country aliases using selected language', () => {
-    langSubject.next(Languages.Italian);
+    store.setState({
+      app: { ...initialAppState, language: Languages.Italian },
+    });
     const result = pipe.transform('Berlin, Germany');
     expect(result).toContain('Germania');
   });
 
   it('should localize ISO country codes using selected language', () => {
-    langSubject.next(Languages.French);
+    store.setState({
+      app: { ...initialAppState, language: Languages.French },
+    });
     const result = pipe.transform('Paris, fr');
     expect(result).toContain('Paris');
     expect(result).not.toBe('Paris, fr');
@@ -60,7 +61,9 @@ describe('LocaleLocationPipe', () => {
   });
 
   it('should localize Austria and Switzerland in German', () => {
-    langSubject.next(Languages.German);
+    store.setState({
+      app: { ...initialAppState, language: Languages.German },
+    });
     expect(pipe.transform('Vienna, Austria')).toContain('Österreich');
     expect(pipe.transform('Zurich, Switzerland')).toContain('Schweiz');
   });
