@@ -145,7 +145,7 @@ public class ActionProperties {
   public static class GroqInvocationProperties {
     private double temperature = 0.1;
     @Positive private int maxTokens = 500;
-    @NotBlank private String model = "llama-3.3-70b-versatile";
+    @NotBlank private String model = "openai/gpt-oss-120b";
 
     public double getTemperature() {
       return temperature;

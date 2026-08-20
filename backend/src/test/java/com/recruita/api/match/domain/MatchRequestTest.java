@@ -14,8 +14,9 @@ class MatchRequestTest {
     MatchRequest explicitModel = new MatchRequest("role", List.of(), false, " custom ", 0, 1, 42);
 
     assertEquals("role", missingModel.jobDescription());
-    assertEquals("llama-3.3-70b-versatile", missingModel.resolvedModel("llama-3.3-70b-versatile"));
-    assertEquals("llama-3.3-70b-versatile", blankModel.resolvedModel("llama-3.3-70b-versatile"));
-    assertEquals("custom", explicitModel.resolvedModel("llama-3.3-70b-versatile"));
+    String fallbackModel = "default-model";
+    assertEquals(fallbackModel, missingModel.resolvedModel(fallbackModel));
+    assertEquals(fallbackModel, blankModel.resolvedModel(fallbackModel));
+    assertEquals("custom", explicitModel.resolvedModel(fallbackModel));
   }
 }

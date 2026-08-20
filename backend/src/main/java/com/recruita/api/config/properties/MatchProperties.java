@@ -136,13 +136,13 @@ public class MatchProperties {
     @NotBlank private String apiKey = "";
     @NotBlank private String baseUrl = "https://api.groq.com/openai/v1";
     @NotBlank private String chatCompletionsPath = "/chat/completions";
-    @NotBlank private String defaultModel = "llama-3.3-70b-versatile";
+    @NotBlank private String defaultModel = "openai/gpt-oss-120b";
     private double defaultTemperature = 0;
     private double defaultTopP = 1;
     private int defaultSeed = 42;
     @NotBlank private String responseFormatType = "json_object";
     @NotBlank private String emptyJsonObjectLiteral = "{}";
-    @NotBlank private String modelPattern = "^[a-zA-Z0-9._-]{1,96}$";
+    @NotBlank private String modelPattern = "^[a-zA-Z0-9._/-]{1,96}$";
     @Valid @NotNull private GroqApiContractProperties apiContract = new GroqApiContractProperties();
     @Valid @NotNull private PromptProperties prompts = new PromptProperties();
 

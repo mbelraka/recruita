@@ -412,7 +412,9 @@ export const APP_CONFIG = {
   SMART_ACTION: {
     API: {
       PARSE_PATH: '/api/action/parse',
-      REQUEST_TIMEOUT_MS: 10_000,
+      /** Groq parse plus roster snapshot; keep above typical provider latency. */
+      REQUEST_TIMEOUT_MS: 30_000,
+      /** User-facing copy: `SmartActionApiErrorMessage`. */
     },
     INPUT: {
       MAX_COMMAND_LENGTH: 500,
@@ -452,7 +454,7 @@ export const APP_CONFIG = {
     } as const,
     GROQ: {
       MATCH_ENDPOINT: '/api/match',
-      MODEL: 'llama-3.3-70b-versatile',
+      MODEL: 'openai/gpt-oss-120b',
       TEMPERATURE: 0,
       DETERMINISTIC_SCORING: true,
     } as const,

@@ -12,10 +12,13 @@ import {
   switchMap,
   take,
   tap,
+  TimeoutError,
 } from 'rxjs';
 
 import { SMART_ACTION_MESSAGES } from '../constants/smart-action-messages.constants';
+import { SmartActionApiErrorMessage } from '../enums/smart-action-api-error-message.enum';
 import { FullState } from '../../../models/full-state.model';
+import { HttpApiError } from '../../../models/http-api-error.model';
 import { selectAppLanguage } from '../../../state/app.selectors';
 import { getErrorMessage } from '../../../utilities/error.utils';
 import { ParsedAction } from '../models/parsed-action.type';
@@ -58,11 +61,7 @@ export class SmartActionEffects {
                 return parseSmartActionSuccess({ action });
               }),
               catchError((error: unknown) =>
-                of(
-                  parseSmartActionFailure({
-                    errors: [getErrorMessage(error)],
-                  })
-                )
+                of(this._parseCommandFailure(error))
               )
             )
           )
@@ -109,6 +108,20 @@ export class SmartActionEffects {
       store: this._store,
       router: this._router,
     };
+  }
+
+  private _parseCommandFailure(error: unknown): Action {
+    if (error instanceof HttpApiError) {
+      return executeSmartActionFailure({ message: error.message });
+    }
+    if (error instanceof TimeoutError) {
+      return executeSmartActionFailure({
+        message: SmartActionApiErrorMessage.RequestTimeout,
+      });
+    }
+    return parseSmartActionFailure({
+      errors: [getErrorMessage(error)],
+    });
   }
 
   private _runExecution$(

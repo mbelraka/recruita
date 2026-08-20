@@ -76,7 +76,7 @@ spring:
     groq:
       temperature: 0
       max-tokens: 500
-      model: llama-3.3-70b-versatile
+      model: openai/gpt-oss-120b
     prompt-catalog:
       assistant-role: You are an AI assistant for Recruita, an applicant tracking system.
       response-rule: Return ONLY valid JSON — no explanations, no markdown fences.
@@ -244,13 +244,13 @@ spring:
       api-key: ${GROQ_API_KEY:}
       base-url: https://api.groq.com/openai/v1
       chat-completions-path: /chat/completions
-      default-model: llama-3.3-70b-versatile
+      default-model: openai/gpt-oss-120b
       default-temperature: 0
       default-top-p: 1
       default-seed: 42
       response-format-type: json_object
       empty-json-object-literal: '{}'
-      model-pattern: '^[a-zA-Z0-9._-]{1,96}$'
+      model-pattern: '^[a-zA-Z0-9._/-]{1,96}$'
       api-contract:
         bearer-authorization-prefix: 'Bearer '
         match-response-scores-field: scores

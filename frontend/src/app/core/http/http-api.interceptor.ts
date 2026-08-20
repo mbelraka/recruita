@@ -14,6 +14,7 @@ import { HttpStatusCode } from '../../enums/http-status-code.enum';
 import { ApplicantApiErrorMessage } from '../../modules/applicants/enums/applicant-api-error-message.enum';
 import { ProfileApiErrorMessage } from '../../modules/main/enums/profile-api-error-message.enum';
 import { MatchErrorMessage } from '../../modules/match/enums/match-error-message.enum';
+import { SmartActionApiErrorMessage } from '../../modules/smart-action/enums/smart-action-api-error-message.enum';
 import type { HttpApiPolicy } from '../../models/http-api-policy.model';
 import { toHttpApiServiceError } from '../../utilities/http-api-error.util';
 
@@ -74,6 +75,17 @@ function resolveHttpApiPolicy(url: string): HttpApiPolicy | null {
         requestTimeout: MatchErrorMessage.GroqRequestTimeout,
         notAvailable: MatchErrorMessage.GroqProxyUnreachable,
         unreachable: MatchErrorMessage.GroqProxyUnreachable,
+      },
+    };
+  }
+
+  if (url.startsWith(APP_CONFIG.SMART_ACTION.API.PARSE_PATH)) {
+    return {
+      timeoutMs: APP_CONFIG.SMART_ACTION.API.REQUEST_TIMEOUT_MS,
+      messages: {
+        requestTimeout: SmartActionApiErrorMessage.RequestTimeout,
+        notAvailable: SmartActionApiErrorMessage.NotAvailable,
+        unreachable: SmartActionApiErrorMessage.Unreachable,
       },
     };
   }

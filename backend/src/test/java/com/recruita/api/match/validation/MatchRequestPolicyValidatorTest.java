@@ -59,7 +59,7 @@ class MatchRequestPolicyValidatorTest {
             "Java engineer with 3+ years",
             List.of(new MatchCandidateDto("a", List.of("java"), 3.0, "Engineer")),
             true,
-            "llama-3.3-70b-versatile",
+            "openai/gpt-oss-120b",
             null,
             null,
             null);
